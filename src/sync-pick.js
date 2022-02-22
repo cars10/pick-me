@@ -4,7 +4,6 @@ import SyncPickMarkup from './sync-pick/sync-pick-markup'
  * SyncPick
  * @param {Object}   options
  * @param {String}   options.id - id of the select to use
- * @param {String}   options.url - url to fetch data from
  * @param {String}  [options.language='en'] - set language. defaults to document language or 'en'
  * @param {String}  [options.valueProp='id'] - name of the json key that holds the data to use as option value
  * @param {String}  [options.textProp='name'] - name of the json key that holds the data to use as option text
@@ -43,7 +42,6 @@ export default function SyncPick(options) {
     if (this.isInitialized()) SyncPick.elements[this.id].destroy()
 
     this.element = document.getElementById(this.id)
-    this.url = options.url.replace(/&amp;/g, '&')
     this.language = options.language || document.documentElement.lang || 'en'
     this.i18n = SyncPick.i18n ? SyncPick.i18n[this.language] : {}
 
