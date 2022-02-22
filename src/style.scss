@@ -1,0 +1,111 @@
+.async-pick {
+  z-index: 2500;
+  position: relative;
+  display: inline-block;
+
+  .ap__button-text {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.ap__popup {
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+  border: 1px solid #bbb;
+  background-color: #ddd;
+  display: none;
+  width: 200px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: auto;
+  margin: 2px 0;
+
+  &.ap__popup--right {
+    right: 0;
+    left: auto;
+  }
+
+  &.ap__popup--visible {
+    display: inline-block;
+  }
+
+  .ap__search-input {
+    width: 100%;
+    height: 36px;
+  }
+
+  .ap__results-scroll-wrapper {
+    max-height: 200px;
+    overflow-y: scroll;
+    width: 100%;
+    border: 2px solid #0f0;
+  }
+
+  .ap__selected-scroll-wrapper {
+    max-height: 200px;
+    overflow-y: scroll;
+    width: 100%;
+    border: 2px solid #00f;
+  }
+
+  .ap__results {
+    padding: 5px 0;
+  }
+
+  .ap__results-list__item {
+    height: 24px;
+    padding: 2px 20px 4px 20px;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .ap__results-list__item:not(.ap__results-list__item--selected):not(.ap__results-list__item--muted):not(.ap__results-list__item--disabled):hover {
+    background-color: #ccc;
+  }
+
+  .ap__results-list__item:not(.ap__results-list__item--muted):not(.ap__results-list__item--disabled):hover {
+    cursor: pointer;
+  }
+
+  .ap__results-list__item--selected {
+    color: #fff;
+    background-color: #1b6ec2;
+  }
+
+  .ap__results-list__item--disabled {
+    color: #666;
+  }
+
+  .ap__results-list__item__subtext {
+    color: grey;
+    padding-left: 0.5em;
+  }
+
+  .ap__results-list__item__check-mark {
+    position: absolute;
+    right: 5px;
+  }
+
+  .ap__results-list, .ap__selected-list {
+    list-style-type: none;
+    margin-top: 5px;
+    margin-bottom: 0;
+    padding-bottom: 5px;
+    padding-left: 0;
+  }
+
+  .ap__results-list:not(:last-child) {
+    list-style-type: none;
+    border-bottom: 1px solid #eee;
+  }
+
+  .ap__results-list__item--muted {
+    color: #666
+  }
+}

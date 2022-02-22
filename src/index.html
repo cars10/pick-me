@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="ie=edge" http-equiv="X-UA-Compatible">
+  <title>SyncPick</title>
+  <style>
+      * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+      }
+
+      body {
+          font-family: sans-serif;
+          margin: 10px auto;
+          border-bottom: 2px solid grey;
+      }
+
+      .card {
+          background-color: #eee;
+          border: 1px solid #ccc;
+          border-radius: 2px;
+          padding: 18px 20px;
+          box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+          margin-bottom: 20px;
+      }
+  </style>
+  <script crossorigin="anonymous"
+          integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+          src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" rel="stylesheet">
+  <script crossorigin="anonymous"
+          integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+          src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <h1>Demo</h1>
+
+  <div class="card">
+    <a data-toggle="collapse" href="#collapseExample">Settings</a>
+    <div class="collapse in" id="collapseExample">
+      <h2>Settings</h2>
+
+      <div class="row" id="settings">
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="set_id">ID</label>
+            <input class="form-control" disabled id="set_id" value="picker">
+          </div>
+        </div>
+
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="set_container">Container</label>
+            <input class="form-control" disabled id="set_container" value="">
+          </div>
+        </div>
+
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="set_language">Language</label>
+            <select class="form-control" id="set_language">
+              <option selected value="de">German</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="set_selected_text_format">Selected text format</label>
+            <input class="form-control" id="set_selected_text_format" value="count>2">
+          </div>
+
+          <div class="form-group">
+            <div class="checkbox">
+              <label for="set_dropdown_align_right">
+                <input id="set_dropdown_align_right" type="checkbox"> Align dropdown right
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="checkbox">
+              <label for="set_disabled">
+                <input id="set_disabled" type="checkbox"> Disable select
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <h2>Debug information</h2>
+    <table class="table table-bordered">
+      <tr>
+        <th>First entry</th>
+        <th>Last entry</th>
+        <th># Entries</th>
+        <th># Pages</th>
+        <th>Active pages</th>
+        <th>Top reached?</th>
+        <th>End reached?</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td id="first"></td>
+        <td id="last"></td>
+        <td id="amount">0</td>
+        <td id="num_pages">0</td>
+        <td id="active_pages">0</td>
+        <td id="top_reached">false</td>
+        <td id="end_reached">false</td>
+        <td id="value"></td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>Output</h2>
+  <div class="row" style="margin-bottom: 400px;">
+    <div class="col-sm-4 col-sm-offset-2">
+      <select id="picker" name="picker" title="Select something" multiple>
+        <option value>blank</option>
+        <option data-subtext="#1Abbey" selected value="1">Abbey Storrs1</option>
+        <option data-subtext="#2Abbey" selected value="2">Abbey Storrs2</option>
+        <option value="3">Abbey Storrs3</option>
+        <option value="4">Abbey Storrs4</option>
+        <option value="5">Abbey Storrs5</option>
+        <option value="6">Abbey Storrs6</option>
+        <option value="7">Abbey Storrs7</option>
+        <option value="8">Abbey Storrs8</option>
+        <option value="9">Abbey Storrs9</option>
+        <option value="10">Abbey Storrs10</option>
+        <option value="11">Abbey Storrs11</option>
+        <option value="12">Abbey Storrs12</option>
+        <option value="13">Abbey Storrs13</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    reloadSyncPic()
+  })
+
+  Array.apply(null, document.getElementById('settings').querySelectorAll('input,select')).forEach(function (input) {
+    input.addEventListener('input', function () {
+      Object.keys(window.SyncPick.elements).forEach(function (id) {
+        window.SyncPick.elements[id].destroy()
+      })
+      reloadSyncPic()
+    })
+  })
+
+  function reloadSyncPic () {
+    new SyncPick({
+      id: 'picker',
+      url: 'http://localhost:9000/users',
+      selectedTextFormat: document.getElementById('set_selected_text_format').value,
+      language: document.getElementById('set_language').value,
+      dropdownAlignRight: document.getElementById('set_dropdown_align_right').checked,
+      disabled: document.getElementById('set_disabled').checked,
+      customDebugHandler: debugHandler,
+      debug: true
+    })
+  }
+
+  function debugHandler (context) {
+    try {
+      const firstElement = context.markup.resultsWrapper && context.markup.resultsWrapper.firstChild && context.markup.resultsWrapper.firstChild.firstChild
+      const lastElement = context.markup.resultsWrapper && context.markup.resultsWrapper.lastChild && context.markup.resultsWrapper.lastChild.lastChild
+      if (firstElement) {
+        document.getElementById('first').innerHTML = '#' + firstElement.getAttribute('data-value') + ' ' + firstElement.innerHTML
+      } else {
+        document.getElementById('first').innerHTML = ''
+      }
+
+      if (lastElement) {
+        document.getElementById('last').innerHTML = '#' + lastElement.getAttribute('data-value') + ' ' + lastElement.innerHTML
+      } else {
+        document.getElementById('last').innerHTML = ''
+      }
+      document.getElementById('amount').innerHTML = context.markup.resultsWrapper.querySelectorAll('li').length.toString()
+      document.getElementById('num_pages').innerHTML = context.markup.resultsWrapper.querySelectorAll('ul').length.toString()
+      document.getElementById('active_pages').innerHTML = Array.prototype.slice.call(context.markup.resultsWrapper.querySelectorAll('ul')).map(function (ul) {
+        return ul.getAttribute('data-page')
+      }).toString()
+      document.getElementById('value').innerHTML = Object.keys(context.values).toString()
+    } catch (e) {
+      console.log(e)
+      console.warn('could not show debug')
+    }
+  }
+
+  document.getElementById('picker').addEventListener('change', function (e) {
+    console.log('Picker changed, new value:', e.detail)
+  })
+</script>
+</body>
+</html>
