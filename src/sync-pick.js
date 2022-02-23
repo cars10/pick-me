@@ -191,12 +191,10 @@ SyncPick.prototype.setupValues = function () {
         }).forEach(function (option) {
             self.values[option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'),
                 option.selected.toString())
-            console.log(self.values)
         })
         Array.apply(null, this.element.options).forEach(function (option) {
             self.dropdownValues[option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'),
                 option.selected.toString())
-            //console.log(self.dropdownValues)
         })
     }
 }

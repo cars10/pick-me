@@ -188,7 +188,6 @@ SyncPickMarkup.prototype.renderSelectedOption = function (value, text) {
     option.value = value
     option.innerHTML = text
     option.selected = true
-    console.log('selected')
     option.setAttribute('selected', '')
     return option
 }
