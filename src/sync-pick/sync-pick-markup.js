@@ -5,6 +5,8 @@ export default function SyncPickMarkup(options) {
     this.valueProp = options.valueProp
     this.textProp = options.textProp
     this.subtextProp = options.subtextProp
+    this.searchPlaceholder = options.searchPlaceholder
+    this.searchInputClasses = options.searchInputClasses
     this.buttonClasses = options.buttonClasses
     this.buttonDisabledClasses = options.buttonDisabledClasses
     this.emptySelectButtonText = options.emptySelectButtonText
@@ -17,6 +19,7 @@ export default function SyncPickMarkup(options) {
     this.noResultsText = options.noResultsText
     this.dividerText = options.dividerText
     this.container = options.container
+    this.withSearch = options.withSearch
     this.dropdownAlignRight = options.dropdownAlignRight
     this.popupWidth = options.popupWidth
     this.open = false
@@ -139,9 +142,27 @@ SyncPickMarkup.prototype.buildPopup = function () {
     popup.classList.add('ap__popup')
     if (this.dropdownAlignRight) popup.classList.add('ap__popup--right')
 
+    if (this.withSearch) popup.appendChild(this.buildSearchInput())
     popup.appendChild(this.buildResultsScrollWrapper())
 
     return popup
+}
+
+SyncPickMarkup.prototype.buildSearchInput = function () {
+    const wrapper = document.createElement('div')
+    wrapper.classList.add('ap__search-input__wrapper')
+    this.searchInput = document.createElement('input')
+    this.searchInput.type = 'search'
+    this.searchInput.setAttribute('placeholder', this.searchPlaceholder)
+    this.searchInput.classList.add('ap__search-input')
+
+    let self = this
+    this.searchInputClasses.forEach(function (searchInputClass) {
+        self.searchInput.classList.add(searchInputClass)
+    })
+
+    wrapper.appendChild(this.searchInput)
+    return wrapper
 }
 
 SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
@@ -156,7 +177,7 @@ SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
 
 SyncPickMarkup.prototype.appendEntries = function (values) {
     const pageUl = buildUl(this.listClasses)
-    const keyvalue = Object.keys(values).map(key => Object.assign({}, values[key], {value: key}))
+    const keyvalue = Object.keys(values).map(key => Object.assign({}, values[key], {value: key})) //anders zusammen bauen key = value?
     this.renderNewEntries(keyvalue, pageUl)
 
     this.resultsWrapper.appendChild(pageUl)
@@ -192,15 +213,18 @@ SyncPickMarkup.prototype.renderSelectedOption = function (value, text) {
     return option
 }
 
-SyncPickMarkup.prototype.removeSelectedOption = function () {
-    const self = this
-    Array.apply(null, this.element.options).forEach(function (option) {
-        self.element.removeChild(option)
+SyncPickMarkup.prototype.removeSelectedOption = function (value) {
+    Array.apply(null, this.element.options).filter(function (option) {
+        return option.value === value || option.value.toString() === value.toString()
+    }).forEach(function (option) {
+        option.removeAttribute('selected')
     })
 }
 
-SyncPickMarkup.prototype.selectItem = function (key, value) {
-    const option = this.renderSelectedOption(key, value[this.textProp])
+SyncPickMarkup.prototype.selectItem = function (key, value, selectValue) {
+    const oldOption = this.element.querySelector('select option[value="' + selectValue + '"]')
+    const option = this.renderSelectedOption(oldOption.value, value[this.textProp])
+    this.element.removeChild(oldOption)
     this.element.appendChild(option)
     this.addSelectedClassByValue(key)
 }
@@ -310,6 +334,7 @@ function joinSelectedTexts(values, textProp) {
 
 function buildUl(additionalClasses) {
     const pageUl = document.createElement('ul')
+    pageUl.setAttribute('id', 'page_ul')
     pageUl.classList.add('ap__results-list')
     pageUl.setAttribute('aria-role', 'listbox')
     additionalClasses.forEach(function (listClass) {

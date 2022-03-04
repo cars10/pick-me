@@ -8,6 +8,9 @@ import SyncPickMarkup from './sync-pick/sync-pick-markup'
  * @param {String}  [options.valueProp='id'] - name of the json key that holds the data to use as option value
  * @param {String}  [options.textProp='name'] - name of the json key that holds the data to use as option text
  * @param {String}  [options.subtextProp='subtext'] - name of the json key for additional subtext
+ * @param {Number}  [options.searchTimeout=400] - timeout after the last keydown when to start searching
+ * @param {String}  [options.searchPlaceholder='Search'] - placeholder for the search input
+ * @param {Array}   [options.searchInputClasses=[]] - additional classes to add to the search input
  * @param {String}  [options.emptySelectButtonText=[]] - set the text of the select button before something is selected
  * @param {Array}   [options.buttonClasses=[]] - additional classes to add to the "open" button
  * @param {Array}   [options.buttonDisabledClasses=[]] - additional classes to add to the disabled button
@@ -21,6 +24,7 @@ import SyncPickMarkup from './sync-pick/sync-pick-markup'
  * @param {String}  [options.selectedText=options.selectedTextVariable + 'selected'] - the actual text
  * @param {String}  [options.noResultsText='No results'] - text to display when api returns no results
  * @param {String}  [options.container=null] - container to append the html to
+ * @param {Boolean} [options.withSearch=false] - set to true to active the searchbar
  * @param {Boolean} [options.dropdownAlignRight=false] - set to true to align the dropdown on the right
  * @param {Boolean} [options.popupWidth='300px'] - set width for popup when container option is set
  * @param {Boolean} [options.disabled=false] - to disabled the select. alternatively set your select to disabled
@@ -47,6 +51,9 @@ export default function SyncPick(options) {
 
     this.textProp = options.textProp || 'name'
     this.subtextProp = options.subtextProp || 'subtext'
+    this.searchTimeout = options.searchTimeout || 400
+    this.searchPlaceholder = options.searchPlaceholder || this.i18n.searchPlaceholder || 'Search'
+    this.searchInputClasses = options.searchInputClasses || []
     this.buttonClasses = options.buttonClasses || []
     this.emptySelectButtonText = options.emptySelectButtonText || this.i18n.emptySelectButtonText || 'Select'
     this.buttonDisabledClasses = options.buttonDisabledClasses || []
@@ -57,6 +64,7 @@ export default function SyncPick(options) {
     this.selectedTextVariable = options.selectedTextVariable || '%num%'
     this.selectedText = options.selectedText || this.i18n.selectedText || this.selectedTextVariable + ' selected'
     this.container = options.container || null
+    this.withSearch = !!options.withSearch
     this.dropdownAlignRight = !!options.dropdownAlignRight
     this.popupWidth = options.popupWidth || '300px'
     this.values = options.values || null
@@ -97,6 +105,8 @@ SyncPick.prototype.buildMarkup = function () {
         disabled: this.disabled,
         textProp: this.textProp,
         subtextProp: this.subtextProp,
+        searchPlaceholder: this.searchPlaceholder,
+        searchInputClasses: this.searchInputClasses,
         buttonClasses: this.buttonClasses,
         buttonDisabledClasses: this.buttonDisabledClasses,
         emptySelectButtonText: this.emptySelectButtonText,
@@ -109,6 +119,7 @@ SyncPick.prototype.buildMarkup = function () {
         noResultsText: this.noResultsText,
         dividerText: this.dividerText,
         container: this.container,
+        withSearch: this.withSearch,
         dropdownAlignRight: this.dropdownAlignRight,
         popupWidth: this.popupWidth
     })
@@ -116,6 +127,7 @@ SyncPick.prototype.buildMarkup = function () {
 
 SyncPick.prototype.addHandlers = function () {
     this.togglePopupHandler = this.togglePopup.bind(this)
+    this.searchHandler = this.search.bind(this)
     this.closePopupHandler = this.closePopup.bind(this)
     this.selectHandler = this.select.bind(this)
     this.stopPropagationHandler = function (e) {
@@ -153,6 +165,7 @@ SyncPick.prototype.onMarkupKeyDown = function (e) {
 
 SyncPick.prototype.addEvents = function () {
     this.markup.button.addEventListener('click', this.togglePopupHandler)
+    if (this.withSearch) this.markup.searchInput.addEventListener('input', this.searchHandler)
     this.markup.popup.addEventListener('click', this.stopPropagationHandler)
     this.markup.button.addEventListener('keydown', this.buttonKeyHandler)
     this.markup.popup.addEventListener('keydown', this.markupKeyHandler)
@@ -169,6 +182,7 @@ SyncPick.prototype.addEvents = function () {
 SyncPick.prototype.removeEvents = function () {
     let self = this
     this.markup.button.removeEventListener('click', this.togglePopupHandler)
+    this.markup.searchInput.removeEventListener('input', this.searchHandler)
     Array.apply(null, this.markup.resultsWrapper.querySelectorAll('li')).forEach(function (li) {
         li.removeEventListener('click', self.selectHandler)
     })
@@ -210,11 +224,29 @@ SyncPick.prototype.togglePopup = function () {
     this.open ? this.closePopupAndFocus() : this.openPopup()
 }
 
+SyncPick.prototype.search = function () {
+    if (this.searchInputTimer) clearTimeout(this.searchInputTimer)
+
+    let inputValue = this.markup.searchInput.value
+    if (this.shouldSearch(inputValue)) {
+        let self = this
+        self.previousSearchValue = inputValue
+        this.searchInputTimer = setTimeout(function () {
+            self.searchQuery = self.markup.searchInput.value
+            const searchValues = Object.values(self.dropdownValues).filter(obj => {return obj.name.includes(inputValue)})
+            self.markup.resultsWrapper.removeChild(document.getElementById('page_ul'))
+            const pageUl = self.markup.appendEntries(searchValues)
+            self.addEventListenersForPage(pageUl)
+        }, self.searchTimeout)
+    }
+}
+
 SyncPick.prototype.openPopup = function () {
     this.markup.popup.classList.add('ap__popup--visible')
     this.open = true
     this.markup.open = true
     this.markup.positionPopup()
+    if (this.withSearch) this.markup.searchInput.focus()
 }
 
 SyncPick.prototype.closePopupAndFocus = function (e) {
@@ -238,12 +270,21 @@ SyncPick.prototype.addEventListenersForPage = function (pageUl) {
     })
 }
 
+SyncPick.prototype.shouldSearch = function (newValue) {
+    return this.previousSearchValue !== newValue
+}
+
 SyncPick.prototype.select = function (e) {
     const li = e.currentTarget
     const key = li.getAttribute('data-value')
     const text = li.getAttribute('data-text')
     const subtext = li.getAttribute('data-subtext')
-    const value = this.buildValue(text, subtext)
+    let value
+    if (this.values[key]){
+        value = this.buildValue(text, subtext, 'false')
+    } else {
+        value = this.buildValue(text, subtext, 'true')
+    }
 
     this.toggleValue(key, value)
 
@@ -259,7 +300,7 @@ SyncPick.prototype.triggerChange = function () {
 
 SyncPick.prototype.toggleValue = function (key, value) {
     if (this.values[key]) {
-        this.removeValue(key)
+        this.removeValue(key, value)
     } else {
         this.addValue(key, value)
     }
@@ -267,14 +308,29 @@ SyncPick.prototype.toggleValue = function (key, value) {
 
 SyncPick.prototype.addValue = function (key, value) {
     this.values[key] = value
-    const newLi = this.markup.selectItem(key, value)
+    let keyvalueOfDropdownValue = 0
+    for (const [key, valueOfDropdowns] of Object.entries(this.dropdownValues)) {
+        if (valueOfDropdowns.name === value.name) {
+            keyvalueOfDropdownValue = key
+            this.dropdownValues[key].selected = true
+        }
+    }
+    const newLi = this.markup.selectItem(key, value, keyvalueOfDropdownValue)
     if (newLi) newLi.addEventListener('click', this.selectHandler)
+    this.markup.searchInput.focus()
     this.logDebugMessage('Value added:', value)
 }
 
-SyncPick.prototype.removeValue = function (value) {
-    delete this.values[value]
-    const removedLi = this.markup.deselectItem(value)
+SyncPick.prototype.removeValue = function (key, value) {
+    delete this.values[key]
+    let keyvalueOfDropdownValue = 0
+    for (const [key, valueOfDropdowns] of Object.entries(this.dropdownValues)) {
+        if (valueOfDropdowns.name === value.name) {
+            keyvalueOfDropdownValue = key
+            this.dropdownValues[keyvalueOfDropdownValue].selected = false
+        }
+    }
+    const removedLi = this.markup.deselectItem(key)
     if (removedLi) removedLi.removeEventListener('click', this.selectHandler)
     this.logDebugMessage('Value removed:', value)
 }
@@ -297,6 +353,11 @@ SyncPick.prototype.logDebugMessage = function (msg, someObject) {
 
 SyncPick.prototype.register = function () {
     SyncPick.elements[this.id] = this
+}
+
+SyncPick.prototype.searchQueryPresent = function () {
+    const query = this.markup.searchInput.value
+    return typeof query !== 'undefined' && query.trim().length > 0
 }
 
 SyncPick.prototype.isInitialized = function () {
