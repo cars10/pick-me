@@ -317,7 +317,7 @@ SyncPick.prototype.addValue = function (key, value) {
     }
     const newLi = this.markup.selectItem(key, value, keyvalueOfDropdownValue)
     if (newLi) newLi.addEventListener('click', this.selectHandler)
-    this.markup.searchInput.focus()
+    if (this.withSearch) this.markup.searchInput.focus()
     this.logDebugMessage('Value added:', value)
 }
 
