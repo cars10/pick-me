@@ -73,7 +73,6 @@ export default function SyncPick(options) {
     this.customDebugHandler = options.customDebugHandler || null
 
     this.disabled = !!this.element.disabled || !!options.disabled
-    this.blankOption = {}
     this.open = false
 
     this.initialize()
@@ -90,7 +89,6 @@ SyncPick.prototype.initialize = function () {
         this.addEvents()
     }
     this.setupValues()
-    this.setupBlankOption()
     if (!this.disabled) {
         const pageUl = this.markup.appendEntries(this.dropdownValues)
         this.addEventListenersForPage(pageUl)
@@ -211,13 +209,6 @@ SyncPick.prototype.setupValues = function () {
                 option.selected.toString())
         })
     }
-}
-
-SyncPick.prototype.setupBlankOption = function () {
-    let blank = Array.apply(null, this.element.options).filter(function (option) {
-        return option.value === ''
-    })[0]
-    if (!!blank) this.blankOption[''] = blank.innerHTML
 }
 
 SyncPick.prototype.togglePopup = function () {
