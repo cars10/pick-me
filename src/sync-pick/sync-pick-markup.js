@@ -33,7 +33,7 @@ export default function SyncPickMarkup(options) {
 }
 
 SyncPickMarkup.prototype.hideOriginalSelect = function () {
-    this.element.style.display = 'none'
+    this.element.classList.add('visually-hidden')
 }
 
 SyncPickMarkup.prototype.showOriginalSelect = function () {
@@ -54,7 +54,7 @@ SyncPickMarkup.prototype.assemble = function () {
             this.wrapper.appendChild(this.popup)
         }
     }
-    this.element.parentNode.insertBefore(this.wrapper, this.element.nextSibling)
+    this.element.parentNode.insertBefore(this.wrapper, this.element)
 }
 
 SyncPickMarkup.prototype.positionPopup = function () {
