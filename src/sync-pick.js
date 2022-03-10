@@ -63,6 +63,7 @@ export default function SyncPick(options) {
     this.selectedTextFormat = options.selectedTextFormat || null
     this.selectedTextVariable = options.selectedTextVariable || '%num%'
     this.selectedText = options.selectedText || this.i18n.selectedText || this.selectedTextVariable + ' selected'
+    this.noResultsText = options.noResultsText || this.i18n.noResultsText || 'No results'
     this.container = options.container || null
     this.withSearch = !!options.withSearch
     this.dropdownAlignRight = !!options.dropdownAlignRight
@@ -224,9 +225,18 @@ SyncPick.prototype.search = function () {
         self.previousSearchValue = inputValue
         this.searchInputTimer = setTimeout(function () {
             self.searchQuery = self.markup.searchInput.value
-            const searchValues = Object.values(self.dropdownValues).filter(obj => {return obj.name.includes(inputValue)})
+            const searchValues = Object.values(self.dropdownValues).filter(obj => {
+                return obj.name.includes(inputValue)
+            })
+            let searchValuesWithRightKeys = []
+            let step
+            for (step = 0; step < searchValues.length; step++) {
+                let searchKey = step + 1
+                console.log(searchValues[step])
+                searchValuesWithRightKeys[searchKey] = searchValues[step]
+            }
             self.markup.resultsWrapper.removeChild(document.getElementById('page_ul'))
-            const pageUl = self.markup.appendEntries(searchValues)
+            const pageUl = self.markup.appendEntries(searchValuesWithRightKeys)
             self.addEventListenersForPage(pageUl)
         }, self.searchTimeout)
     }
@@ -251,6 +261,7 @@ SyncPick.prototype.closePopup = function (e) {
         this.markup.popup.classList.remove('ap__popup--visible')
         this.open = false
         this.markup.open = false
+        this.resetSearch()
     }
 }
 
@@ -268,10 +279,11 @@ SyncPick.prototype.shouldSearch = function (newValue) {
 SyncPick.prototype.select = function (e) {
     const li = e.currentTarget
     const key = li.getAttribute('data-value')
+    console.log(key)
     const text = li.getAttribute('data-text')
     const subtext = li.getAttribute('data-subtext')
     let value
-    if (this.values[key]){
+    if (this.values[key]) {
         value = this.buildValue(text, subtext, 'false')
     } else {
         value = this.buildValue(text, subtext, 'true')
@@ -298,10 +310,10 @@ SyncPick.prototype.toggleValue = function (key, value) {
 }
 
 SyncPick.prototype.addValue = function (key, value) {
-    this.values[key] = value
     let keyvalueOfDropdownValue = 0
     for (const [key, valueOfDropdowns] of Object.entries(this.dropdownValues)) {
         if (valueOfDropdowns.name === value.name) {
+            this.values[key] = value
             keyvalueOfDropdownValue = key
             this.dropdownValues[key].selected = true
         }
@@ -313,15 +325,16 @@ SyncPick.prototype.addValue = function (key, value) {
 }
 
 SyncPick.prototype.removeValue = function (key, value) {
-    delete this.values[key]
-    let keyvalueOfDropdownValue = 0
+    let keyvalueOfDropdownValue = null
     for (const [key, valueOfDropdowns] of Object.entries(this.dropdownValues)) {
         if (valueOfDropdowns.name === value.name) {
             keyvalueOfDropdownValue = key
+            delete this.values[keyvalueOfDropdownValue]
+            console.log(keyvalueOfDropdownValue)
             this.dropdownValues[keyvalueOfDropdownValue].selected = false
         }
     }
-    const removedLi = this.markup.deselectItem(key)
+    const removedLi = this.markup.deselectItem(keyvalueOfDropdownValue)
     if (removedLi) removedLi.removeEventListener('click', this.selectHandler)
     this.logDebugMessage('Value removed:', value)
 }
@@ -346,17 +359,17 @@ SyncPick.prototype.register = function () {
     SyncPick.elements[this.id] = this
 }
 
-SyncPick.prototype.searchQueryPresent = function () {
-    const query = this.markup.searchInput.value
-    return typeof query !== 'undefined' && query.trim().length > 0
-}
-
 SyncPick.prototype.isInitialized = function () {
     if (typeof window.SyncPick === 'undefined') {
         return false
     } else {
         return !!SyncPick.elements[this.id]
     }
+}
+
+SyncPick.prototype.resetSearch = function () {
+    this.markup.searchInput.value = ''
+    this.search()
 }
 
 SyncPick.prototype.destroy = function () {
