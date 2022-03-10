@@ -239,7 +239,7 @@ SyncPick.prototype.search = function () {
 }
 
 SyncPick.prototype.openPopup = function () {
-    this.markup.popup.classList.add('ap__popup--visible')
+    this.markup.popup.classList.add('sp__popup--visible')
     this.open = true
     this.markup.open = true
     this.markup.positionPopup()
@@ -254,7 +254,7 @@ SyncPick.prototype.closePopupAndFocus = function (e) {
 SyncPick.prototype.closePopup = function (e) {
     let clickedButton = e && (e.target === this.markup.button || e.target.parentElement === this.markup.button)
     if (this.open && !clickedButton) {
-        this.markup.popup.classList.remove('ap__popup--visible')
+        this.markup.popup.classList.remove('sp__popup--visible')
         this.open = false
         this.markup.open = false
         this.resetSearch()
@@ -263,7 +263,7 @@ SyncPick.prototype.closePopup = function (e) {
 
 SyncPick.prototype.addEventListenersForPage = function (pageUl) {
     let self = this
-    Array.apply(null, pageUl.querySelectorAll('li.ap__results-list__item')).forEach(function (li) {
+    Array.apply(null, pageUl.querySelectorAll('li.sp__results-list__item')).forEach(function (li) {
         li.addEventListener('click', self.selectHandler)
     })
 }

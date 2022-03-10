@@ -121,7 +121,7 @@ SyncPickMarkup.prototype.buildButton = function () {
     }
 
     this.buttonText = document.createElement('span')
-    this.buttonText.classList.add('ap__button-text')
+    this.buttonText.classList.add('sp__button-text')
 
     if (this.buttonIconClasses && this.buttonIconClasses.length > 0) {
         let buttonIcon = document.createElement('i')
@@ -139,8 +139,8 @@ SyncPickMarkup.prototype.buildButton = function () {
 
 SyncPickMarkup.prototype.buildPopup = function () {
     const popup = document.createElement('div')
-    popup.classList.add('ap__popup')
-    if (this.dropdownAlignRight) popup.classList.add('ap__popup--right')
+    popup.classList.add('sp__popup')
+    if (this.dropdownAlignRight) popup.classList.add('sp__popup--right')
 
     if (this.withSearch) popup.appendChild(this.buildSearchInput())
     popup.appendChild(this.buildResultsScrollWrapper())
@@ -150,11 +150,11 @@ SyncPickMarkup.prototype.buildPopup = function () {
 
 SyncPickMarkup.prototype.buildSearchInput = function () {
     const wrapper = document.createElement('div')
-    wrapper.classList.add('ap__search-input__wrapper')
+    wrapper.classList.add('sp__search-input__wrapper')
     this.searchInput = document.createElement('input')
     this.searchInput.type = 'search'
     this.searchInput.setAttribute('placeholder', this.searchPlaceholder)
-    this.searchInput.classList.add('ap__search-input')
+    this.searchInput.classList.add('sp__search-input')
 
     let self = this
     this.searchInputClasses.forEach(function (searchInputClass) {
@@ -167,9 +167,9 @@ SyncPickMarkup.prototype.buildSearchInput = function () {
 
 SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
     this.resultsScrollWrapper = document.createElement('div')
-    this.resultsScrollWrapper.classList.add('ap__results-scroll-wrapper')
+    this.resultsScrollWrapper.classList.add('sp__results-scroll-wrapper')
     this.resultsWrapper = document.createElement('div')
-    this.resultsWrapper.classList.add('ap__results')
+    this.resultsWrapper.classList.add('sp__results')
     this.resultsWrapper.setAttribute('aria-role', 'list')
     this.resultsScrollWrapper.appendChild(this.resultsWrapper)
     return this.resultsScrollWrapper
@@ -199,7 +199,7 @@ SyncPickMarkup.prototype.renderNewEntries = function (values, ul) {
         })
     } else {
         const li = buildLi({text: this.noResultsText})
-        li.classList.add('ap__results-list__item')
+        li.classList.add('sp__results-list__item')
         ul.appendChild(li)
     }
 }
@@ -254,7 +254,7 @@ SyncPickMarkup.prototype.destroy = function () {
 }
 
 SyncPickMarkup.prototype.getSelected = function () {
-    return this.resultsWrapper.querySelectorAll('li.ap__results-list__item--selected')[0]
+    return this.resultsWrapper.querySelectorAll('li.sp__results-list__item--selected')[0]
 }
 
 SyncPickMarkup.prototype.focusPreviousEntry = function () {
@@ -262,13 +262,13 @@ SyncPickMarkup.prototype.focusPreviousEntry = function () {
     if (selected) {
         const prev = selected.previousSibling || (selected.parentNode && selected.parentNode.previousSibling && selected.parentNode.previousSibling.lastChild)
         if (prev) {
-            selected.classList.remove('ap__results-list__item--selected')
-            prev.classList.add('ap__results-list__item--selected')
+            selected.classList.remove('sp__results-list__item--selected')
+            prev.classList.add('sp__results-list__item--selected')
             this.scrollEntryIntoView(prev)
         }
     } else {
-        const first = this.resultsWrapper.querySelectorAll('li.ap__results-list__item[data-value]')[0]
-        first.classList.add('ap__results-list__item--selected')
+        const first = this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]')[0]
+        first.classList.add('sp__results-list__item--selected')
         this.scrollEntryIntoView(first)
     }
 }
@@ -278,13 +278,13 @@ SyncPickMarkup.prototype.focusNextEntry = function () {
     if (selected) {
         const next = selected.nextSibling || (selected.parentNode && selected.parentNode.nextSibling && selected.parentNode.nextSibling.firstChild)
         if (next) {
-            selected.classList.remove('ap__results-list__item--selected')
-            next.classList.add('ap__results-list__item--selected')
+            selected.classList.remove('sp__results-list__item--selected')
+            next.classList.add('sp__results-list__item--selected')
             this.scrollEntryIntoView(next)
         }
     } else {
-        const first = this.resultsWrapper.querySelectorAll('li.ap__results-list__item[data-value]')[0]
-        first.classList.add('ap__results-list__item--selected')
+        const first = this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]')[0]
+        first.classList.add('sp__results-list__item--selected')
         this.scrollEntryIntoView(first)
     }
 }
@@ -335,7 +335,7 @@ function joinSelectedTexts(values, textProp) {
 function buildUl(additionalClasses) {
     const pageUl = document.createElement('ul')
     pageUl.setAttribute('id', 'page_ul')
-    pageUl.classList.add('ap__results-list')
+    pageUl.classList.add('sp__results-list')
     pageUl.setAttribute('aria-role', 'listbox')
     additionalClasses.forEach(function (listClass) {
         pageUl.classList.add(listClass)
@@ -350,7 +350,7 @@ function buildLi(options) {
     const li = document.createElement('li')
 
     const textSpan = document.createElement('span')
-    textSpan.classList.add('ap__results-list__item__text')
+    textSpan.classList.add('sp__results-list__item__text')
     textSpan.innerHTML = text
 
     if (typeof value !== 'undefined' && value !== null) li.setAttribute('data-value', value)
@@ -363,12 +363,12 @@ function buildLi(options) {
         li.setAttribute('data-subtext', subtext)
         const subtextDom = document.createElement('small')
         subtextDom.innerHTML = subtext
-        subtextDom.classList.add('ap__results-list__item__subtext')
+        subtextDom.classList.add('sp__results-list__item__subtext')
         textSpan.appendChild(subtextDom)
     }
 
     li.setAttribute('aria-role', 'listitem')
-    li.classList.add('ap__results-list__item')
+    li.classList.add('sp__results-list__item')
 
     li.appendChild(textSpan)
     if (options.selected) {
@@ -383,10 +383,10 @@ function setLiSelected(li, selected, checkedIconClasses) {
         checkedIconClasses.forEach(function (checkedIconClass) {
             check.classList.add(checkedIconClass)
         })
-        check.classList.add('ap__results-list__item__check-mark')
+        check.classList.add('sp__results-list__item__check-mark')
         li.appendChild(check)
     } else {
-        const check = li.querySelector('.ap__results-list__item__check-mark')
+        const check = li.querySelector('.sp__results-list__item__check-mark')
         if (check) li.removeChild(check)
     }
 }
