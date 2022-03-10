@@ -334,7 +334,6 @@ function joinSelectedTexts(values, textProp) {
 
 function buildUl(additionalClasses) {
     const pageUl = document.createElement('ul')
-    pageUl.setAttribute('id', 'page_ul')
     pageUl.classList.add('sp__results-list')
     pageUl.setAttribute('aria-role', 'listbox')
     additionalClasses.forEach(function (listClass) {

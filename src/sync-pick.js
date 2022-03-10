@@ -231,7 +231,7 @@ SyncPick.prototype.search = function () {
                     filteredValues[key] = value
                 }
             })
-            self.markup.resultsWrapper.removeChild(document.getElementById('page_ul'))
+            self.markup.resultsWrapper.removeChild(self.markup.resultsWrapper.querySelector('ul'))
             const pageUl = self.markup.appendEntries(filteredValues)
             self.addEventListenersForPage(pageUl)
         }, self.searchTimeout)
