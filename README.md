@@ -43,7 +43,7 @@ new SyncPick({
     perPage: 50,
     paginateUpThreshold: 20,
     paginateDownThreshold: 80,
-    searchTimeout: 400,
+    searchTimeout: 50,
     searchPlaceholder: 'Search',
     searchInputClasses: [],
     buttonClasses: [],

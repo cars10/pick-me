@@ -178,7 +178,6 @@ SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
 SyncPickMarkup.prototype.appendEntries = function (values) {
     const pageUl = buildUl(this.listClasses)
     const keyvalue = Object.keys(values).map(key => Object.assign({}, values[key], {value: key})) //anders zusammen bauen key = value?
-    console.log(keyvalue)
     this.renderNewEntries(keyvalue, pageUl)
 
     this.resultsWrapper.appendChild(pageUl)
@@ -200,7 +199,6 @@ SyncPickMarkup.prototype.renderNewEntries = function (values, ul) {
         })
     } else {
         const li = buildLi({text: this.noResultsText})
-        console.log(li)
         li.classList.add('ap__results-list__item')
         ul.appendChild(li)
     }
@@ -347,7 +345,6 @@ function buildUl(additionalClasses) {
 
 function buildLi(options) {
     const text = options.text
-    console.log(text)
     const value = options.value
     const subtext = options.subtext
     const li = document.createElement('li')

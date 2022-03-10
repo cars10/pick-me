@@ -8,7 +8,7 @@ import SyncPickMarkup from './sync-pick/sync-pick-markup'
  * @param {String}  [options.valueProp='id'] - name of the json key that holds the data to use as option value
  * @param {String}  [options.textProp='name'] - name of the json key that holds the data to use as option text
  * @param {String}  [options.subtextProp='subtext'] - name of the json key for additional subtext
- * @param {Number}  [options.searchTimeout=400] - timeout after the last keydown when to start searching
+ * @param {Number}  [options.searchTimeout=50] - timeout after the last keydown when to start searching
  * @param {String}  [options.searchPlaceholder='Search'] - placeholder for the search input
  * @param {Array}   [options.searchInputClasses=[]] - additional classes to add to the search input
  * @param {String}  [options.emptySelectButtonText=[]] - set the text of the select button before something is selected
@@ -51,7 +51,7 @@ export default function SyncPick(options) {
 
     this.textProp = options.textProp || 'name'
     this.subtextProp = options.subtextProp || 'subtext'
-    this.searchTimeout = options.searchTimeout || 400
+    this.searchTimeout = options.searchTimeout || 50
     this.searchPlaceholder = options.searchPlaceholder || this.i18n.searchPlaceholder || 'Search'
     this.searchInputClasses = options.searchInputClasses || []
     this.buttonClasses = options.buttonClasses || []
@@ -223,20 +223,16 @@ SyncPick.prototype.search = function () {
     if (this.shouldSearch(inputValue)) {
         let self = this
         self.previousSearchValue = inputValue
+        const lowerInputValue = inputValue.toLowerCase()
         this.searchInputTimer = setTimeout(function () {
-            self.searchQuery = self.markup.searchInput.value
-            const searchValues = Object.values(self.dropdownValues).filter(obj => {
-                return obj.name.includes(inputValue)
+            let filteredValues = {}
+            Object.entries(self.dropdownValues).forEach(([key,value]) => {
+                if (value.name.toLowerCase().includes(lowerInputValue)) {
+                    filteredValues[key] = value
+                }
             })
-            let searchValuesWithRightKeys = []
-            let step
-            for (step = 0; step < searchValues.length; step++) {
-                let searchKey = step + 1
-                console.log(searchValues[step])
-                searchValuesWithRightKeys[searchKey] = searchValues[step]
-            }
             self.markup.resultsWrapper.removeChild(document.getElementById('page_ul'))
-            const pageUl = self.markup.appendEntries(searchValuesWithRightKeys)
+            const pageUl = self.markup.appendEntries(filteredValues)
             self.addEventListenersForPage(pageUl)
         }, self.searchTimeout)
     }
@@ -279,7 +275,6 @@ SyncPick.prototype.shouldSearch = function (newValue) {
 SyncPick.prototype.select = function (e) {
     const li = e.currentTarget
     const key = li.getAttribute('data-value')
-    console.log(key)
     const text = li.getAttribute('data-text')
     const subtext = li.getAttribute('data-subtext')
     let value
@@ -330,7 +325,6 @@ SyncPick.prototype.removeValue = function (key, value) {
         if (valueOfDropdowns.name === value.name) {
             keyvalueOfDropdownValue = key
             delete this.values[keyvalueOfDropdownValue]
-            console.log(keyvalueOfDropdownValue)
             this.dropdownValues[keyvalueOfDropdownValue].selected = false
         }
     }
