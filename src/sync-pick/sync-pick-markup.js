@@ -218,6 +218,7 @@ SyncPickMarkup.prototype.removeSelectedOption = function (value) {
         return option.value === value || option.value.toString() === value.toString()
     }).forEach(function (option) {
         option.selected = false
+        option.removeAttribute('selected')
     })
 }
 
