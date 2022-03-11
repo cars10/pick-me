@@ -257,7 +257,7 @@ SyncPick.prototype.closePopup = function (e) {
         this.markup.popup.classList.remove('sp__popup--visible')
         this.open = false
         this.markup.open = false
-        this.resetSearch()
+        if (this.withSearch) this.resetSearch()
     }
 }
 
