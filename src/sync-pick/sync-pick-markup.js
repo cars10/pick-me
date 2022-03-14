@@ -17,7 +17,6 @@ export default function SyncPickMarkup(options) {
     this.selectedTextVariable = options.selectedTextVariable
     this.selectedText = options.selectedText
     this.noResultsText = options.noResultsText
-    this.dividerText = options.dividerText
     this.container = options.container
     this.withSearch = options.withSearch
     this.dropdownAlignRight = options.dropdownAlignRight
@@ -175,63 +174,57 @@ SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
     return this.resultsScrollWrapper
 }
 
-SyncPickMarkup.prototype.appendEntries = function (values) {
-    const pageUl = buildUl(this.listClasses)
-    const keyvalue = Object.keys(values).map(key => Object.assign({}, values[key], {value: key})) //anders zusammen bauen key = value?
-    this.renderNewEntries(keyvalue, pageUl)
-
-    this.resultsWrapper.appendChild(pageUl)
-    return pageUl
-}
-
-SyncPickMarkup.prototype.renderNewEntries = function (values, ul) {
-    let self = this
-    if (values.length > 0) {
-        values.forEach(function (element) {
-            const li = buildLi({
-                value: element.value,
-                text: element[self.textProp],
-                subtext: element[self.subtextProp],
-                selected: element.selected,
-                checkedIconClasses: self.checkedIconClasses
-            })
-            ul.appendChild(li)
+SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValues) {
+    if (Object.keys(dropdownValues).length > 0) {
+        Object.entries(dropdownValues).forEach(([optGroupLabel, options]) => {
+            if(optGroupLabel && optGroupLabel.length > 0){
+                const label = document.createElement('span')
+                label.innerText = optGroupLabel
+                this.resultsWrapper.appendChild(label)
+            }
+            const pageUl = buildUl(this.listClasses)
+            pageUl.setAttribute('data-label', optGroupLabel)
+            this.renderNewEntries(options, pageUl, selectedValues)
+            this.resultsWrapper.appendChild(pageUl)
         })
     } else {
         const li = buildLi({text: this.noResultsText})
         li.classList.add('sp__results-list__item--muted')
-        ul.appendChild(li)
+        const pageUl = buildUl(this.listClasses)
+        pageUl.appendChild(li)
+        this.resultsWrapper.appendChild(pageUl)
     }
+
 }
 
-SyncPickMarkup.prototype.renderSelectedOption = function (value, text) {
-    const option = document.createElement('option')
-    option.value = value
-    option.innerHTML = text
+SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValues) {
+    let self = this
+
+    //optgroup label reinbauen
+    Object.entries(options).forEach(([value, element]) => {
+        const li = buildLi({
+            value: value,
+            text: element[self.textProp],
+            subtext: element[self.subtextProp],
+            selected: selectedValues.indexOf(value) > -1,
+            checkedIconClasses: self.checkedIconClasses
+        })
+        ul.appendChild(li)
+    })
+
+}
+
+SyncPickMarkup.prototype.selectItem = function (key) {
+    const option = this.element.querySelector('option[value="' + key + '"]')
     option.selected = true
     option.setAttribute('selected', '')
-    return option
-}
-
-SyncPickMarkup.prototype.removeSelectedOption = function (value) {
-    Array.apply(null, this.element.options).filter(function (option) {
-        return option.value === value || option.value.toString() === value.toString()
-    }).forEach(function (option) {
-        option.selected = false
-        option.removeAttribute('selected')
-    })
-}
-
-SyncPickMarkup.prototype.selectItem = function (key, value, selectValue) {
-    const oldOption = this.element.querySelector('select option[value="' + selectValue + '"]')
-    const option = this.renderSelectedOption(oldOption.value, value[this.textProp])
-    this.element.removeChild(oldOption)
-    this.element.appendChild(option)
     this.addSelectedClassByValue(key)
 }
 
 SyncPickMarkup.prototype.deselectItem = function (value) {
-    this.removeSelectedOption(value)
+    const option = this.element.querySelector('option[value="' + value + '"]')
+    option.selected = false
+    option.removeAttribute('selected')
     this.removeSelectedClassByValue(value)
 }
 

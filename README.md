@@ -55,7 +55,6 @@ new SyncPick({
     selectedTextVariable: '%num%', // '%x%'
     selectedText: '%num% selected', // '%x% Einträge ausgewählt'
     noResultsText: 'No results',
-    dividerText: 'Selected entries:',
     resetOnClose: true,
     container: null,
     dropdownAlignRight: false,

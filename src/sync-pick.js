@@ -35,6 +35,7 @@ import SyncPickMarkup from './sync-pick/sync-pick-markup'
  * @param {Object}  [options.dropdownValues] - hash with all values in the dropdown.
  *                                    Structure has to be {<value>: {<textProp>: <text>, disabledProp: <disabled>}}.
  *                                    Note that both <value> and <text> should be equal to the actual option values.
+ * @param {Object}  [options.optGroups] - hash with all optgroups of the dropdown.
  * @param {Boolean} [options.debug=false] - enable to log debug messages
  * @param {Function} [options.customDebugHandler=null] - additional function to call when debug messages are logged.
  *                                                       Receives the instance of sync-pick as first arg.
@@ -70,6 +71,7 @@ export default function SyncPick(options) {
     this.popupWidth = options.popupWidth || '300px'
     this.values = options.values || null
     this.dropdownValues = options.dropdownValues || null
+    this.optGroups = options.optGroups || null
     this.debug = options.debug || false
     this.customDebugHandler = options.customDebugHandler || null
 
@@ -91,8 +93,8 @@ SyncPick.prototype.initialize = function () {
     }
     this.setupValues()
     if (!this.disabled) {
-        const pageUl = this.markup.appendEntries(this.dropdownValues)
-        this.addEventListenersForPage(pageUl)
+        this.markup.appendEntries(this.dropdownValues, Object.keys(this.values))
+        this.addEventListenersForPage()
     }
     this.register()
     this.markup.setButtonText(this.values)
@@ -116,7 +118,6 @@ SyncPick.prototype.buildMarkup = function () {
         selectedTextVariable: this.selectedTextVariable,
         selectedText: this.selectedText,
         noResultsText: this.noResultsText,
-        dividerText: this.dividerText,
         container: this.container,
         withSearch: this.withSearch,
         dropdownAlignRight: this.dropdownAlignRight,
@@ -206,7 +207,14 @@ SyncPick.prototype.setupValues = function () {
                 option.selected.toString())
         })
         Array.apply(null, this.element.options).forEach(function (option) {
-            self.dropdownValues[option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'),
+            let optgrouplabel
+            if (option.parentNode.nodeName === 'OPTGROUP') {
+                optgrouplabel = option.parentNode.label
+            } else {
+                optgrouplabel = ''
+            }
+            if (!self.dropdownValues[optgrouplabel]) self.dropdownValues[optgrouplabel] = {}
+            self.dropdownValues[optgrouplabel][option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'),
                 option.selected.toString())
         })
     }
@@ -226,14 +234,17 @@ SyncPick.prototype.search = function () {
         const lowerInputValue = inputValue.toLowerCase()
         this.searchInputTimer = setTimeout(function () {
             let filteredValues = {}
-            Object.entries(self.dropdownValues).forEach(([key,value]) => {
-                if (value.name.toLowerCase().includes(lowerInputValue)) {
-                    filteredValues[key] = value
-                }
+            Object.entries(self.dropdownValues).forEach(([optGroupLabel, options]) => {
+                Object.entries(options).forEach(([key, value]) => {
+                    if (value.name.toLowerCase().includes(lowerInputValue)) {
+                        if (!filteredValues[optGroupLabel]) filteredValues[optGroupLabel] = {}
+                        filteredValues[optGroupLabel][key] = value
+                    }
+                })
             })
-            self.markup.resultsWrapper.removeChild(self.markup.resultsWrapper.querySelector('ul'))
-            const pageUl = self.markup.appendEntries(filteredValues)
-            self.addEventListenersForPage(pageUl)
+            self.markup.resultsWrapper.innerHTML = ''
+            self.markup.appendEntries(filteredValues, Object.keys(self.values))
+            self.addEventListenersForPage()
         }, self.searchTimeout)
     }
 }
@@ -261,9 +272,9 @@ SyncPick.prototype.closePopup = function (e) {
     }
 }
 
-SyncPick.prototype.addEventListenersForPage = function (pageUl) {
+SyncPick.prototype.addEventListenersForPage = function () {
     let self = this
-    Array.apply(null, pageUl.querySelectorAll('li.sp__results-list__item[data-value]:not(.sp__results-list__item--disabled)')).forEach(function (li) {
+    Array.apply(null, self.markup.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]:not(.sp__results-list__item--disabled)')).forEach(function (li) {
         li.addEventListener('click', self.selectHandler)
     })
 }
@@ -305,31 +316,20 @@ SyncPick.prototype.toggleValue = function (key, value) {
 }
 
 SyncPick.prototype.addValue = function (key, value) {
-    let keyvalueOfDropdownValue = 0
-    for (const [key, valueOfDropdowns] of Object.entries(this.dropdownValues)) {
-        if (valueOfDropdowns.name === value.name) {
-            this.values[key] = value
-            keyvalueOfDropdownValue = key
-            this.dropdownValues[key].selected = true
-        }
-    }
-    const newLi = this.markup.selectItem(key, value, keyvalueOfDropdownValue)
-    if (newLi) newLi.addEventListener('click', this.selectHandler)
+    console.log(key)
+    console.log(value)
+
+    //this.dropdownValues[key].selected = true
+    this.values[key] = value
+
+    this.markup.selectItem(key)
     if (this.withSearch) this.markup.searchInput.focus()
     this.logDebugMessage('Value added:', value)
 }
 
 SyncPick.prototype.removeValue = function (key, value) {
-    let keyvalueOfDropdownValue = null
-    for (const [key, valueOfDropdowns] of Object.entries(this.dropdownValues)) {
-        if (valueOfDropdowns.name === value.name) {
-            keyvalueOfDropdownValue = key
-            delete this.values[keyvalueOfDropdownValue]
-            this.dropdownValues[keyvalueOfDropdownValue].selected = false
-        }
-    }
-    const removedLi = this.markup.deselectItem(keyvalueOfDropdownValue)
-    if (removedLi) removedLi.removeEventListener('click', this.selectHandler)
+    delete this.values[key]
+    this.markup.deselectItem(key)
     this.logDebugMessage('Value removed:', value)
 }
 
