@@ -199,7 +199,7 @@ SyncPickMarkup.prototype.renderNewEntries = function (values, ul) {
         })
     } else {
         const li = buildLi({text: this.noResultsText})
-        li.classList.add('sp__results-list__item')
+        li.classList.add('sp__results-list__item--muted')
         ul.appendChild(li)
     }
 }

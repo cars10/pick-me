@@ -263,7 +263,7 @@ SyncPick.prototype.closePopup = function (e) {
 
 SyncPick.prototype.addEventListenersForPage = function (pageUl) {
     let self = this
-    Array.apply(null, pageUl.querySelectorAll('li.sp__results-list__item')).forEach(function (li) {
+    Array.apply(null, pageUl.querySelectorAll('li.sp__results-list__item[data-value]:not(.sp__results-list__item--disabled)')).forEach(function (li) {
         li.addEventListener('click', self.selectHandler)
     })
 }
