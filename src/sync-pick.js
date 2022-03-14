@@ -316,10 +316,6 @@ SyncPick.prototype.toggleValue = function (key, value) {
 }
 
 SyncPick.prototype.addValue = function (key, value) {
-    console.log(key)
-    console.log(value)
-
-    //this.dropdownValues[key].selected = true
     this.values[key] = value
 
     this.markup.selectItem(key)
