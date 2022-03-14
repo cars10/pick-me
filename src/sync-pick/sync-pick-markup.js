@@ -99,8 +99,8 @@ SyncPickMarkup.prototype.shouldDropUp = function () {
 
 SyncPickMarkup.prototype.buildWrapper = function () {
     const wrapper = document.createElement('div')
-    wrapper.classList.add('async-pick')
-    wrapper.classList.add('async-pick--multiple')
+    wrapper.classList.add('sync-pick')
+    wrapper.classList.add('sync-pick--multiple')
     const elementClasses = this.element.classList
     Array.apply(null, elementClasses).forEach(function (elementClass) {
         wrapper.classList.add(elementClass)
