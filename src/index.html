@@ -125,10 +125,11 @@
   <h2>Output</h2>
   <div class="row" style="margin-bottom: 400px;">
     <div class="col-sm-4 col-sm-offset-2">
-      <select id="picker" name="picker" title="Select something" multiple>
+      <select id="picker" name="picker" title="Select something">
         <optgroup label="erste">
-          <option data-subtext="#1Abbey" selected value="100">Abbey Storrs1</option>
-          <option data-subtext="#2Abbey" selected value="2">Abbey Storrs2</option>
+          <option value></option>
+          <option data-subtext="#1Abbey" value="100">Abbey Storrs1</option>
+          <option data-subtext="#2Abbey" value="2">Abbey Storrs2</option>
           <option value="3">Abbey Storrs3</option>
           <option value="4">Abbey Storrs4</option>
           <option value="5">Abbey Storrs5</option>
@@ -170,7 +171,7 @@
       dropdownAlignRight: document.getElementById('set_dropdown_align_right').checked,
       disabled: document.getElementById('set_disabled').checked,
       withSearch: true,
-      withSelectAllButton: true,
+      emptySelectButtonText: 'Bitte auswählen',
       selectAllButtonClasses: ['btn', 'btn-default'],
       selectAllButtonGroupClasses: ['btn-group'],
       customDebugHandler: debugHandler,

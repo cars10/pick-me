@@ -104,7 +104,7 @@ SyncPickMarkup.prototype.shouldDropUp = function () {
 SyncPickMarkup.prototype.buildWrapper = function () {
     const wrapper = document.createElement('div')
     wrapper.classList.add('sync-pick')
-    wrapper.classList.add('sync-pick--multiple')
+    if (this.multiple) wrapper.classList.add('sync-pick--multiple')
     const elementClasses = this.element.classList
     Array.apply(null, elementClasses).forEach(function (elementClass) {
         wrapper.classList.add(elementClass)
@@ -236,6 +236,7 @@ SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValue
             text: element[self.textProp],
             subtext: element[self.subtextProp],
             selected: selectedValues.indexOf(value) > -1,
+            multiple: self.multiple,
             checkedIconClasses: self.checkedIconClasses
         })
         ul.appendChild(li)
@@ -258,12 +259,12 @@ SyncPickMarkup.prototype.deselectItem = function (value) {
 
 SyncPickMarkup.prototype.addSelectedClassByValue = function (value) {
     const li = this.resultsWrapper.querySelector('li[data-value="' + value + '"]')
-    if (li) setLiSelected(li, true, this.checkedIconClasses)
+    if (li) setLiSelected(li, true, this.multiple, this.checkedIconClasses)
 }
 
 SyncPickMarkup.prototype.removeSelectedClassByValue = function (value) {
     const li = this.resultsWrapper.querySelector('li[data-value="' + value + '"]')
-    if (li) setLiSelected(li, false, this.checkedIconClasses)
+    if (li) setLiSelected(li, false, this.multiple, this.checkedIconClasses)
 }
 
 SyncPickMarkup.prototype.destroy = function () {
@@ -393,22 +394,30 @@ function buildLi(options) {
 
     li.appendChild(textSpan)
     if (options.selected) {
-        setLiSelected(li, true, options.checkedIconClasses)
+        setLiSelected(li, true, options.multiple, options.checkedIconClasses)
     }
     return li
 }
 
-function setLiSelected(li, selected, checkedIconClasses) {
+function setLiSelected (li, selected, addCheck, checkedIconClasses) {
     if (selected) {
-        const check = document.createElement('i')
-        checkedIconClasses.forEach(function (checkedIconClass) {
-            check.classList.add(checkedIconClass)
-        })
-        check.classList.add('sp__results-list__item__check-mark')
-        li.appendChild(check)
+        if (addCheck) {
+            const check = document.createElement('i')
+            checkedIconClasses.forEach(function (checkedIconClass) {
+                check.classList.add(checkedIconClass)
+            })
+            check.classList.add('sp__results-list__item__check-mark')
+            li.appendChild(check)
+        } else {
+            li.classList.add('sp__results-list__item--selected')
+        }
     } else {
-        const check = li.querySelector('.sp__results-list__item__check-mark')
-        if (check) li.removeChild(check)
+        if (addCheck) {
+            const check = li.querySelector('.sp__results-list__item__check-mark')
+            if (check) li.removeChild(check)
+        } else {
+            li.classList.remove('sp__results-list__item--selected')
+        }
     }
 }
 

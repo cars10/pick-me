@@ -27,6 +27,7 @@ import SyncPickMarkup from './sync-pick/sync-pick-markup'
  * @param {Boolean} [options.withSearch=false] - set to true to active the searchbar
  * @param {Boolean} [options.dropdownAlignRight=false] - set to true to align the dropdown on the right
  * @param {Boolean} [options.popupWidth='300px'] - set width for popup when container option is set
+ * @param {Boolean} [options.multiple=false] - to enable multiple. alternatively set your select to multiple
  * @param {Boolean} [options.disabled=false] - to disabled the select. alternatively set your select to disabled
  * @param {Object}  [options.values] - hash with preselected values, overrides possible <option selected> elements.
  *                                    This is an alternative to adding actual <option selected> elements to the dom.
@@ -83,6 +84,7 @@ export default function SyncPick(options) {
     this.debug = options.debug || false
     this.customDebugHandler = options.customDebugHandler || null
 
+    this.multiple = !!this.element.multiple || !!options.multiple
     this.disabled = !!this.element.disabled || !!options.disabled
     this.open = false
 
@@ -111,6 +113,7 @@ SyncPick.prototype.initialize = function () {
 SyncPick.prototype.buildMarkup = function () {
     return new SyncPickMarkup({
         element: this.element,
+        multiple: this.multiple,
         disabled: this.disabled,
         textProp: this.textProp,
         subtextProp: this.subtextProp,
@@ -329,7 +332,11 @@ SyncPick.prototype.select = function (e) {
     const subtext = li.getAttribute('data-subtext')
     const value = this.buildValue(text, subtext)
 
-    this.toggleValue(key, value)
+    if (this.multiple) {
+        this.toggleValue(key, value)
+    } else {
+        this.setValue(key, value)
+    }
 
     this.markup.setButtonText(this.values)
     this.triggerChange()
@@ -362,6 +369,14 @@ SyncPick.prototype.removeValue = function (key, value) {
     delete this.values[key]
     this.markup.deselectItem(key)
     this.logDebugMessage('Value removed:', value)
+}
+
+SyncPick.prototype.setValue = function (key, value) {
+    if (Object.keys(this.values).length > 0){
+        this.removeValue(Object.keys(this.values)[0])
+    }
+    this.addValue(key, value)
+    this.logDebugMessage('Value set:', value)
 }
 
 SyncPick.prototype.buildValue = function (text, subtext) {
