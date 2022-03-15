@@ -245,14 +245,14 @@ SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValue
 SyncPickMarkup.prototype.selectItem = function (value) {
     const option = this.element.querySelector('option[value="' + value + '"]')
     option.selected = true
-    option.setAttribute('selected', '')
+    option.setAttribute('data-selected', '')
     this.addSelectedClassByValue(value)
 }
 
 SyncPickMarkup.prototype.deselectItem = function (value) {
     const option = this.element.querySelector('option[value="' + value + '"]')
     option.selected = false
-    option.removeAttribute('selected')
+    option.removeAttribute('data-selected')
     this.removeSelectedClassByValue(value)
 }
 
