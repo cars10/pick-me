@@ -3,6 +3,6 @@ export default {
     emptySelectButtonText: 'Show all',
     noResultsText: 'No results found',
     selectedText: '%num% selected',
-    selectAllButtonText: 'Select all entries',
-    deselectAllButtonText: 'Deselect all entries'
+    selectAllButtonText: 'Select all',
+    deselectAllButtonText: 'Deselect all'
 }

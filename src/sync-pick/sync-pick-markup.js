@@ -202,7 +202,7 @@ SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
     return this.resultsScrollWrapper
 }
 
-SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValues) {
+SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValues, valuesOrder) {
     if (Object.keys(dropdownValues).length > 0) {
         Object.entries(dropdownValues).forEach(([optGroupLabel, options]) => {
             if(optGroupLabel && optGroupLabel.length > 0){
@@ -212,7 +212,8 @@ SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValue
             }
             const pageUl = buildUl(this.listClasses)
             pageUl.setAttribute('data-label', optGroupLabel)
-            this.renderNewEntries(options, pageUl, selectedValues)
+            const order = valuesOrder[optGroupLabel]
+            this.renderNewEntries(options, pageUl, selectedValues, order)
             this.resultsWrapper.appendChild(pageUl)
         })
     } else {
@@ -225,9 +226,11 @@ SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValue
 
 }
 
-SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValues) {
+SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValues, order) {
     let self = this
-    Object.entries(options).forEach(([value, element]) => {
+    order.forEach(value => {
+        const element = options[value]
+        if (!element) return
         const li = buildLi({
             value: value,
             text: element[self.textProp],

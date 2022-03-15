@@ -101,7 +101,7 @@ SyncPick.prototype.initialize = function () {
     }
     this.setupValues()
     if (!this.disabled) {
-        this.markup.appendEntries(this.dropdownValues, Object.keys(this.values))
+        this.markup.appendEntries(this.dropdownValues, Object.keys(this.values), this.valuesOrder)
         this.addEventListenersForPage()
     }
     this.register()
@@ -216,6 +216,7 @@ SyncPick.prototype.setupValues = function () {
     if (!this.values) {
         this.values = {}
         this.dropdownValues = {}
+        this.valuesOrder = {}
         let self = this
         Array.apply(null, this.element.options).filter(function (option) {
             return option.selected
@@ -229,6 +230,8 @@ SyncPick.prototype.setupValues = function () {
             } else {
                 optgrouplabel = ''
             }
+            if (!self.valuesOrder[optgrouplabel]) self.valuesOrder[optgrouplabel] = []
+            self.valuesOrder[optgrouplabel].push(option.value)
             if (!self.dropdownValues[optgrouplabel]) self.dropdownValues[optgrouplabel] = {}
             self.dropdownValues[optgrouplabel][option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'))
         })
@@ -258,7 +261,7 @@ SyncPick.prototype.search = function () {
                 })
             })
             self.markup.resultsWrapper.innerHTML = ''
-            self.markup.appendEntries(filteredValues, Object.keys(self.values))
+            self.markup.appendEntries(filteredValues, Object.keys(self.values), self.valuesOrder)
             self.addEventListenersForPage()
         }, self.searchTimeout)
     }
