@@ -35,7 +35,11 @@ import SyncPickMarkup from './sync-pick/sync-pick-markup'
  * @param {Object}  [options.dropdownValues] - hash with all values in the dropdown.
  *                                    Structure has to be {<value>: {<textProp>: <text>, disabledProp: <disabled>}}.
  *                                    Note that both <value> and <text> should be equal to the actual option values.
- * @param {Object}  [options.optGroups] - hash with all optgroups of the dropdown.
+ * @param {Object}  [options.withSelectAllButton] - enables buttons to select and deselect all entries
+ * @param {Array}   [options.selectAllButtonClasses=[]] - additional classes to add to "select all" buttons
+ * @param {Array}   [options.selectAllButtonGroupClasses=[]] - additional classes to add to "select all" buttongroup
+ * @param {String}  [options.selectAllButtonText='Select all'] - text to display on button to select all
+ * @param {String}  [options.deselectAllButtonText='Deselect all'] - text to display on button to deselect all
  * @param {Boolean} [options.debug=false] - enable to log debug messages
  * @param {Function} [options.customDebugHandler=null] - additional function to call when debug messages are logged.
  *                                                       Receives the instance of sync-pick as first arg.
@@ -71,7 +75,11 @@ export default function SyncPick(options) {
     this.popupWidth = options.popupWidth || '300px'
     this.values = options.values || null
     this.dropdownValues = options.dropdownValues || null
-    this.optGroups = options.optGroups || null
+    this.withSelectAllButton = options.withSelectAllButton || false
+    this.selectAllButtonClasses = options.selectAllButtonClasses || []
+    this.selectAllButtonGroupClasses = options.selectAllButtonGroupClasses || []
+    this.selectAllButtonText = options.selectAllButtonText || this.i18n.selectAllButtonText || 'Select all'
+    this.deselectAllButtonText = options.deselectAllButtonText || this.i18n.deselectAllButtonText || 'Deselect all'
     this.debug = options.debug || false
     this.customDebugHandler = options.customDebugHandler || null
 
@@ -121,7 +129,12 @@ SyncPick.prototype.buildMarkup = function () {
         container: this.container,
         withSearch: this.withSearch,
         dropdownAlignRight: this.dropdownAlignRight,
-        popupWidth: this.popupWidth
+        popupWidth: this.popupWidth,
+        withSelectAllButton: this.withSelectAllButton,
+        selectAllButtonClasses: this.selectAllButtonClasses,
+        selectAllButtonGroupClasses: this.selectAllButtonGroupClasses,
+        selectAllButtonText: this.selectAllButtonText,
+        deselectAllButtonText: this.deselectAllButtonText
     })
 }
 
@@ -135,6 +148,8 @@ SyncPick.prototype.addHandlers = function () {
     }
     this.buttonKeyHandler = this.onButtonKeyDown.bind(this)
     this.markupKeyHandler = this.onMarkupKeyDown.bind(this)
+    this.selectAllHandler = this.selectAllEntries.bind(this)
+    this.deselectAllHandler = this.deselectAllEntries.bind(this)
     this.labelClickHandler = function (e) {
         e.preventDefault()
         this.markup.button.focus()
@@ -167,6 +182,8 @@ SyncPick.prototype.addEvents = function () {
     this.markup.button.addEventListener('click', this.togglePopupHandler)
     if (this.withSearch) this.markup.searchInput.addEventListener('input', this.searchHandler)
     this.markup.popup.addEventListener('click', this.stopPropagationHandler)
+    this.markup.selectAllButton.addEventListener('click', this.selectAllHandler)
+    this.markup.deselectAllButton.addEventListener('click', this.deselectAllHandler)
     this.markup.button.addEventListener('keydown', this.buttonKeyHandler)
     this.markup.popup.addEventListener('keydown', this.markupKeyHandler)
     document.addEventListener('click', this.closePopupHandler)
@@ -203,8 +220,7 @@ SyncPick.prototype.setupValues = function () {
         Array.apply(null, this.element.options).filter(function (option) {
             return option.selected
         }).forEach(function (option) {
-            self.values[option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'),
-                option.selected.toString())
+            self.values[option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'))
         })
         Array.apply(null, this.element.options).forEach(function (option) {
             let optgrouplabel
@@ -214,8 +230,7 @@ SyncPick.prototype.setupValues = function () {
                 optgrouplabel = ''
             }
             if (!self.dropdownValues[optgrouplabel]) self.dropdownValues[optgrouplabel] = {}
-            self.dropdownValues[optgrouplabel][option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'),
-                option.selected.toString())
+            self.dropdownValues[optgrouplabel][option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'))
         })
     }
 }
@@ -272,6 +287,27 @@ SyncPick.prototype.closePopup = function (e) {
     }
 }
 
+SyncPick.prototype.selectAllEntries = function () {
+    const keysOfSelectedValues = Object.keys(this.values)
+    this.values = Object.assign({}, ...Object.values(this.dropdownValues))
+    Object.keys(this.values).forEach(value => {
+        if (!keysOfSelectedValues.includes(value)){
+            this.markup.selectItem(value)
+        }
+    })
+    this.markup.setButtonText(this.values)
+    this.triggerChange()
+}
+
+SyncPick.prototype.deselectAllEntries = function () {
+    Object.keys(this.values).forEach(value => {
+        this.markup.deselectItem(value)
+    })
+    this.values = {}
+    this.markup.setButtonText(this.values)
+    this.triggerChange()
+}
+
 SyncPick.prototype.addEventListenersForPage = function () {
     let self = this
     Array.apply(null, self.markup.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]:not(.sp__results-list__item--disabled)')).forEach(function (li) {
@@ -288,12 +324,7 @@ SyncPick.prototype.select = function (e) {
     const key = li.getAttribute('data-value')
     const text = li.getAttribute('data-text')
     const subtext = li.getAttribute('data-subtext')
-    let value
-    if (this.values[key]) {
-        value = this.buildValue(text, subtext, 'false')
-    } else {
-        value = this.buildValue(text, subtext, 'true')
-    }
+    const value = this.buildValue(text, subtext)
 
     this.toggleValue(key, value)
 
@@ -305,6 +336,7 @@ SyncPick.prototype.triggerChange = function () {
     let event = new CustomEvent('Event', {detail: this.values})
     event.initEvent('change', true, true)
     this.element.dispatchEvent(event)
+    this.logDebugMessage('changeTriggered')
 }
 
 SyncPick.prototype.toggleValue = function (key, value) {
@@ -329,11 +361,10 @@ SyncPick.prototype.removeValue = function (key, value) {
     this.logDebugMessage('Value removed:', value)
 }
 
-SyncPick.prototype.buildValue = function (text, subtext, selected) {
+SyncPick.prototype.buildValue = function (text, subtext) {
     let value = {}
     value[this.textProp] = text
     value[this.subtextProp] = subtext
-    value.selected = (selected === 'true')
     return value
 }
 

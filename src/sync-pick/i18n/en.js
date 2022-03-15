@@ -2,5 +2,7 @@ export default {
     searchPlaceholder: 'Search',
     emptySelectButtonText: 'Show all',
     noResultsText: 'No results found',
-    selectedText: '%num% selected'
+    selectedText: '%num% selected',
+    selectAllButtonText: 'Select all entries',
+    deselectAllButtonText: 'Deselect all entries'
 }

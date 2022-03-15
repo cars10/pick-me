@@ -19,6 +19,11 @@ export default function SyncPickMarkup(options) {
     this.noResultsText = options.noResultsText
     this.container = options.container
     this.withSearch = options.withSearch
+    this.withSelectAllButton = options.withSelectAllButton
+    this.selectAllButtonClasses = options.selectAllButtonClasses
+    this.selectAllButtonGroupClasses = options.selectAllButtonGroupClasses
+    this.selectAllButtonText = options.selectAllButtonText
+    this.deselectAllButtonText = options.deselectAllButtonText
     this.dropdownAlignRight = options.dropdownAlignRight
     this.popupWidth = options.popupWidth
     this.open = false
@@ -142,6 +147,7 @@ SyncPickMarkup.prototype.buildPopup = function () {
     if (this.dropdownAlignRight) popup.classList.add('sp__popup--right')
 
     if (this.withSearch) popup.appendChild(this.buildSearchInput())
+    if (this.withSelectAllButton) popup.appendChild(this.buildSelectAllButtons())
     popup.appendChild(this.buildResultsScrollWrapper())
 
     return popup
@@ -162,6 +168,28 @@ SyncPickMarkup.prototype.buildSearchInput = function () {
 
     wrapper.appendChild(this.searchInput)
     return wrapper
+}
+
+SyncPickMarkup.prototype.buildSelectAllButtons = function () {
+    const buttongroup = document.createElement('div')
+    this.selectAllButtonGroupClasses.forEach(function (buttonGroupClass) {
+        buttongroup.classList.add(buttonGroupClass)
+    })
+    this.selectAllButton = document.createElement('button')
+    this.selectAllButton.setAttribute('type', 'button')
+    this.deselectAllButton = document.createElement('button')
+    this.deselectAllButton.setAttribute('type', 'button')
+    this.selectAllButton.innerHTML = this.selectAllButtonText
+    this.deselectAllButton.innerHTML = this.deselectAllButtonText
+    let self = this
+    this.selectAllButtonClasses.forEach(function (buttonClass) {
+        self.selectAllButton.classList.add(buttonClass)
+        self.deselectAllButton.classList.add(buttonClass)
+    })
+    buttongroup.appendChild(this.selectAllButton)
+    buttongroup.appendChild(this.deselectAllButton)
+
+    return buttongroup
 }
 
 SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
@@ -199,8 +227,6 @@ SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValue
 
 SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValues) {
     let self = this
-
-    //optgroup label reinbauen
     Object.entries(options).forEach(([value, element]) => {
         const li = buildLi({
             value: value,
@@ -211,14 +237,13 @@ SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValue
         })
         ul.appendChild(li)
     })
-
 }
 
-SyncPickMarkup.prototype.selectItem = function (key) {
-    const option = this.element.querySelector('option[value="' + key + '"]')
+SyncPickMarkup.prototype.selectItem = function (value) {
+    const option = this.element.querySelector('option[value="' + value + '"]')
     option.selected = true
     option.setAttribute('selected', '')
-    this.addSelectedClassByValue(key)
+    this.addSelectedClassByValue(value)
 }
 
 SyncPickMarkup.prototype.deselectItem = function (value) {
