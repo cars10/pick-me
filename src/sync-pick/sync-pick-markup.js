@@ -244,26 +244,26 @@ SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValue
 }
 
 SyncPickMarkup.prototype.selectItem = function (value) {
-    const option = this.element.querySelector('option[value="' + value + '"]')
+    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
     option.selected = true
     option.setAttribute('data-selected', '')
     this.addSelectedClassByValue(value)
 }
 
 SyncPickMarkup.prototype.deselectItem = function (value) {
-    const option = this.element.querySelector('option[value="' + value + '"]')
+    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
     option.selected = false
     option.removeAttribute('data-selected')
     this.removeSelectedClassByValue(value)
 }
 
 SyncPickMarkup.prototype.addSelectedClassByValue = function (value) {
-    const li = this.resultsWrapper.querySelector('li[data-value="' + value + '"]')
+    const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
     if (li) setLiSelected(li, true, this.multiple, this.checkedIconClasses)
 }
 
 SyncPickMarkup.prototype.removeSelectedClassByValue = function (value) {
-    const li = this.resultsWrapper.querySelector('li[data-value="' + value + '"]')
+    const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
     if (li) setLiSelected(li, false, this.multiple, this.checkedIconClasses)
 }
 

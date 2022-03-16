@@ -127,8 +127,8 @@
     <div class="col-sm-4 col-sm-offset-2">
       <select id="picker" name="picker" title="Select something">
         <optgroup label="erste">
-          <option value></option>
-          <option data-subtext="#1Abbey" value="100">Abbey Storrs1</option>
+          <option value="{&quot;UserMailer&quot;:&quot;notify_about_survey&quot;}">Benutzer über Umfrage benachrichtigen</option>
+          <option data-subtext="#1Abbey" value="{&quot;UserMailer&quot;:&quot;notify_user_for_added_tutorials&quot;}">Abbey Storrs1</option>
           <option data-subtext="#2Abbey" value="2">Abbey Storrs2</option>
           <option value="3">Abbey Storrs3</option>
           <option value="4">Abbey Storrs4</option>
@@ -171,7 +171,6 @@
       dropdownAlignRight: document.getElementById('set_dropdown_align_right').checked,
       disabled: document.getElementById('set_disabled').checked,
       withSearch: true,
-      emptySelectButtonText: 'Bitte auswählen',
       selectAllButtonClasses: ['btn', 'btn-default'],
       selectAllButtonGroupClasses: ['btn-group'],
       customDebugHandler: debugHandler,

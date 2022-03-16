@@ -224,6 +224,7 @@ SyncPick.prototype.setupValues = function () {
         Array.apply(null, this.element.options).filter(function (option) {
             return option.selected
         }).forEach(function (option) {
+            console.log(option.value)
             self.values[option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'))
         })
         Array.apply(null, this.element.options).forEach(function (option) {
@@ -366,6 +367,7 @@ SyncPick.prototype.addValue = function (key, value) {
 }
 
 SyncPick.prototype.removeValue = function (key, value) {
+    console.log(this.values)
     delete this.values[key]
     this.markup.deselectItem(key)
     this.logDebugMessage('Value removed:', value)
