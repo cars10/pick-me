@@ -207,6 +207,7 @@ SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValue
         Object.entries(dropdownValues).forEach(([optGroupLabel, options]) => {
             if(optGroupLabel && optGroupLabel.length > 0){
                 const label = document.createElement('span')
+                label.classList.add('sp__opt-group-label')
                 label.innerText = optGroupLabel
                 this.resultsWrapper.appendChild(label)
             }
