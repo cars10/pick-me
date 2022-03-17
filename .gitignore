@@ -7,4 +7,4 @@ yarn-error.log*
 /.vscode
 /.idea
 
-dist/index.html
+/public/dist

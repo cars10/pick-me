@@ -1,4 +1,6 @@
 import SyncPickMarkup from './sync-pick/sync-pick-markup'
+import en from "./sync-pick/i18n/en";
+import de from "./sync-pick/i18n/de";
 
 /**
  * SyncPick
@@ -92,7 +94,7 @@ export default function SyncPick(options) {
     this.logDebugMessage('initialized with options:', this)
     return this
 }
-
+SyncPick.i18n = { de, en }
 SyncPick.elements = {}
 
 SyncPick.prototype.initialize = function () {
