@@ -101,6 +101,7 @@ SyncPick.prototype.initialize = function () {
         this.addHandlers()
         this.addEvents()
     }
+    console.log('initialize')
     this.setupValues()
     if (!this.disabled) {
         this.markup.appendEntries(this.dropdownValues, Object.keys(this.values), this.valuesOrder)
@@ -158,6 +159,12 @@ SyncPick.prototype.addHandlers = function () {
         this.markup.button.focus()
     }.bind(this)
     this.containerPositionHandler = this.markup.positionPopup.bind(this.markup)
+    this.resetFormHandler = this.resetAndReload.bind(this)
+}
+
+SyncPick.prototype.resetAndReload = function () {
+    this.logDebugMessage('form reset! reloading sync-pick')
+    this.reload()
 }
 
 SyncPick.prototype.onButtonKeyDown = function (e) {
@@ -193,6 +200,7 @@ SyncPick.prototype.addEvents = function () {
     window.addEventListener('resize', this.containerPositionHandler)
     window.addEventListener('scroll', this.containerPositionHandler)
     if (this.label) this.label.addEventListener('click', this.labelClickHandler)
+    if (this.element.form) this.element.form.addEventListener('reset', this.resetFormHandler)
     let self = this
     onDomRemove(this.markup.element, function () {
         self.destroy()
@@ -213,6 +221,7 @@ SyncPick.prototype.removeEvents = function () {
     window.removeEventListener('resize', this.containerPositionHandler)
     window.removeEventListener('scroll', this.containerPositionHandler)
     if (this.label) this.label.removeEventListener('click', this.labelClickHandler)
+    if (this.element.form) this.element.form.removeEventListener('reset', this.resetFormHandler)
 }
 
 SyncPick.prototype.setupValues = function () {
@@ -418,6 +427,7 @@ SyncPick.prototype.destroy = function () {
     this.dropdownValues = {}
     delete this.markup
     delete SyncPick.elements[this.id]
+    this.element.classList.remove('visually-hidden')
 }
 
 SyncPick.prototype.reload = function () {

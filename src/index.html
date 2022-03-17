@@ -125,40 +125,47 @@
   <h2>Output</h2>
   <div class="row" style="margin-bottom: 400px;">
     <div class="col-sm-4 col-sm-offset-2">
-      <select id="picker" name="picker" title="Select something">
-        <optgroup label="erste">
-          <option value="{&quot;UserMailer&quot;:&quot;notify_about_survey&quot;}">Benutzer über Umfrage benachrichtigen</option>
-          <option data-subtext="#1Abbey" value="{&quot;UserMailer&quot;:&quot;notify_user_for_added_tutorials&quot;}">Abbey Storrs1</option>
-          <option data-subtext="#2Abbey" value="2">Abbey Storrs2</option>
-          <option value="3">Abbey Storrs3</option>
-          <option value="4">Abbey Storrs4</option>
-          <option value="5">Abbey Storrs5</option>
-          <option value="6">Abbey Storrs6</option>
-        </optgroup>
-        <optgroup label="zweite">
-          <option value="7">Abbey Storrs7</option>
-          <option value="8">Abbey Storrs8</option>
-          <option value="9">Abbey Storrs9</option>
-          <option value="10">Abbey Storrs10</option>
-          <option value="11">Abbey Storrs11</option>
-          <option value="12">Abbey Storrs12</option>
-          <option value="13">Abbey Storrs13</option>
-        </optgroup>
-      </select>
+      <form>
+        <button type="button" id="reset-form">Reset</button>
+        <select id="picker" name="picker" title="Select something">
+          <optgroup label="erste">
+            <option value="{&quot;UserMailer&quot;:&quot;notify_about_survey&quot;}">Benutzer über Umfrage benachrichtigen</option>
+            <option data-subtext="#1Abbey" value="{&quot;UserMailer&quot;:&quot;notify_user_for_added_tutorials&quot;}">Abbey Storrs1</option>
+            <option data-subtext="#2Abbey" value="2">Abbey Storrs2</option>
+            <option value="3">Abbey Storrs3</option>
+            <option value="4">Abbey Storrs4</option>
+            <option value="5">Abbey Storrs5</option>
+            <option value="6">Abbey Storrs6</option>
+          </optgroup>
+          <optgroup label="zweite">
+            <option value="7">Abbey Storrs7</option>
+            <option value="8">Abbey Storrs8</option>
+            <option value="9">Abbey Storrs9</option>
+            <option value="10">Abbey Storrs10</option>
+            <option value="11">Abbey Storrs11</option>
+            <option value="12">Abbey Storrs12</option>
+            <option value="13">Abbey Storrs13</option>
+          </optgroup>
+        </select>
+      </form>
+
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    reloadSyncPic()
+  const selectId = 'picker'
+
+  document.addEventListener('DOMContentLoaded', reloadSyncPic)
+  document.getElementById('reset-form').addEventListener('click', function (e) {
+    e.target.form.reset()
+    debugHandler(window.SyncPick.elements[selectId])
+    console.log(document.getElementById(selectId).value)
   })
 
   Array.apply(null, document.getElementById('settings').querySelectorAll('input,select')).forEach(function (input) {
     input.addEventListener('input', function () {
-      Object.keys(window.SyncPick.elements).forEach(function (id) {
-        window.SyncPick.elements[id].destroy()
-      })
+      window.SyncPick.elements[selectId].destroy()
       reloadSyncPic()
     })
   })
