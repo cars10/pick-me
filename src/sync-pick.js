@@ -101,7 +101,6 @@ SyncPick.prototype.initialize = function () {
         this.addHandlers()
         this.addEvents()
     }
-    console.log('initialize')
     this.setupValues()
     if (!this.disabled) {
         this.markup.appendEntries(this.dropdownValues, Object.keys(this.values), this.valuesOrder)
