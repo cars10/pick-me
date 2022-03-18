@@ -281,34 +281,60 @@ SyncPickMarkup.prototype.getSelected = function () {
     return this.resultsWrapper.querySelectorAll('li.sp__results-list__item--selected')[0]
 }
 
+SyncPickMarkup.prototype.getHovered = function () {
+    return this.hovered
+}
+
 SyncPickMarkup.prototype.focusPreviousEntry = function () {
-    const selected = this.getSelected()
-    if (selected) {
-        const prev = selected.previousSibling || (selected.parentNode && selected.parentNode.previousSibling && selected.parentNode.previousSibling.lastChild)
-        if (prev) {
-            selected.classList.remove('sp__results-list__item--selected')
-            prev.classList.add('sp__results-list__item--selected')
+    if (!this.hovered) this.hovered = this.getSelected()
+    if (this.hovered) {
+        const prev = this.hovered.previousSibling || (this.hovered.parentNode && this.hovered.parentNode.previousSibling && this.hovered.parentNode.previousSibling.lastChild)
+        if (this.hovered.previousSibling) {
+            this.hovered.classList.remove('sp__results-list__item--hover')
+            prev.classList.add('sp__results-list__item--hover')
+            this.hovered = prev
             this.scrollEntryIntoView(prev)
+        }
+        else if (this.hovered.parentNode.previousSibling && this.hovered.parentNode.previousSibling.nodeName === 'SPAN') {
+            const prevOptGroup = this.hovered.parentNode.previousSibling.previousSibling
+            if (prevOptGroup) {
+                this.hovered.classList.remove('sp__results-list__item--hover')
+                prevOptGroup.lastChild.classList.add('sp__results-list__item--hover')
+                this.hovered = prevOptGroup.lastChild
+                this.scrollEntryIntoView(this.hovered)
+            }
         }
     } else {
         const first = this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]')[0]
-        first.classList.add('sp__results-list__item--selected')
+        first.classList.add('sp__results-list__item--hover')
+        this.hovered = first
         this.scrollEntryIntoView(first)
     }
 }
 
 SyncPickMarkup.prototype.focusNextEntry = function () {
-    const selected = this.getSelected()
-    if (selected) {
-        const next = selected.nextSibling || (selected.parentNode && selected.parentNode.nextSibling && selected.parentNode.nextSibling.firstChild)
-        if (next) {
-            selected.classList.remove('sp__results-list__item--selected')
-            next.classList.add('sp__results-list__item--selected')
+    if (!this.hovered) this.hovered = this.getSelected()
+    if (this.hovered) {
+        const next = this.hovered.nextSibling || (this.hovered.parentNode && this.hovered.parentNode.nextSibling && this.hovered.parentNode.nextSibling.firstChild)
+        if (this.hovered.nextSibling) {
+            this.hovered.classList.remove('sp__results-list__item--hover')
+            next.classList.add('sp__results-list__item--hover')
+            this.hovered = next
             this.scrollEntryIntoView(next)
+        }
+        else if (this.hovered.parentNode.nextSibling && this.hovered.parentNode.nextSibling.nodeName === 'SPAN') {
+            const nextOptGroup = this.hovered.parentNode.nextSibling.nextSibling
+            if (nextOptGroup) {
+                this.hovered.classList.remove('sp__results-list__item--hover')
+                nextOptGroup.firstChild.classList.add('sp__results-list__item--hover')
+                this.hovered = nextOptGroup.firstChild
+                this.scrollEntryIntoView(this.hovered)
+            }
         }
     } else {
         const first = this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]')[0]
-        first.classList.add('sp__results-list__item--selected')
+        first.classList.add('sp__results-list__item--hover')
+        this.hovered = first
         this.scrollEntryIntoView(first)
     }
 }
@@ -410,6 +436,7 @@ function setLiSelected (li, selected, addCheck, checkedIconClasses) {
             check.classList.add('sp__results-list__item__check-mark')
             li.appendChild(check)
         } else {
+            li.classList.remove('sp__results-list__item--hover')
             li.classList.add('sp__results-list__item--selected')
         }
     } else {

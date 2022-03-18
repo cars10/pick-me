@@ -94,7 +94,7 @@ export default function SyncPick(options) {
     this.logDebugMessage('initialized with options:', this)
     return this
 }
-SyncPick.i18n = { de, en }
+SyncPick.i18n = {de, en}
 SyncPick.elements = {}
 
 SyncPick.prototype.initialize = function () {
@@ -184,7 +184,7 @@ SyncPick.prototype.onMarkupKeyDown = function (e) {
         this.markup.focusPreviousEntry()
     } else if (e.keyCode === 13) { // enter
         e.preventDefault()
-        const li = this.markup.getSelected()
+        const li = this.markup.getHovered()
         if (li) this.select({currentTarget: li})
     }
 }
@@ -211,7 +211,7 @@ SyncPick.prototype.addEvents = function () {
 SyncPick.prototype.removeEvents = function () {
     let self = this
     this.markup.button.removeEventListener('click', this.togglePopupHandler)
-    this.markup.searchInput.removeEventListener('input', this.searchHandler)
+    if (this.withSearch) this.markup.searchInput.removeEventListener('input', this.searchHandler)
     Array.apply(null, this.markup.resultsWrapper.querySelectorAll('li')).forEach(function (li) {
         li.removeEventListener('click', self.selectHandler)
     })
@@ -257,6 +257,8 @@ SyncPick.prototype.togglePopup = function () {
 
 SyncPick.prototype.search = function () {
     if (this.searchInputTimer) clearTimeout(this.searchInputTimer)
+    if (this.markup.hovered) this.markup.hovered.classList.remove('sp__results-list__item--hover')
+    this.markup.hovered = false
 
     let inputValue = this.markup.searchInput.value
     if (this.shouldSearch(inputValue)) {
@@ -299,6 +301,8 @@ SyncPick.prototype.closePopup = function (e) {
         this.markup.popup.classList.remove('sp__popup--visible')
         this.open = false
         this.markup.open = false
+        if (this.markup.hovered) this.markup.hovered.classList.remove('sp__results-list__item--hover')
+        this.markup.hovered = false
         if (this.withSearch) this.resetSearch()
     }
 }
@@ -307,7 +311,7 @@ SyncPick.prototype.selectAllEntries = function () {
     const keysOfSelectedValues = Object.keys(this.values)
     this.values = Object.assign({}, ...Object.values(this.dropdownValues))
     Object.keys(this.values).forEach(value => {
-        if (!keysOfSelectedValues.includes(value)){
+        if (!keysOfSelectedValues.includes(value)) {
             this.markup.selectItem(value)
         }
     })
@@ -349,6 +353,7 @@ SyncPick.prototype.select = function (e) {
     }
 
     this.markup.setButtonText(this.values)
+    if (!this.multiple) this.closePopupAndFocus()
     this.triggerChange()
 }
 
@@ -382,8 +387,10 @@ SyncPick.prototype.removeValue = function (key, value) {
 }
 
 SyncPick.prototype.setValue = function (key, value) {
-    if (Object.keys(this.values).length > 0){
+    if (Object.keys(this.values).length > 0) {
         this.removeValue(Object.keys(this.values)[0])
+        const selected = this.markup.getSelected()
+        if (selected) selected.classList.remove('sp__results-list__item--selected')
     }
     this.addValue(key, value)
     this.logDebugMessage('Value set:', value)

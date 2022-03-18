@@ -79,6 +79,10 @@
     background-color: #1b6ec2;
 }
 
+.sp__popup .sp__results-list__item--hover {
+    background-color: #ccc;
+}
+
 .sp__popup .sp__results-list__item--disabled {
     color: #666;
 }
