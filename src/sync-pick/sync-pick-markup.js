@@ -204,8 +204,8 @@ SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
 
 SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValues, valuesOrder) {
     if (Object.keys(dropdownValues).length > 0) {
-        Object.entries(dropdownValues).forEach(([optGroupLabel, options]) => {
-            if(optGroupLabel && optGroupLabel.length > 0){
+        Object.entries(dropdownValues).forEach(([optGroupLabel, options], index, arr) => {
+            if (optGroupLabel && optGroupLabel.length > 0) {
                 const label = document.createElement('span')
                 label.classList.add('sp__opt-group-label')
                 label.innerText = optGroupLabel
@@ -216,6 +216,11 @@ SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValue
             const order = valuesOrder[optGroupLabel]
             this.renderNewEntries(options, pageUl, selectedValues, order)
             this.resultsWrapper.appendChild(pageUl)
+            if (optGroupLabel && optGroupLabel.length > 0 && arr[index + 1]) {
+                const hr = document.createElement('hr')
+                hr.classList.add('sp__hr')
+                this.resultsWrapper.appendChild(hr)
+            }
         })
     } else {
         const li = buildLi({text: this.noResultsText})
@@ -294,8 +299,7 @@ SyncPickMarkup.prototype.focusPreviousEntry = function () {
             prev.classList.add('sp__results-list__item--hover')
             this.hovered = prev
             this.scrollEntryIntoView(prev)
-        }
-        else if (this.hovered.parentNode.previousSibling && this.hovered.parentNode.previousSibling.nodeName === 'SPAN') {
+        } else if (this.hovered.parentNode.previousSibling && this.hovered.parentNode.previousSibling.nodeName === 'SPAN') {
             const prevOptGroup = this.hovered.parentNode.previousSibling.previousSibling
             if (prevOptGroup) {
                 this.hovered.classList.remove('sp__results-list__item--hover')
@@ -321,8 +325,7 @@ SyncPickMarkup.prototype.focusNextEntry = function () {
             next.classList.add('sp__results-list__item--hover')
             this.hovered = next
             this.scrollEntryIntoView(next)
-        }
-        else if (this.hovered.parentNode.nextSibling && this.hovered.parentNode.nextSibling.nodeName === 'SPAN') {
+        } else if (this.hovered.parentNode.nextSibling && this.hovered.parentNode.nextSibling.nodeName === 'SPAN') {
             const nextOptGroup = this.hovered.parentNode.nextSibling.nextSibling
             if (nextOptGroup) {
                 this.hovered.classList.remove('sp__results-list__item--hover')
@@ -426,7 +429,7 @@ function buildLi(options) {
     return li
 }
 
-function setLiSelected (li, selected, addCheck, checkedIconClasses) {
+function setLiSelected(li, selected, addCheck, checkedIconClasses) {
     if (selected) {
         if (addCheck) {
             const check = document.createElement('i')
