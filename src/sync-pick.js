@@ -287,7 +287,11 @@ SyncPick.prototype.openPopup = function () {
     this.open = true
     this.markup.open = true
     this.markup.positionPopup()
-    if (this.withSearch) this.markup.searchInput.focus()
+    if (this.withSearch) {
+        this.markup.searchInput.focus()
+    } else {
+        this.markup.invisibleInput.focus()
+    }
 }
 
 SyncPick.prototype.closePopupAndFocus = function (e) {
