@@ -103,6 +103,7 @@ SyncPick.prototype.initialize = function () {
         this.addHandlers()
         this.addEvents()
     }
+
     this.setupValues()
     if (!this.disabled) {
         this.markup.appendEntries(this.dropdownValues, Object.keys(this.values), this.valuesOrder)
@@ -179,13 +180,19 @@ SyncPick.prototype.onMarkupKeyDown = function (e) {
     if (e.keyCode === 9 || e.keyCode === 27) { // tab || esc
         this.closePopupAndFocus()
     } else if (e.keyCode === 40) { // arrow down
+        e.preventDefault()
         this.markup.focusNextEntry()
     } else if (e.keyCode === 38) { // arrow up
+        e.preventDefault()
         this.markup.focusPreviousEntry()
     } else if (e.keyCode === 13) { // enter
         e.preventDefault()
-        const li = this.markup.getHovered()
-        if (li) this.select({currentTarget: li})
+        if (this.open) {
+            const li = this.markup.getHovered()
+            if (li) this.select({currentTarget: li})
+        } else {
+            this.openPopup()
+        }
     }
 }
 
@@ -193,10 +200,16 @@ SyncPick.prototype.addEvents = function () {
     this.markup.button.addEventListener('click', this.togglePopupHandler)
     if (this.withSearch) this.markup.searchInput.addEventListener('input', this.searchHandler)
     this.markup.popup.addEventListener('click', this.stopPropagationHandler)
-    if (this.withSelectAllButton) this.markup.selectAllButton.addEventListener('click', this.selectAllHandler)
-    if (this.withSelectAllButton) this.markup.deselectAllButton.addEventListener('click', this.deselectAllHandler)
-    this.markup.button.addEventListener('keydown', this.buttonKeyHandler)
-    this.markup.popup.addEventListener('keydown', this.markupKeyHandler)
+    if (this.withSelectAllButton) {
+        this.markup.selectAllButton.addEventListener('click', this.selectAllHandler)
+        this.markup.deselectAllButton.addEventListener('click', this.deselectAllHandler)
+    }
+    if (this.withSearch) {
+        this.markup.button.addEventListener('keydown', this.buttonKeyHandler)
+        this.markup.popup.addEventListener('keydown', this.markupKeyHandler)
+    } else {
+        this.markup.button.addEventListener('keydown', this.markupKeyHandler)
+    }
     document.addEventListener('click', this.closePopupHandler)
     window.addEventListener('resize', this.containerPositionHandler)
     window.addEventListener('scroll', this.containerPositionHandler)
@@ -287,11 +300,7 @@ SyncPick.prototype.openPopup = function () {
     this.open = true
     this.markup.open = true
     this.markup.positionPopup()
-    if (this.withSearch) {
-        this.markup.searchInput.focus()
-    } else {
-        this.markup.invisibleInput.focus()
-    }
+    if (this.withSearch) this.markup.searchInput.focus()
 }
 
 SyncPick.prototype.closePopupAndFocus = function (e) {
@@ -443,6 +452,9 @@ SyncPick.prototype.destroy = function () {
 }
 
 SyncPick.prototype.reload = function () {
+    Object.keys(this.values).forEach(value => {
+        this.markup.deselectItem(value)
+    })
     this.destroy()
     this.disabled = !!this.element.disabled
     this.values = null

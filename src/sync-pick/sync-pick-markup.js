@@ -148,7 +148,6 @@ SyncPickMarkup.prototype.buildPopup = function () {
 
     if (this.withSearch) popup.appendChild(this.buildSearchInput())
     if (this.withSelectAllButton) popup.appendChild(this.buildSelectAllButtons())
-    if (!this.withSearch) popup.appendChild(this.buildInvisibleInput())
     popup.appendChild(this.buildResultsScrollWrapper())
 
     return popup
@@ -169,21 +168,6 @@ SyncPickMarkup.prototype.buildSearchInput = function () {
 
     wrapper.appendChild(this.searchInput)
     return wrapper
-}
-
-SyncPickMarkup.prototype.buildInvisibleInput = function () {
-    //const wrapper = document.createElement('div')
-    this.invisibleInput = document.createElement('button')
-    this.invisibleInput.style.height = '1px'
-    this.invisibleInput.style.width = '1px'
-    this.invisibleInput.style.border = 'none'
-    this.invisibleInput.style.padding = '0'
-    this.invisibleInput.style.margin = '0 0 0 0px'
-    this.invisibleInput.style.outline = 'none'
-    this.invisibleInput.style.background = 'transparent'
-
-    //wrapper.appendChild(this.invisibleInput)
-    return this.invisibleInput
 }
 
 SyncPickMarkup.prototype.buildSelectAllButtons = function () {
