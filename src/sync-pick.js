@@ -103,7 +103,6 @@ SyncPick.prototype.initialize = function () {
         this.addHandlers()
         this.addEvents()
     }
-
     this.setupValues()
     if (!this.disabled) {
         this.markup.appendEntries(this.dropdownValues, Object.keys(this.values), this.valuesOrder)
@@ -244,11 +243,6 @@ SyncPick.prototype.setupValues = function () {
         this.dropdownValues = {}
         this.valuesOrder = {}
         let self = this
-        Array.apply(null, this.element.options).filter(function (option) {
-            return option.selected
-        }).forEach(function (option) {
-            self.values[option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'))
-        })
         Array.apply(null, this.element.options).forEach(function (option) {
             let optgrouplabel
             if (option.parentNode.nodeName === 'OPTGROUP') {
@@ -259,7 +253,9 @@ SyncPick.prototype.setupValues = function () {
             if (!self.valuesOrder[optgrouplabel]) self.valuesOrder[optgrouplabel] = []
             self.valuesOrder[optgrouplabel].push(option.value)
             if (!self.dropdownValues[optgrouplabel]) self.dropdownValues[optgrouplabel] = {}
-            self.dropdownValues[optgrouplabel][option.value] = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'))
+            const newValue = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'))
+            self.dropdownValues[optgrouplabel][option.value] = newValue
+            if (option.selected) self.values[option.value] = newValue
         })
     }
 }
@@ -444,8 +440,8 @@ SyncPick.prototype.resetSearch = function () {
 SyncPick.prototype.destroy = function () {
     if (!this.disabled) this.removeEvents()
     this.markup.destroy()
-    this.values = {}
-    this.dropdownValues = {}
+    this.values = null
+    this.dropdownValues = null
     delete this.markup
     delete SyncPick.elements[this.id]
     this.element.classList.remove('visually-hidden')
@@ -457,7 +453,6 @@ SyncPick.prototype.reload = function () {
     })
     this.destroy()
     this.disabled = !!this.element.disabled
-    this.values = null
     this.initialize()
 }
 

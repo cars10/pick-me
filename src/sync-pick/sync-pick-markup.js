@@ -292,24 +292,17 @@ SyncPickMarkup.prototype.getHovered = function () {
 
 SyncPickMarkup.prototype.focusPreviousEntry = function () {
     if (!this.hovered) this.hovered = this.getSelected()
+    const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]'))
     if (this.hovered) {
-        const prev = this.hovered.previousSibling || (this.hovered.parentNode && this.hovered.parentNode.previousSibling && this.hovered.parentNode.previousSibling.lastChild)
-        if (this.hovered.previousSibling) {
+        const hoveredIndex = allLis.indexOf(this.hovered)
+        if (hoveredIndex > 0) {
             this.hovered.classList.remove('sp__results-list__item--hover')
-            prev.classList.add('sp__results-list__item--hover')
-            this.hovered = prev
-            this.scrollEntryIntoView(prev)
-        } else if (this.hovered.parentNode.previousSibling && this.hovered.parentNode.previousSibling.nodeName === 'SPAN') {
-            const prevOptGroup = this.hovered.parentNode.previousSibling.previousSibling
-            if (prevOptGroup) {
-                this.hovered.classList.remove('sp__results-list__item--hover')
-                prevOptGroup.lastChild.classList.add('sp__results-list__item--hover')
-                this.hovered = prevOptGroup.lastChild
-                this.scrollEntryIntoView(this.hovered)
-            }
+            this.hovered = allLis[hoveredIndex - 1]
+            this.hovered.classList.add('sp__results-list__item--hover')
+            this.scrollEntryIntoView(this.hovered)
         }
     } else {
-        const first = this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]')[0]
+        const first = allLis[0]
         first.classList.add('sp__results-list__item--hover')
         this.hovered = first
         this.scrollEntryIntoView(first)
@@ -318,24 +311,17 @@ SyncPickMarkup.prototype.focusPreviousEntry = function () {
 
 SyncPickMarkup.prototype.focusNextEntry = function () {
     if (!this.hovered) this.hovered = this.getSelected()
+    const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]'))
     if (this.hovered) {
-        const next = this.hovered.nextSibling || (this.hovered.parentNode && this.hovered.parentNode.nextSibling && this.hovered.parentNode.nextSibling.firstChild)
-        if (this.hovered.nextSibling) {
+        const hoveredIndex = allLis.indexOf(this.hovered)
+        if (hoveredIndex < allLis.length - 1) {
             this.hovered.classList.remove('sp__results-list__item--hover')
-            next.classList.add('sp__results-list__item--hover')
-            this.hovered = next
-            this.scrollEntryIntoView(next)
-        } else if (this.hovered.parentNode.nextSibling && this.hovered.parentNode.nextSibling.nodeName === 'SPAN') {
-            const nextOptGroup = this.hovered.parentNode.nextSibling.nextSibling
-            if (nextOptGroup) {
-                this.hovered.classList.remove('sp__results-list__item--hover')
-                nextOptGroup.firstChild.classList.add('sp__results-list__item--hover')
-                this.hovered = nextOptGroup.firstChild
-                this.scrollEntryIntoView(this.hovered)
-            }
+            this.hovered = allLis[hoveredIndex + 1]
+            this.hovered.classList.add('sp__results-list__item--hover')
+            this.scrollEntryIntoView(this.hovered)
         }
     } else {
-        const first = this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]')[0]
+        const first = allLis[0]
         first.classList.add('sp__results-list__item--hover')
         this.hovered = first
         this.scrollEntryIntoView(first)
