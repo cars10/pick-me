@@ -118,8 +118,8 @@ SyncPickMarkup.prototype.buildButton = function () {
     this.buttonClasses.forEach(function (buttonClass) {
         button.classList.add(buttonClass)
     })
-    button.disabled = true
     if (this.disabled) {
+        button.disabled = true
         this.buttonDisabledClasses.forEach(function (buttonDisabledClass) {
             button.classList.add(buttonDisabledClass)
         })
