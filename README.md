@@ -13,8 +13,6 @@ SyncPick is a synchronous replacement for `bootstrap-select`. It tries to offer 
 
 ## Usage
 
-### Native without JQuery
-
 HTML
 ```html
 <select name="picker" id="picker-single">
@@ -28,34 +26,18 @@ JS
 // these are the default options. you can omit everything except 'id' and 'url'
 new SyncPick({
     id: 'picker-single',
-    url: 'http://192.168.178.192:9000/users',
     language: document.documentElement.lang, // currently: 'de' or 'en'
-    searchParam: 'q',
-    pageParam: '_page',
-    perPageParam: '_limit',
-    valueProp: 'id',
-    textProp: 'name',
-    subtextProp: 'subtext',
-    disabledProp: 'disabled',
-    jsonKey: null,
-    httpMethod: 'GET',
-    maxPages: 2,
-    perPage: 50,
-    paginateUpThreshold: 20,
-    paginateDownThreshold: 80,
-    searchTimeout: 50,
     searchPlaceholder: 'Search',
     searchInputClasses: [],
     buttonClasses: [],
-   emptySelectButtonText: 'Show all',
-   buttonIconClasses: ['fas', 'fa-fw', 'fa-caret-down'],
+    emptySelectButtonText: 'Show all',
+    buttonIconClasses: ['fas', 'fa-fw', 'fa-caret-down'],
     checkedIconClasses: ['fas', 'fa-fw', 'fa-check'],
     listClasses: [],
     selectedTextFormat: null, // 'count > 5'
     selectedTextVariable: '%num%', // '%x%'
     selectedText: '%num% selected', // '%x% Einträge ausgewählt'
     noResultsText: 'No results',
-    resetOnClose: true,
     container: null,
     dropdownAlignRight: false,
     popupWidth: '300px',
@@ -67,9 +49,9 @@ new SyncPick({
 
 #### Without preselected entry
 
-You have to change the way you initialize `options_for_select`. Because SyncPick loads the data via ajax anyway you do not have to add any options to your select beforehand. Example:
+You can use a normal `options_for_select` for initialization. Because SyncPick works on the options from the select. Example:
 
-Before SyncPick: (note that all users are added to `options_for_select`)
+Example select that SyncPick can be used on:
 
 ```erb
 <%= f.select :user_id,
@@ -78,17 +60,9 @@ Before SyncPick: (note that all users are added to `options_for_select`)
              {class: 'selectpicker form-control', data: {live_search: true, selected_text_format: 'count>3'}} %>
 ```
 
-With SyncPick you can completely omit `options_for_select` and replace it with an empty string, because all it does is build an empty string anyway.
-
-```erb
-<%= f.select :user_id, '', {include_blank: t('views.defaults.form.select.choose_user')}, {class: 'form-control'} %>
-```
-
 #### With preselected entries
 
 If you have preselected entries in your select then you need to add these to the select. Example:
-
-Before SyncPick:
 
 ```erb
 <%= f.select :user_id,
@@ -96,41 +70,6 @@ Before SyncPick:
              {include_blank: t('views.defaults.form.select.choose_user')}, 
              {class: 'selectpicker form-control', data: {live_search: true, selected_text_format: 'count>3'}} %>
 ```
-
-With SyncPick: (note that only the selected option is included as option)
-
-```erb
-<%= f.select :user_id, options_for_select([[task.user&.full_name_reverse, task.user_id]], task.user_id),
-             {include_blank: t('views.defaults.form.select.choose_user')}, class: 'form-control' %>
-```
-
-And if you are not sure if the selected option is there (for forms that are used on new and edit for example):
-
-```erb
-<%= f.select :user_id, options_for_select([[task.user&.full_name_reverse, task.user_id].compact].reject(&:blank?), task.user_id),
-             {include_blank: t('views.defaults.form.select.choose_user')}, class: 'form-control' %>
-```
-
-### Backend endpoint
-
-#### Response structure
-
-The above default settings (`valueProp`, `textProp`, `subtextProp`, `disabledProp` and `jsonKey`) expect an endpoint that responds with something like this:
-
-```json
-{
-  "users": [
-    {"name": "Peter", "value": "1", "subtext": "#some-id-1", "disabled": false},
-    {"name": "Dirk", "value": "2", "subtext": "#some-id-2", "disabled": true}
-  ] 
-}
-```
-
-#### Query parameters
-
-For loading data from your endpoint the requests are built by default (`searchParam`, `pageParam`, `perPageParam`) like this:
-
-`your.url.with.protocol?q=some+query&_page=1&_limit=50`
 
 ## API
 
@@ -166,14 +105,11 @@ Install dependencies and start the server:
 # install dependencies
 yarn
 
-# run mock api
-yarn mock
-
 # run development server
-yarn serve
+yarn dev
 ```
 
-Then open [http://localhost:8080](http://localhost:8080). 
+Then open [http://localhost:8000](http://localhost:8000). 
 
 Alternatively you can use the develop version directly in tbs by symlinking the current build:
 
