@@ -38,6 +38,7 @@ export default function SyncPickMarkup(options) {
 
 SyncPickMarkup.prototype.hideOriginalSelect = function () {
     this.element.classList.add('visually-hidden')
+    this.element.setAttribute('tabindex', '-1')
 }
 
 SyncPickMarkup.prototype.showOriginalSelect = function () {
