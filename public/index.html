@@ -105,6 +105,14 @@
               </label>
             </div>
           </div>
+
+          <div class="form-group">
+            <div class="checkbox">
+              <label for="search_option">
+                <input id="search_option" type="checkbox"> Enable search
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -134,7 +142,7 @@
             <option data-subtext="#1Abbey" value="{&quot;UserMailer&quot;:&quot;notify_user_for_added_tutorials&quot;}">Abbey Storrs1</option>
             <option data-subtext="#2Abbey" value="2">Abbey Storrs2</option>
             <option value="3">Abbey Storrs3</option>
-            <option value="4">Abbey Storrs4</option>
+            <option value="4" selected="selected">Abbey Storrs4</option>
             <option value="5">Abbey Storrs5</option>
             <option value="6">Abbey Storrs6</option>
           </optgroup>
@@ -179,7 +187,7 @@
       language: document.getElementById('set_language').value,
       dropdownAlignRight: document.getElementById('set_dropdown_align_right').checked,
       disabled: document.getElementById('set_disabled').checked,
-      withSearch: false,
+      withSearch: document.getElementById('search_option').checked,
       withSelectAllButton: false,
       selectAllButtonClasses: ['btn', 'btn-default'],
       selectAllButtonGroupClasses: ['btn-group'],

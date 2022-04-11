@@ -1,4 +1,4 @@
-export default function SyncPickMarkup(options) {
+export default function SyncPickMarkup (options) {
     this.element = options.element
     this.multiple = options.multiple || false
     this.disabled = options.disabled || false
@@ -225,7 +225,7 @@ SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValue
             }
         })
     } else {
-        const li = buildLi({text: this.noResultsText})
+        const li = buildLi({ text: this.noResultsText })
         li.classList.add('sp__results-list__item--muted')
         const pageUl = buildUl(this.listClasses)
         pageUl.appendChild(li)
@@ -305,6 +305,7 @@ SyncPickMarkup.prototype.focusPreviousEntry = function () {
         }
     } else {
         const first = allLis[0]
+        if (!first) return
         first.classList.add('sp__results-list__item--hover')
         this.hovered = first
         this.scrollEntryIntoView(first)
@@ -324,6 +325,7 @@ SyncPickMarkup.prototype.focusNextEntry = function () {
         }
     } else {
         const first = allLis[0]
+        if (!first) return
         first.classList.add('sp__results-list__item--hover')
         this.hovered = first
         this.scrollEntryIntoView(first)
@@ -365,7 +367,7 @@ SyncPickMarkup.prototype.renderButtonText = function (values) {
     }
 }
 
-function joinSelectedTexts(values, textProp) {
+function joinSelectedTexts (values, textProp) {
     let selected = []
     Object.keys(values).forEach(function (key) {
         selected.push(values[key][textProp])
@@ -373,7 +375,7 @@ function joinSelectedTexts(values, textProp) {
     return selected.join(', ')
 }
 
-function buildUl(additionalClasses) {
+function buildUl (additionalClasses) {
     const pageUl = document.createElement('ul')
     pageUl.classList.add('sp__results-list')
     pageUl.setAttribute('aria-role', 'listbox')
@@ -383,7 +385,7 @@ function buildUl(additionalClasses) {
     return pageUl
 }
 
-function buildLi(options) {
+function buildLi (options) {
     const text = options.text
     const value = options.value
     const subtext = options.subtext
@@ -417,7 +419,7 @@ function buildLi(options) {
     return li
 }
 
-function setLiSelected(li, selected, addCheck, checkedIconClasses) {
+function setLiSelected (li, selected, addCheck, checkedIconClasses) {
     if (selected) {
         if (addCheck) {
             const check = document.createElement('i')
@@ -440,7 +442,7 @@ function setLiSelected(li, selected, addCheck, checkedIconClasses) {
     }
 }
 
-function getOffsetFromBoundingBox(box) {
+function getOffsetFromBoundingBox (box) {
     const docElem = document.documentElement
 
     return {
