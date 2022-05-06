@@ -16,7 +16,9 @@
     border: 1px solid #bbb;
     background-color: #ddd;
     display: none;
-    width: 200px;
+    width: 100%;
+    min-width: 300px;
+    max-width: 600px;
     position: absolute;
     top: 100%;
     left: 0;
@@ -87,10 +89,15 @@
     color: #666;
 }
 
-.sp__popup .sp__popup.sp__results-list__item__subtext {
+.sp__popup .sp__results-list__item__subtext {
     color: grey;
-    padding-left: 0.5em;
+    margin-left: 2em;
 }
+
+.sp__popup .sp__results-list__item--selected .sp__results-list__item__subtext {
+    color: white;
+}
+
 
 .sp__popup .sp__results-list__item__check-mark {
     position: absolute;
@@ -107,9 +114,21 @@
 
 .sp__popup .sp__results-list:not(:last-child) {
     list-style-type: none;
-    border-bottom: 1px solid #eee;
 }
 
 .sp__popup .sp__results-list__item--muted {
     color: #666
+}
+
+.sp__results-list__item__image {
+    border-radius: 64px;
+    height: 20px;
+    width: 20px;
+    margin-bottom: 3px;
+    margin-right: 6px;
+}
+
+.sp__hr {
+    margin-top: 8px;
+    margin-bottom: 4px;
 }

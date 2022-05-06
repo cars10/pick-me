@@ -238,9 +238,8 @@ SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValue
         const element = options[value]
         if (!element) return
         const li = buildLi({
-            value: value,
-            text: element.text,
-            subtext: element.subtext,
+            value,
+            ...element,
             selected: selectedValues.indexOf(value) > -1,
             multiple: self.multiple,
             checkedIconClasses: self.checkedIconClasses
@@ -342,33 +341,33 @@ SyncPickMarkup.prototype.scrollEntryIntoView = function (entry) {
     }
 }
 
-SyncPickMarkup.prototype.setButtonText = function (values) {
-    if (values && Object.keys(values).length > 0) {
-        this.buttonText.innerHTML = this.renderButtonText(values)
+SyncPickMarkup.prototype.setButtonText = function (selectedValues) {
+    if (selectedValues && Object.keys(selectedValues).length > 0) {
+        this.buttonText.innerHTML = this.renderButtonText(selectedValues)
     } else {
         this.buttonText.innerHTML = this.emptySelectButtonText
     }
 }
 
-SyncPickMarkup.prototype.renderButtonText = function (values) {
+SyncPickMarkup.prototype.renderButtonText = function (selectedValues) {
     if (this.selectedTextFormat) {
         const match = this.selectedTextFormat.match(/count\s?>\s?([0-9]*)/)
         const count = match && match[1] && parseInt(match[1])
 
-        if (count && count < Object.keys(values).length) {
-            return this.selectedText.replace(this.selectedTextVariable, Object.keys(values).length)
+        if (count && count < Object.keys(selectedValues).length) {
+            return this.selectedText.replace(this.selectedTextVariable, Object.keys(selectedValues).length)
         } else {
-            return joinSelectedTexts(values)
+            return joinSelectedTexts(selectedValues)
         }
     } else {
-        return joinSelectedTexts(values)
+        return joinSelectedTexts(selectedValues)
     }
 }
 
-function joinSelectedTexts (values) {
+function joinSelectedTexts (selectedValues) {
     let selected = []
-    Object.keys(values).forEach(function (key) {
-        selected.push(values[key].text)
+    Object.keys(selectedValues).forEach(function (key) {
+        selected.push(selectedValues[key].text)
     })
     return selected.join(', ')
 }
@@ -387,6 +386,7 @@ function buildLi (options) {
     const text = options.text
     const value = options.value
     const subtext = options.subtext
+    const imgAttributes = options.img
     const li = document.createElement('li')
 
     const textSpan = document.createElement('span')
@@ -409,6 +409,17 @@ function buildLi (options) {
 
     li.setAttribute('aria-role', 'listitem')
     li.classList.add('sp__results-list__item')
+
+    if (typeof imgAttributes !== 'undefined' && imgAttributes !== null) {
+        const imageTag = document.createElement('img')
+        Object.keys(imgAttributes).forEach(function (attr) {
+            imageTag.setAttribute(attr, imgAttributes[attr])
+        })
+
+        imageTag.classList.add('sp__results-list__item__image')
+        li.setAttribute('data-img', JSON.stringify(imgAttributes))
+        li.appendChild(imageTag)
+    }
 
     li.appendChild(textSpan)
     if (options.selected) {

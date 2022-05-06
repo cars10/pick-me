@@ -136,26 +136,7 @@
     <div class="col-sm-4 col-sm-offset-2">
       <form>
         <button type="button" id="reset-form">Reset</button>
-        <select id="picker" name="picker" title="Select something">
-          <optgroup label="erste">
-            <option value="{&quot;UserMailer&quot;:&quot;notify_about_survey&quot;}">Benutzer über Umfrage benachrichtigen</option>
-            <option data-subtext="#1Abbey" value="{&quot;UserMailer&quot;:&quot;notify_user_for_added_tutorials&quot;}">Abbey Storrs1</option>
-            <option data-subtext="#2Abbey" value="2">Abbey Storrs2</option>
-            <option value="3">Abbey Storrs3</option>
-            <option value="4" selected="selected">Abbey Storrs4</option>
-            <option value="5">Abbey Storrs5</option>
-            <option value="6">Abbey Storrs6</option>
-          </optgroup>
-          <optgroup label="zweite">
-            <option value="7">Abbey Storrs7</option>
-            <option value="8">Abbey Storrs8</option>
-            <option value="9">Abbey Storrs9</option>
-            <option value="10">Abbey Storrs10</option>
-            <option value="11">Abbey Storrs11</option>
-            <option value="12">Abbey Storrs12</option>
-            <option value="13">Abbey Storrs13</option>
-          </optgroup>
-        </select>
+        <select id="picker" name="picker" title="Select something"> </select>
       </form>
 
     </div>
@@ -166,7 +147,26 @@
 <script>
   const selectId = 'picker'
 
-  document.addEventListener('DOMContentLoaded', reloadSyncPic)
+  const userData = {
+    'Manager': [
+      { value: 1, text: 'Anna Müller', subtext: 'awesome', img: { src: 'https://picsum.photos/24?a=1' } },
+      { value: 2, text: 'Jim Knopf', subtext: 'cool', img: { src: 'https://picsum.photos/24?a=2' } },
+      {
+        value: "{&quot;UserMailer&quot;:&quot;notify_about_survey&quot;}",
+        text: 'Max Mustermann',
+        img: { src: 'https://picsum.photos/24?a=3' }
+      },
+    ],
+    'Praktikanten': [
+      { value: 13, text: 'Günther Jauch', img: { src: "https://picsum.photos/24?a=13" } },
+      { value: 17, text: 'Thomas Gottschalk', subtext: 'stylisch', img: { src: "https://picsum.photos/24?a=17" } }
+    ]
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setupSelect(userData, true)
+    reloadSyncPic()
+  })
   document.getElementById('reset-form').addEventListener('click', function (e) {
     e.target.form.reset()
     debugHandler(window.SyncPick.elements[selectId])
@@ -180,9 +180,34 @@
     })
   })
 
+  function setupSelect (data, useOptgroups) {
+    const select = document.getElementById(selectId)
+    Object.entries(data).forEach(([optGroupLabel, options]) => {
+      let optgroup
+      if (useOptgroups) {
+        optgroup = document.createElement('optgroup')
+        optgroup.setAttribute('label', optGroupLabel)
+        select.appendChild(optgroup)
+      }
+
+      options.forEach(optionData => {
+        const option = document.createElement('option')
+        option.innerHTML = optionData.text
+        option.setAttribute('value', optionData.value)
+        if (optionData.subtext) option.setAttribute('data-subtext', optionData.subtext)
+        if (optionData.img) option.setAttribute('data-img', JSON.stringify(optionData.img))
+        if (optgroup) {
+          optgroup.appendChild(option)
+        } else {
+          select.appendChild(option)
+        }
+      })
+    })
+  }
+
   function reloadSyncPic () {
     new SyncPick({
-      id: 'picker',
+      id: selectId,
       selectedTextFormat: document.getElementById('set_selected_text_format').value,
       language: document.getElementById('set_language').value,
       dropdownAlignRight: document.getElementById('set_dropdown_align_right').checked,
@@ -199,7 +224,7 @@
   function debugHandler (context) {
     try {
       document.getElementById('amount').innerHTML = context.markup.resultsWrapper.querySelectorAll('li').length.toString()
-      document.getElementById('value').innerHTML = Object.keys(context.values).toString()
+      document.getElementById('value').innerHTML = Object.keys(context.selectedValues).toString()
     } catch (e) {
       console.log(e)
       console.warn('could not show debug')

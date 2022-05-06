@@ -1,6 +1,6 @@
 import SyncPickMarkup from './sync-pick/sync-pick-markup'
-import en from "./sync-pick/i18n/en";
-import de from "./sync-pick/i18n/de";
+import en from "./sync-pick/i18n/en"
+import de from "./sync-pick/i18n/de"
 
 /**
  * SyncPick
@@ -31,11 +31,7 @@ import de from "./sync-pick/i18n/de";
  * @param {Boolean} [options.disabled=false] - to disabled the select. alternatively set your select to disabled
  * @param {Object}  [options.values] - hash with preselected values, overrides possible <option selected> elements.
  *                                    This is an alternative to adding actual <option selected> elements to the dom.
- *                                    Structure has to be {value: {text: <text>, disabledProp: <disabled>}}.
- *                                    Note that both <value> and <text> should be equal to the actual option values.
- * @param {Object}  [options.dropdownValues] - hash with all values in the dropdown.
- *                                    Structure has to be {value: {text: <text>, disabledProp: <disabled>}}.
- *                                    Note that both <value> and <text> should be equal to the actual option values.
+ *                                    Structure has to be {value: {text: <text>, subtext: <subtext>}}.
  * @param {Object}  [options.withSelectAllButton] - enables buttons to select and deselect all entries
  * @param {Array}   [options.selectAllButtonClasses=[]] - additional classes to add to "select all" buttons
  * @param {Array}   [options.selectAllButtonGroupClasses=[]] - additional classes to add to "select all" buttongroup
@@ -46,7 +42,7 @@ import de from "./sync-pick/i18n/de";
  *                                                       Receives the instance of sync-pick as first arg.
  * @constructor
  */
-export default function SyncPick(options) {
+export default function SyncPick (options) {
     this.id = options.id
     this.label = document.querySelector('label[for="' + this.id + '"]')
     if (this.isInitialized()) SyncPick.elements[this.id].destroy()
@@ -72,8 +68,7 @@ export default function SyncPick(options) {
     this.withSearch = !!options.withSearch
     this.dropdownAlignRight = !!options.dropdownAlignRight
     this.popupWidth = options.popupWidth || '300px'
-    this.values = options.values || null
-    this.dropdownValues = options.dropdownValues || null
+    this.selectedValues = options.values || null
     this.withSelectAllButton = options.withSelectAllButton || false
     this.selectAllButtonClasses = options.selectAllButtonClasses || []
     this.selectAllButtonGroupClasses = options.selectAllButtonGroupClasses || []
@@ -90,7 +85,7 @@ export default function SyncPick(options) {
     this.logDebugMessage('initialized with options:', this)
     return this
 }
-SyncPick.i18n = {de, en}
+SyncPick.i18n = { de, en }
 SyncPick.elements = {}
 
 SyncPick.prototype.initialize = function () {
@@ -101,11 +96,11 @@ SyncPick.prototype.initialize = function () {
     }
     this.setupValues()
     if (!this.disabled) {
-        this.markup.appendEntries(this.dropdownValues, Object.keys(this.values), this.valuesOrder)
+        this.markup.appendEntries(this.dropdownValues, Object.keys(this.selectedValues), this.selectedValuesOrder)
         this.addEventListenersForPage()
     }
     this.register()
-    this.markup.setButtonText(this.values)
+    this.markup.setButtonText(this.selectedValues)
 }
 
 SyncPick.prototype.buildMarkup = function () {
@@ -182,7 +177,7 @@ SyncPick.prototype.onMarkupKeyDown = function (e) {
         e.preventDefault()
         if (this.open) {
             const li = this.markup.getHovered()
-            if (li) this.select({currentTarget: li})
+            if (li) this.select({ currentTarget: li })
         } else {
             this.openPopup()
         }
@@ -232,10 +227,10 @@ SyncPick.prototype.removeEvents = function () {
 }
 
 SyncPick.prototype.setupValues = function () {
-    if (!this.values) {
-        this.values = {}
+    if (!this.selectedValues) {
+        this.selectedValues = {}
         this.dropdownValues = {}
-        this.valuesOrder = {}
+        this.selectedValuesOrder = {}
         let self = this
         Array.apply(null, this.element.options).forEach(function (option) {
             let optgrouplabel
@@ -244,12 +239,19 @@ SyncPick.prototype.setupValues = function () {
             } else {
                 optgrouplabel = ''
             }
-            if (!self.valuesOrder[optgrouplabel]) self.valuesOrder[optgrouplabel] = []
-            self.valuesOrder[optgrouplabel].push(option.value)
+            if (!self.selectedValuesOrder[optgrouplabel]) self.selectedValuesOrder[optgrouplabel] = []
+
+            self.selectedValuesOrder[optgrouplabel].push(option.value)
             if (!self.dropdownValues[optgrouplabel]) self.dropdownValues[optgrouplabel] = {}
-            const newValue = self.buildValue(option.innerHTML, option.getAttribute('data-subtext'))
+
+            const newValue = {
+                text: option.innerHTML,
+                subtext: option.getAttribute('data-subtext'),
+                img: JSON.parse(option.getAttribute('data-img'))
+            }
             self.dropdownValues[optgrouplabel][option.value] = newValue
-            if (option.selected) self.values[option.value] = newValue
+
+            if (option.selected) self.selectedValues[option.value] = newValue
         })
     }
 }
@@ -271,15 +273,15 @@ SyncPick.prototype.search = function () {
         this.searchInputTimer = setTimeout(function () {
             let filteredValues = {}
             Object.entries(self.dropdownValues).forEach(([optGroupLabel, options]) => {
-                Object.entries(options).forEach(([key, value]) => {
-                    if (value.name.toLowerCase().includes(lowerInputValue)) {
+                Object.entries(options).forEach(([value, optionData]) => {
+                    if (optionData.text.toLowerCase().includes(lowerInputValue)) {
                         if (!filteredValues[optGroupLabel]) filteredValues[optGroupLabel] = {}
-                        filteredValues[optGroupLabel][key] = value
+                        filteredValues[optGroupLabel][value] = optionData
                     }
                 })
             })
             self.markup.resultsWrapper.innerHTML = ''
-            self.markup.appendEntries(filteredValues, Object.keys(self.values), self.valuesOrder)
+            self.markup.appendEntries(filteredValues, Object.keys(self.selectedValues), self.selectedValuesOrder)
             self.addEventListenersForPage()
         }, self.searchTimeout)
     }
@@ -311,23 +313,23 @@ SyncPick.prototype.closePopup = function (e) {
 }
 
 SyncPick.prototype.selectAllEntries = function () {
-    const keysOfSelectedValues = Object.keys(this.values)
-    this.values = Object.assign({}, ...Object.values(this.dropdownValues))
-    Object.keys(this.values).forEach(value => {
+    const keysOfSelectedValues = Object.keys(this.selectedValues)
+    this.selectedValues = Object.assign({}, ...Object.values(this.dropdownValues))
+    Object.keys(this.selectedValues).forEach(value => {
         if (!keysOfSelectedValues.includes(value)) {
             this.markup.selectItem(value)
         }
     })
-    this.markup.setButtonText(this.values)
+    this.markup.setButtonText(this.selectedValues)
     this.triggerChange()
 }
 
 SyncPick.prototype.deselectAllEntries = function () {
-    Object.keys(this.values).forEach(value => {
+    Object.keys(this.selectedValues).forEach(value => {
         this.markup.deselectItem(value)
     })
-    this.values = {}
-    this.markup.setButtonText(this.values)
+    this.selectedValues = {}
+    this.markup.setButtonText(this.selectedValues)
     this.triggerChange()
 }
 
@@ -344,66 +346,62 @@ SyncPick.prototype.shouldSearch = function (newValue) {
 
 SyncPick.prototype.select = function (e) {
     const li = e.currentTarget
-    const key = li.getAttribute('data-value')
-    const text = li.getAttribute('data-text')
-    const subtext = li.getAttribute('data-subtext')
-    const value = this.buildValue(text, subtext)
-
-    if (this.multiple) {
-        this.toggleValue(key, value)
-    } else {
-        this.setValue(key, value)
+    const value = li.getAttribute('data-value')
+    const optionData = {
+        text: li.getAttribute('data-text'),
+        subtext: li.getAttribute('data-subtext'),
+        disabled: li.getAttribute('data-disabled'),
+        img: li.getAttribute('data-img') ? JSON.parse(li.getAttribute('data-img')) : null
     }
 
-    this.markup.setButtonText(this.values)
+    if (this.multiple) {
+        this.toggleSelectedValue(value, optionData)
+    } else {
+        this.setSelectedValue(value, optionData)
+    }
+
+    this.markup.setButtonText(this.selectedValues)
     if (!this.multiple) this.closePopupAndFocus()
     this.triggerChange()
 }
 
 SyncPick.prototype.triggerChange = function () {
-    let event = new CustomEvent('Event', {detail: this.values})
+    let event = new CustomEvent('Event', { detail: this.selectedValues })
     event.initEvent('change', true, true)
     this.element.dispatchEvent(event)
     this.logDebugMessage('changeTriggered')
 }
 
-SyncPick.prototype.toggleValue = function (key, value) {
-    if (this.values[key]) {
-        this.removeValue(key, value)
+SyncPick.prototype.toggleSelectedValue = function (value, optionData) {
+    if (this.selectedValues[value]) {
+        this.removeSelectedValue(value, optionData)
     } else {
-        this.addValue(key, value)
+        this.addSelectedValue(value, optionData)
     }
 }
 
-SyncPick.prototype.addValue = function (key, value) {
-    this.values[key] = value
+SyncPick.prototype.addSelectedValue = function (value, optionData) {
+    this.selectedValues[value] = optionData
 
-    this.markup.selectItem(key)
+    this.markup.selectItem(value)
     if (this.withSearch) this.markup.searchInput.focus()
-    this.logDebugMessage('Value added:', value)
+    this.logDebugMessage('Value added:', optionData)
 }
 
-SyncPick.prototype.removeValue = function (key, value) {
-    delete this.values[key]
-    this.markup.deselectItem(key)
-    this.logDebugMessage('Value removed:', value)
+SyncPick.prototype.removeSelectedValue = function (value, optionData) {
+    delete this.selectedValues[value]
+    this.markup.deselectItem(value)
+    this.logDebugMessage('Value removed:', optionData)
 }
 
-SyncPick.prototype.setValue = function (key, value) {
-    if (Object.keys(this.values).length > 0) {
-        this.removeValue(Object.keys(this.values)[0])
+SyncPick.prototype.setSelectedValue = function (value, optionData) {
+    if (Object.keys(this.selectedValues).length > 0) {
+        this.removeSelectedValue(Object.keys(this.selectedValues)[0])
         const selected = this.markup.getSelected()
         if (selected) selected.classList.remove('sp__results-list__item--selected')
     }
-    this.addValue(key, value)
-    this.logDebugMessage('Value set:', value)
-}
-
-SyncPick.prototype.buildValue = function (text, subtext) {
-    let value = {}
-    value.text = text
-    value.subtext = subtext
-    return value
+    this.addSelectedValue(value, optionData)
+    this.logDebugMessage('Value set:', optionData)
 }
 
 SyncPick.prototype.logDebugMessage = function (msg, someObject) {
@@ -434,7 +432,7 @@ SyncPick.prototype.resetSearch = function () {
 SyncPick.prototype.destroy = function () {
     if (!this.disabled) this.removeEvents()
     this.markup.destroy()
-    this.values = null
+    this.selectedValues = null
     this.dropdownValues = null
     delete this.markup
     delete SyncPick.elements[this.id]
@@ -442,7 +440,7 @@ SyncPick.prototype.destroy = function () {
 }
 
 SyncPick.prototype.reload = function () {
-    Object.keys(this.values).forEach(value => {
+    Object.keys(this.selectedValues).forEach(value => {
         this.markup.deselectItem(value)
     })
     this.destroy()
@@ -454,9 +452,9 @@ SyncPick.prototype.reload = function () {
  * Helpers
  */
 
-function onDomRemove(element, onDetachCallback) {
+function onDomRemove (element, onDetachCallback) {
     const observer = new MutationObserver(function () {
-        function isDetached(el) {
+        function isDetached (el) {
             if (el.parentNode === document) {
                 return false
             } else if (el.parentNode === null) {
