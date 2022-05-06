@@ -8,8 +8,6 @@ import de from "./sync-pick/i18n/de";
  * @param {String}   options.id - id of the select to use
  * @param {String}  [options.language='en'] - set language. defaults to document language or 'en'
  * @param {String}  [options.valueProp='id'] - name of the json key that holds the data to use as option value
- * @param {String}  [options.textProp='name'] - name of the json key that holds the data to use as option text
- * @param {String}  [options.subtextProp='subtext'] - name of the json key for additional subtext
  * @param {Number}  [options.searchTimeout=50] - timeout after the last keydown when to start searching
  * @param {String}  [options.searchPlaceholder='Search'] - placeholder for the search input
  * @param {Array}   [options.searchInputClasses=[]] - additional classes to add to the search input
@@ -33,10 +31,10 @@ import de from "./sync-pick/i18n/de";
  * @param {Boolean} [options.disabled=false] - to disabled the select. alternatively set your select to disabled
  * @param {Object}  [options.values] - hash with preselected values, overrides possible <option selected> elements.
  *                                    This is an alternative to adding actual <option selected> elements to the dom.
- *                                    Structure has to be {<value>: {<textProp>: <text>, disabledProp: <disabled>}}.
+ *                                    Structure has to be {value: {text: <text>, disabledProp: <disabled>}}.
  *                                    Note that both <value> and <text> should be equal to the actual option values.
  * @param {Object}  [options.dropdownValues] - hash with all values in the dropdown.
- *                                    Structure has to be {<value>: {<textProp>: <text>, disabledProp: <disabled>}}.
+ *                                    Structure has to be {value: {text: <text>, disabledProp: <disabled>}}.
  *                                    Note that both <value> and <text> should be equal to the actual option values.
  * @param {Object}  [options.withSelectAllButton] - enables buttons to select and deselect all entries
  * @param {Array}   [options.selectAllButtonClasses=[]] - additional classes to add to "select all" buttons
@@ -57,8 +55,6 @@ export default function SyncPick(options) {
     this.language = options.language || document.documentElement.lang || 'en'
     this.i18n = SyncPick.i18n ? SyncPick.i18n[this.language] : {}
 
-    this.textProp = options.textProp || 'name'
-    this.subtextProp = options.subtextProp || 'subtext'
     this.searchTimeout = options.searchTimeout || 50
     this.searchPlaceholder = options.searchPlaceholder || this.i18n.searchPlaceholder || 'Search'
     this.searchInputClasses = options.searchInputClasses || []
@@ -117,8 +113,6 @@ SyncPick.prototype.buildMarkup = function () {
         element: this.element,
         multiple: this.multiple,
         disabled: this.disabled,
-        textProp: this.textProp,
-        subtextProp: this.subtextProp,
         searchPlaceholder: this.searchPlaceholder,
         searchInputClasses: this.searchInputClasses,
         buttonClasses: this.buttonClasses,
@@ -407,8 +401,8 @@ SyncPick.prototype.setValue = function (key, value) {
 
 SyncPick.prototype.buildValue = function (text, subtext) {
     let value = {}
-    value[this.textProp] = text
-    value[this.subtextProp] = subtext
+    value.text = text
+    value.subtext = subtext
     return value
 }
 

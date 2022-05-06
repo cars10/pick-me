@@ -3,8 +3,6 @@ export default function SyncPickMarkup (options) {
     this.multiple = options.multiple || false
     this.disabled = options.disabled || false
     this.valueProp = options.valueProp
-    this.textProp = options.textProp
-    this.subtextProp = options.subtextProp
     this.searchPlaceholder = options.searchPlaceholder
     this.searchInputClasses = options.searchInputClasses
     this.buttonClasses = options.buttonClasses
@@ -241,8 +239,8 @@ SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValue
         if (!element) return
         const li = buildLi({
             value: value,
-            text: element[self.textProp],
-            subtext: element[self.subtextProp],
+            text: element.text,
+            subtext: element.subtext,
             selected: selectedValues.indexOf(value) > -1,
             multiple: self.multiple,
             checkedIconClasses: self.checkedIconClasses
@@ -360,17 +358,17 @@ SyncPickMarkup.prototype.renderButtonText = function (values) {
         if (count && count < Object.keys(values).length) {
             return this.selectedText.replace(this.selectedTextVariable, Object.keys(values).length)
         } else {
-            return joinSelectedTexts(values, this.textProp)
+            return joinSelectedTexts(values)
         }
     } else {
-        return joinSelectedTexts(values, this.textProp)
+        return joinSelectedTexts(values)
     }
 }
 
-function joinSelectedTexts (values, textProp) {
+function joinSelectedTexts (values) {
     let selected = []
     Object.keys(values).forEach(function (key) {
-        selected.push(values[key][textProp])
+        selected.push(values[key].text)
     })
     return selected.join(', ')
 }
