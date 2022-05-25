@@ -111,7 +111,7 @@ yarn dev
 
 Then open [http://localhost:8000](http://localhost:8000). 
 
-Alternatively you can use the develop version directly in tbs by symlinking the current build:
+Alternatively you can use the dev version directly in tbs by symlinking the current build:
 
 ```bash
 cd sync-pick
@@ -122,19 +122,17 @@ rm -rf path/to/tbs/node_modules/sync-pick
 # symlink built version
 ln -sf $(pwd) path/to/tbs/node_modules/
 
-# then run webpack with --watch do automatically compile
-EXTRACT_CSS=true npx webpack --watch
+# build after every change
+yarn build
 ```
 
 ## Publishing a new version
 
-1. Commit your changes on develop
-2. Update the `version` in `package.json` and commit new version
-3. Run `yarn build` and commit the `dist` folder
-4. Push develop
-5. Merge develop into master
-6. Push master
-7. Create new tag on master `git tag -a v0.x.x`
-8. Push tag `git push --tags`
-9. Go to tbs and update sync-pick version in `package.json`
-10. Run `yarn` 
+1. Make your changes and create a new build with `yarn build`
+2. Update the `version` in `package.json`
+3. Commit
+4. Push master
+5. Create new tag on master `git tag -a v0.x.x`
+6. Push tag `git push --tags`
+7. Go to tbs and update sync-pick version in `package.json`
+8. Run `yarn` 

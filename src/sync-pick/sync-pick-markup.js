@@ -104,10 +104,6 @@ SyncPickMarkup.prototype.buildWrapper = function () {
     const wrapper = document.createElement('div')
     wrapper.classList.add('sync-pick')
     if (this.multiple) wrapper.classList.add('sync-pick--multiple')
-    const elementClasses = this.element.classList
-    Array.apply(null, elementClasses).forEach(function (elementClass) {
-        wrapper.classList.add(elementClass)
-    })
     return wrapper
 }
 
