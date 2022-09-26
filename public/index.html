@@ -136,7 +136,7 @@
     <div class="col-sm-4 col-sm-offset-2">
       <form>
         <button type="button" id="reset-form">Reset</button>
-        <select id="picker" name="picker" title="Select something"> </select>
+        <select id="picker" name="picker" title="Select something" multiple="multiple"> </select>
       </form>
 
     </div>
@@ -194,6 +194,7 @@
         const option = document.createElement('option')
         option.innerHTML = optionData.text
         option.setAttribute('value', optionData.value)
+        if (optionData.selected) option.setAttribute('selected', optionData.selected)
         if (optionData.subtext) option.setAttribute('data-subtext', optionData.subtext)
         if (optionData.img) option.setAttribute('data-img', JSON.stringify(optionData.img))
         if (optgroup) {

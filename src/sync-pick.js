@@ -251,7 +251,10 @@ SyncPick.prototype.setupValues = function () {
             }
             self.dropdownValues[optgrouplabel][option.value] = newValue
 
-            if (option.selected) self.selectedValues[option.value] = newValue
+            if (option.getAttribute('selected')) {
+                self.selectedValues[option.value] = newValue
+                option.setAttribute('data-selected', true)
+            }
         })
     }
 }
