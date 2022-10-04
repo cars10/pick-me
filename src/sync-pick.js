@@ -251,7 +251,7 @@ SyncPick.prototype.setupValues = function () {
             }
             self.dropdownValues[optgrouplabel][option.value] = newValue
 
-            if (option.hasAttribute('selected') && (option.getAttribute('selected').length === 0 || option.getAttribute('selected') === 'true')) {
+            if (option.hasAttribute('selected') && ['', 'true', true, 'selected'].includes(option.getAttribute('selected'))) {
                 self.selectedValues[option.value] = newValue
                 option.setAttribute('data-selected', true)
             }
