@@ -76,6 +76,14 @@ export default function SyncPick (options) {
     this.deselectAllButtonText = options.deselectAllButtonText || this.i18n.deselectAllButtonText || 'Deselect all'
     this.debug = options.debug || false
     this.customDebugHandler = options.customDebugHandler || null
+    this.originallySelectedValues = []
+
+    const self = this
+    Array.apply(null, this.element.options).filter(function (option) {
+        return option.hasAttribute('selected') && ['', 'true', true, 'selected'].includes(option.getAttribute('selected'))
+    }).forEach(option => {
+        self.originallySelectedValues.push(option.value)
+    })
 
     this.multiple = !!this.element.multiple || !!options.multiple
     this.disabled = !!this.element.disabled || !!options.disabled
@@ -251,7 +259,7 @@ SyncPick.prototype.setupValues = function () {
             }
             self.dropdownValues[optgrouplabel][option.value] = newValue
 
-            if (option.hasAttribute('selected') && ['', 'true', true, 'selected'].includes(option.getAttribute('selected'))) {
+            if (option.selected || (option.hasAttribute('selected') && ['', 'true', true, 'selected'].includes(option.getAttribute('selected')))) {
                 self.selectedValues[option.value] = newValue
                 option.setAttribute('data-selected', true)
             }
@@ -448,6 +456,12 @@ SyncPick.prototype.reload = function () {
     })
     this.destroy()
     this.disabled = !!this.element.disabled
+
+    this.originallySelectedValues.forEach(value => {
+        const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
+        option.selected = true
+    })
+
     this.initialize()
 }
 
