@@ -219,14 +219,16 @@ SyncPick.prototype.addEvents = function () {
 
 SyncPick.prototype.removeEvents = function () {
     let self = this
-    this.markup.button.removeEventListener('click', this.togglePopupHandler)
-    if (this.withSearch) this.markup.searchInput.removeEventListener('input', this.searchHandler)
-    Array.apply(null, this.markup.resultsWrapper.querySelectorAll('li')).forEach(function (li) {
-        li.removeEventListener('click', self.selectHandler)
-    })
-    this.markup.popup.removeEventListener('click', this.stopPropagationHandler)
-    this.markup.button.removeEventListener('keydown', this.buttonKeyHandler)
-    this.markup.popup.removeEventListener('keydown', this.markupKeyHandler)
+    if (this.markup) { // sometimes markup is already removed from the DOM
+        this.markup.button.removeEventListener('click', this.togglePopupHandler)
+        if (this.withSearch) this.markup.searchInput.removeEventListener('input', this.searchHandler)
+        Array.apply(null, this.markup.resultsWrapper.querySelectorAll('li')).forEach(function (li) {
+            li.removeEventListener('click', self.selectHandler)
+        })
+        this.markup.popup.removeEventListener('click', this.stopPropagationHandler)
+        this.markup.button.removeEventListener('keydown', this.buttonKeyHandler)
+        this.markup.popup.removeEventListener('keydown', this.markupKeyHandler)
+    }
     document.removeEventListener('click', this.closePopupHandler)
     window.removeEventListener('resize', this.containerPositionHandler)
     window.removeEventListener('scroll', this.containerPositionHandler)
