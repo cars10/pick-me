@@ -359,10 +359,7 @@ SyncPick.prototype.shouldSearch = function (newValue) {
 
 SyncPick.prototype.select = function (e) {
     const li = e.currentTarget
-    const rawValue = li.getAttribute('data-value')
-    if (!rawValue) return
-
-    const value = rawValue.toString()
+    const value = li.getAttribute('data-value')
     const optionData = {
         text: li.getAttribute('data-text'),
         subtext: li.getAttribute('data-subtext'),
