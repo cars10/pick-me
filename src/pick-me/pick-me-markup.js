@@ -396,13 +396,6 @@ function buildLi (options) {
     li.setAttribute('title', textSpan.innerText)
     li.setAttribute('data-text', text)
   }
-  if (typeof subtext !== 'undefined' && subtext !== null) {
-    li.setAttribute('data-subtext', subtext)
-    const subtextDom = document.createElement('small')
-    subtextDom.innerHTML = subtext
-    subtextDom.classList.add('pm__results-list__item__subtext')
-    textSpan.appendChild(subtextDom)
-  }
 
   li.setAttribute('aria-role', 'listitem')
   li.classList.add('pm__results-list__item')
@@ -419,6 +412,15 @@ function buildLi (options) {
   }
 
   li.appendChild(textSpan)
+
+  if (typeof subtext !== 'undefined' && subtext !== null) {
+    li.setAttribute('data-subtext', subtext)
+    const subtextDom = document.createElement('small')
+    subtextDom.innerHTML = subtext
+    subtextDom.classList.add('pm__results-list__item__subtext')
+    li.appendChild(subtextDom)
+  }
+
   if (options.selected) {
     setLiSelected(li, true, options.multiple, options.checkedIconClasses)
   }

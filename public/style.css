@@ -79,6 +79,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     max-width: 100%;
+    display: flex;
 }
 
 .pm__popup .pm__results-list__item:not(.pm__results-list__item--selected):not(.pm__results-list__item--muted):not(.pm__results-list__item--disabled):hover {
