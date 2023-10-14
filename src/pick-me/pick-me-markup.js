@@ -1,4 +1,4 @@
-export default function SyncPickMarkup (options) {
+export default function PickMeMarkup (options) {
   this.element = options.element
   this.multiple = options.multiple || false
   this.disabled = options.disabled || false
@@ -34,16 +34,16 @@ export default function SyncPickMarkup (options) {
   this.assemble()
 }
 
-SyncPickMarkup.prototype.hideOriginalSelect = function () {
+PickMeMarkup.prototype.hideOriginalSelect = function () {
   this.element.classList.add('visually-hidden')
   this.element.setAttribute('tabindex', '-1')
 }
 
-SyncPickMarkup.prototype.showOriginalSelect = function () {
+PickMeMarkup.prototype.showOriginalSelect = function () {
   this.element.style.display = 'initial'
 }
 
-SyncPickMarkup.prototype.assemble = function () {
+PickMeMarkup.prototype.assemble = function () {
   this.wrapper.appendChild(this.button)
   if (!this.disabled) {
     if (this.container) {
@@ -60,7 +60,7 @@ SyncPickMarkup.prototype.assemble = function () {
   this.element.parentNode.insertBefore(this.wrapper, this.element)
 }
 
-SyncPickMarkup.prototype.positionPopup = function () {
+PickMeMarkup.prototype.positionPopup = function () {
   if (!this.open) return
   if (this.container) {
     const pos = this.wrapper.getBoundingClientRect()
@@ -92,7 +92,7 @@ SyncPickMarkup.prototype.positionPopup = function () {
   }
 }
 
-SyncPickMarkup.prototype.shouldDropUp = function () {
+PickMeMarkup.prototype.shouldDropUp = function () {
   const pos = this.button.getBoundingClientRect()
   const offset = getOffsetFromBoundingBox(pos)
   const selectOffsetTop = offset.top - document.documentElement.scrollTop
@@ -100,14 +100,14 @@ SyncPickMarkup.prototype.shouldDropUp = function () {
   return selectOffsetTop > selectOffsetBot && selectOffsetBot < this.popup.offsetHeight
 }
 
-SyncPickMarkup.prototype.buildWrapper = function () {
+PickMeMarkup.prototype.buildWrapper = function () {
   const wrapper = document.createElement('div')
-  wrapper.classList.add('sync-pick')
-  if (this.multiple) wrapper.classList.add('sync-pick--multiple')
+  wrapper.classList.add('pick-me')
+  if (this.multiple) wrapper.classList.add('pick-me--multiple')
   return wrapper
 }
 
-SyncPickMarkup.prototype.buildButton = function () {
+PickMeMarkup.prototype.buildButton = function () {
   const button = document.createElement('button')
   button.setAttribute('type', 'button')
   this.buttonClasses.forEach(function (buttonClass) {
@@ -137,7 +137,7 @@ SyncPickMarkup.prototype.buildButton = function () {
   return button
 }
 
-SyncPickMarkup.prototype.buildPopup = function () {
+PickMeMarkup.prototype.buildPopup = function () {
   const popup = document.createElement('div')
   popup.classList.add('sp__popup')
   if (this.dropdownAlignRight) popup.classList.add('sp__popup--right')
@@ -149,7 +149,7 @@ SyncPickMarkup.prototype.buildPopup = function () {
   return popup
 }
 
-SyncPickMarkup.prototype.buildSearchInput = function () {
+PickMeMarkup.prototype.buildSearchInput = function () {
   const wrapper = document.createElement('div')
   wrapper.classList.add('sp__search-input__wrapper')
   this.searchInput = document.createElement('input')
@@ -166,7 +166,7 @@ SyncPickMarkup.prototype.buildSearchInput = function () {
   return wrapper
 }
 
-SyncPickMarkup.prototype.buildSelectAllButtons = function () {
+PickMeMarkup.prototype.buildSelectAllButtons = function () {
   const buttongroup = document.createElement('div')
   this.selectAllButtonGroupClasses.forEach(function (buttonGroupClass) {
     buttongroup.classList.add(buttonGroupClass)
@@ -188,7 +188,7 @@ SyncPickMarkup.prototype.buildSelectAllButtons = function () {
   return buttongroup
 }
 
-SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
+PickMeMarkup.prototype.buildResultsScrollWrapper = function () {
   this.resultsScrollWrapper = document.createElement('div')
   this.resultsScrollWrapper.classList.add('sp__results-scroll-wrapper')
   this.resultsWrapper = document.createElement('div')
@@ -198,7 +198,7 @@ SyncPickMarkup.prototype.buildResultsScrollWrapper = function () {
   return this.resultsScrollWrapper
 }
 
-SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValues, valuesOrder) {
+PickMeMarkup.prototype.appendEntries = function (dropdownValues, selectedValues, valuesOrder) {
   if (Object.keys(dropdownValues).length > 0) {
     Object.entries(dropdownValues).forEach(([optGroupLabel, options], index, arr) => {
       if (optGroupLabel && optGroupLabel.length > 0) {
@@ -228,7 +228,7 @@ SyncPickMarkup.prototype.appendEntries = function (dropdownValues, selectedValue
 
 }
 
-SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValues, order) {
+PickMeMarkup.prototype.renderNewEntries = function (options, ul, selectedValues, order) {
   let self = this
   order.forEach(value => {
     const element = options[value]
@@ -244,31 +244,31 @@ SyncPickMarkup.prototype.renderNewEntries = function (options, ul, selectedValue
   })
 }
 
-SyncPickMarkup.prototype.selectItem = function (value) {
+PickMeMarkup.prototype.selectItem = function (value) {
   const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
   option.selected = true
   option.setAttribute('data-selected', '')
   this.addSelectedClassByValue(value)
 }
 
-SyncPickMarkup.prototype.deselectItem = function (value) {
+PickMeMarkup.prototype.deselectItem = function (value) {
   const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
   option.selected = false
   option.removeAttribute('data-selected')
   this.removeSelectedClassByValue(value)
 }
 
-SyncPickMarkup.prototype.addSelectedClassByValue = function (value) {
+PickMeMarkup.prototype.addSelectedClassByValue = function (value) {
   const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
   if (li) setLiSelected(li, true, this.multiple, this.checkedIconClasses)
 }
 
-SyncPickMarkup.prototype.removeSelectedClassByValue = function (value) {
+PickMeMarkup.prototype.removeSelectedClassByValue = function (value) {
   const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
   if (li) setLiSelected(li, false, this.multiple, this.checkedIconClasses)
 }
 
-SyncPickMarkup.prototype.destroy = function () {
+PickMeMarkup.prototype.destroy = function () {
   this.showOriginalSelect()
   if (this.container) {
     const container = document.querySelector(this.container)
@@ -277,15 +277,15 @@ SyncPickMarkup.prototype.destroy = function () {
   if (this.element && this.element.parentNode) this.element.parentNode.removeChild(this.wrapper)
 }
 
-SyncPickMarkup.prototype.getSelected = function () {
+PickMeMarkup.prototype.getSelected = function () {
   return this.resultsWrapper.querySelectorAll('li.sp__results-list__item--selected')[0]
 }
 
-SyncPickMarkup.prototype.getHovered = function () {
+PickMeMarkup.prototype.getHovered = function () {
   return this.hovered
 }
 
-SyncPickMarkup.prototype.focusPreviousEntry = function () {
+PickMeMarkup.prototype.focusPreviousEntry = function () {
   if (!this.hovered) this.hovered = this.getSelected()
   const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]'))
   if (this.hovered) {
@@ -305,7 +305,7 @@ SyncPickMarkup.prototype.focusPreviousEntry = function () {
   }
 }
 
-SyncPickMarkup.prototype.focusNextEntry = function () {
+PickMeMarkup.prototype.focusNextEntry = function () {
   if (!this.hovered) this.hovered = this.getSelected()
   const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]'))
   if (this.hovered) {
@@ -325,7 +325,7 @@ SyncPickMarkup.prototype.focusNextEntry = function () {
   }
 }
 
-SyncPickMarkup.prototype.scrollEntryIntoView = function (entry) {
+PickMeMarkup.prototype.scrollEntryIntoView = function (entry) {
   const entryOffsetTop = entry.offsetTop - this.resultsScrollWrapper.offsetTop
   const shouldScrollDown = this.resultsScrollWrapper.offsetHeight + this.resultsScrollWrapper.scrollTop < entryOffsetTop + entry.offsetHeight
   const shouldScrollUp = entryOffsetTop < this.resultsScrollWrapper.scrollTop
@@ -337,7 +337,7 @@ SyncPickMarkup.prototype.scrollEntryIntoView = function (entry) {
   }
 }
 
-SyncPickMarkup.prototype.setButtonText = function (selectedValues) {
+PickMeMarkup.prototype.setButtonText = function (selectedValues) {
   if (selectedValues && Object.keys(selectedValues).length > 0) {
     this.buttonText.innerHTML = this.renderButtonText(selectedValues)
   } else {
@@ -345,7 +345,7 @@ SyncPickMarkup.prototype.setButtonText = function (selectedValues) {
   }
 }
 
-SyncPickMarkup.prototype.renderButtonText = function (selectedValues) {
+PickMeMarkup.prototype.renderButtonText = function (selectedValues) {
   if (this.selectedTextFormat) {
     const match = this.selectedTextFormat.match(/count\s?>\s?([0-9]*)/)
     const count = match && match[1] && parseInt(match[1])

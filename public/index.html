@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <meta content="ie=edge" http-equiv="X-UA-Compatible">
-  <title>SyncPick</title>
+  <title>PickMe</title>
   <style>
       * {
           box-sizing: border-box;
@@ -172,18 +172,18 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     setupSelect(userData, true)
-    reloadSyncPic()
+    reload()
   })
   document.getElementById('reset-form').addEventListener('click', function (e) {
     e.target.form.reset()
-    debugHandler(window.SyncPick.elements[selectId])
+    debugHandler(window.PickMe.elements[selectId])
     console.log(document.getElementById(selectId).value)
   })
 
   Array.apply(null, document.getElementById('settings').querySelectorAll('input,select')).forEach(function (input) {
     input.addEventListener('input', function () {
-      window.SyncPick.elements[selectId].destroy()
-      reloadSyncPic()
+      window.PickMe.elements[selectId].destroy()
+      reload()
     })
   })
 
@@ -213,8 +213,8 @@
     })
   }
 
-  function reloadSyncPic () {
-    new SyncPick({
+  function reload () {
+    new PickMe({
       id: selectId,
       selectedTextFormat: document.getElementById('set_selected_text_format').value,
       language: document.getElementById('set_language').value,

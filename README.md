@@ -31,7 +31,7 @@ HTML
 JS
 ```javascript
 // these are the default options. you can omit everything except 'id' and 'url'
-new SyncPick({
+new PickMe({
     id: 'picker-single',
     language: document.documentElement.lang, // currently: 'de' or 'en'
     searchPlaceholder: 'Search',
@@ -56,9 +56,9 @@ new SyncPick({
 
 #### Without preselected entry
 
-You can use a normal `options_for_select` for initialization. Because SyncPick works on the options from the select. Example:
+You can use a normal `options_for_select` for initialization. Because PickMe works on the options from the select. Example:
 
-Example select that SyncPick can be used on:
+Example select that PickMe can be used on:
 
 ```erb
 <%= f.select :user_id,
@@ -80,28 +80,28 @@ If you have preselected entries in your select then you need to add these to the
 
 ## API
 
-SyncPick registers a global `window.SyncPick` object that lets you access each initialized select. You can get each instance by using its id: 
+PickMe registers a global `window.PickMe` object that lets you access each initialized select. You can get each instance by using its id: 
 
 ```javascript
-window.SyncPick.elements // or just SyncPick.elements
-// => {'picker-single': SyncPick}
+window.PickMe.elements // or just PickMe.elements
+// => {'picker-single': PickMe}
 
-window.SyncPick.elements['picker-single']
-// => SyncPick {..}
+window.PickMe.elements['picker-single']
+// => PickMe {..}
 ```
 
-Working on this object you can use any method and read any property that SyncPick uses, but the only useful methods to call externally are the following:
+Working on this object you can use any method and read any property that PickMe uses, but the only useful methods to call externally are the following:
 
 | method  | example                                 | description                                                                                                             |
 |---------|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| `destroy` | `SyncPick.elements['picker'].destroy()` | Destroys the added dom elements and event handlers. Resets the select to it's state before sync-pick was initialized. |
-| `reload`  | `SyncPick.elements['picker'].reload()`  | Same as destroy, but re-initializes the element automatically.                                                        |
+| `destroy` | `PickMe.elements['picker'].destroy()` | Destroys the added dom elements and event handlers. Resets the select to it's state before pick-me was initialized. |
+| `reload`  | `PickMe.elements['picker'].reload()`  | Same as destroy, but re-initializes the element automatically.                                                        |
  
 
 Call a method directly:
 
 ```javascript
-window.SyncPick.elements['picker-single'].reload()
+window.PickMe.elements['picker-single'].reload()
 ```
 
 ## Development
@@ -121,10 +121,10 @@ Then open [http://localhost:8000](http://localhost:8000).
 Alternatively you can use the dev version directly in tbs by symlinking the current build:
 
 ```bash
-cd sync-pick
+cd pick-me
 
 # remove existing lib in tbs
-rm -rf path/to/tbs/node_modules/sync-pick
+rm -rf path/to/tbs/node_modules/pick-me
 
 # symlink built version
 ln -sf $(pwd) path/to/tbs/node_modules/
@@ -141,5 +141,5 @@ yarn build
 4. Push master
 5. Create new tag on master `git tag -a v0.x.x`
 6. Push tag `git push --tags`
-7. Go to tbs and update sync-pick version in `package.json`
+7. Go to tbs and update pick-me version in `package.json`
 8. Run `yarn` 

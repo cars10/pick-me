@@ -1,10 +1,10 @@
-.sync-pick {
+.pick-me {
     z-index: 5;
     position: relative;
     display: inline-block;
 }
 
-.sync-pick .sp__button-text {
+.pick-me .sp__button-text {
     width: 100%;
     white-space: nowrap;
     overflow: hidden;

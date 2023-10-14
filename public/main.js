@@ -1,3 +1,3 @@
-import SyncPick from '../src/sync-pick.js'
+import PickMe from '../src/pick-me.js'
 
-window.SyncPick = SyncPick
+window.PickMe = PickMe

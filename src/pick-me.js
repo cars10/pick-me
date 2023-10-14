@@ -1,9 +1,9 @@
-import SyncPickMarkup from './sync-pick/sync-pick-markup'
-import en from "./sync-pick/i18n/en"
-import de from "./sync-pick/i18n/de"
+import PickMeMarkup from './pick-me/pick-me-markup'
+import en from "./pick-me/i18n/en"
+import de from "./pick-me/i18n/de"
 
 /**
- * SyncPick
+ * PickMe
  * @param {Object}   options
  * @param {String}   options.id - id of the select to use
  * @param {String}  [options.language='en'] - set language. defaults to document language or 'en'
@@ -39,17 +39,17 @@ import de from "./sync-pick/i18n/de"
  * @param {String}  [options.deselectAllButtonText='Deselect all'] - text to display on button to deselect all
  * @param {Boolean} [options.debug=false] - enable to log debug messages
  * @param {Function} [options.customDebugHandler=null] - additional function to call when debug messages are logged.
- *                                                       Receives the instance of sync-pick as first arg.
+ *                                                       Receives the instance of pick-me as first arg.
  * @constructor
  */
-export default function SyncPick (options) {
+export default function PickMe (options) {
   this.id = options.id
   this.label = document.querySelector('label[for="' + this.id + '"]')
-  if (this.isInitialized()) SyncPick.elements[this.id].destroy()
+  if (this.isInitialized()) PickMe.elements[this.id].destroy()
 
   this.element = document.getElementById(this.id)
   this.language = options.language || document.documentElement.lang || 'en'
-  this.i18n = SyncPick.i18n ? SyncPick.i18n[this.language] : {}
+  this.i18n = PickMe.i18n ? PickMe.i18n[this.language] : {}
 
   this.searchTimeout = options.searchTimeout || 50
   this.searchPlaceholder = options.searchPlaceholder || this.i18n.searchPlaceholder || 'Search'
@@ -93,10 +93,10 @@ export default function SyncPick (options) {
   this.logDebugMessage('initialized with options:', this)
   return this
 }
-SyncPick.i18n = { de, en }
-SyncPick.elements = {}
+PickMe.i18n = { de, en }
+PickMe.elements = {}
 
-SyncPick.prototype.initialize = function () {
+PickMe.prototype.initialize = function () {
   this.markup = this.buildMarkup()
   if (!this.disabled) {
     this.addHandlers()
@@ -111,8 +111,8 @@ SyncPick.prototype.initialize = function () {
   this.markup.setButtonText(this.selectedValues)
 }
 
-SyncPick.prototype.buildMarkup = function () {
-  return new SyncPickMarkup({
+PickMe.prototype.buildMarkup = function () {
+  return new PickMeMarkup({
     element: this.element,
     multiple: this.multiple,
     disabled: this.disabled,
@@ -140,7 +140,7 @@ SyncPick.prototype.buildMarkup = function () {
   })
 }
 
-SyncPick.prototype.addHandlers = function () {
+PickMe.prototype.addHandlers = function () {
   this.togglePopupHandler = this.togglePopup.bind(this)
   this.searchHandler = this.search.bind(this)
   this.closePopupHandler = this.closePopup.bind(this)
@@ -160,19 +160,19 @@ SyncPick.prototype.addHandlers = function () {
   this.resetFormHandler = this.resetAndReload.bind(this)
 }
 
-SyncPick.prototype.resetAndReload = function () {
-  this.logDebugMessage('form reset! reloading sync-pick')
+PickMe.prototype.resetAndReload = function () {
+  this.logDebugMessage('form reset! reloading pick-me')
   this.reload()
 }
 
-SyncPick.prototype.onButtonKeyDown = function (e) {
+PickMe.prototype.onButtonKeyDown = function (e) {
   if (e.keyCode === 13) { // enter
     e.preventDefault()
     this.togglePopup(e)
   }
 }
 
-SyncPick.prototype.onMarkupKeyDown = function (e) {
+PickMe.prototype.onMarkupKeyDown = function (e) {
   if (e.keyCode === 9 || e.keyCode === 27) { // tab || esc
     this.closePopupAndFocus()
   } else if (e.keyCode === 40) { // arrow down
@@ -192,7 +192,7 @@ SyncPick.prototype.onMarkupKeyDown = function (e) {
   }
 }
 
-SyncPick.prototype.addEvents = function () {
+PickMe.prototype.addEvents = function () {
   this.markup.button.addEventListener('click', this.togglePopupHandler)
   if (this.withSearch) this.markup.searchInput.addEventListener('input', this.searchHandler)
   this.markup.popup.addEventListener('click', this.stopPropagationHandler)
@@ -217,7 +217,7 @@ SyncPick.prototype.addEvents = function () {
   })
 }
 
-SyncPick.prototype.removeEvents = function () {
+PickMe.prototype.removeEvents = function () {
   let self = this
   if (this.markup) { // sometimes markup is already removed from the DOM
     this.markup.button.removeEventListener('click', this.togglePopupHandler)
@@ -236,7 +236,7 @@ SyncPick.prototype.removeEvents = function () {
   if (this.element.form) this.element.form.removeEventListener('reset', this.resetFormHandler)
 }
 
-SyncPick.prototype.setupValues = function () {
+PickMe.prototype.setupValues = function () {
   if (!this.selectedValues) {
     this.selectedValues = {}
     this.dropdownValues = {}
@@ -269,11 +269,11 @@ SyncPick.prototype.setupValues = function () {
   }
 }
 
-SyncPick.prototype.togglePopup = function () {
+PickMe.prototype.togglePopup = function () {
   this.open ? this.closePopupAndFocus() : this.openPopup()
 }
 
-SyncPick.prototype.search = function () {
+PickMe.prototype.search = function () {
   if (this.searchInputTimer) clearTimeout(this.searchInputTimer)
   if (this.markup.hovered) this.markup.hovered.classList.remove('sp__results-list__item--hover')
   this.markup.hovered = false
@@ -300,7 +300,7 @@ SyncPick.prototype.search = function () {
   }
 }
 
-SyncPick.prototype.openPopup = function () {
+PickMe.prototype.openPopup = function () {
   this.markup.popup.classList.add('sp__popup--visible')
   this.open = true
   this.markup.open = true
@@ -308,12 +308,12 @@ SyncPick.prototype.openPopup = function () {
   if (this.withSearch) this.markup.searchInput.focus()
 }
 
-SyncPick.prototype.closePopupAndFocus = function (e) {
+PickMe.prototype.closePopupAndFocus = function (e) {
   this.closePopup(e)
   this.markup.button.focus()
 }
 
-SyncPick.prototype.closePopup = function (e) {
+PickMe.prototype.closePopup = function (e) {
   let clickedButton = e && (e.target === this.markup.button || e.target.parentElement === this.markup.button)
   if (this.open && !clickedButton) {
     this.markup.popup.classList.remove('sp__popup--visible')
@@ -325,7 +325,7 @@ SyncPick.prototype.closePopup = function (e) {
   }
 }
 
-SyncPick.prototype.selectAllEntries = function () {
+PickMe.prototype.selectAllEntries = function () {
   const keysOfSelectedValues = Object.keys(this.selectedValues)
   this.selectedValues = Object.assign({}, ...Object.values(this.dropdownValues))
   Object.keys(this.selectedValues).forEach(value => {
@@ -337,7 +337,7 @@ SyncPick.prototype.selectAllEntries = function () {
   this.triggerChange()
 }
 
-SyncPick.prototype.deselectAllEntries = function () {
+PickMe.prototype.deselectAllEntries = function () {
   Object.keys(this.selectedValues).forEach(value => {
     this.markup.deselectItem(value)
   })
@@ -346,18 +346,18 @@ SyncPick.prototype.deselectAllEntries = function () {
   this.triggerChange()
 }
 
-SyncPick.prototype.addEventListenersForPage = function () {
+PickMe.prototype.addEventListenersForPage = function () {
   let self = this
   Array.apply(null, self.markup.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]:not(.sp__results-list__item--disabled)')).forEach(function (li) {
     li.addEventListener('click', self.selectHandler)
   })
 }
 
-SyncPick.prototype.shouldSearch = function (newValue) {
+PickMe.prototype.shouldSearch = function (newValue) {
   return this.previousSearchValue !== newValue
 }
 
-SyncPick.prototype.select = function (e) {
+PickMe.prototype.select = function (e) {
   const li = e.currentTarget
   const value = li.getAttribute('data-value')
   const optionData = {
@@ -378,14 +378,14 @@ SyncPick.prototype.select = function (e) {
   this.triggerChange()
 }
 
-SyncPick.prototype.triggerChange = function () {
+PickMe.prototype.triggerChange = function () {
   let event = new CustomEvent('Event', { detail: this.selectedValues })
   event.initEvent('change', true, true)
   this.element.dispatchEvent(event)
   this.logDebugMessage('changeTriggered')
 }
 
-SyncPick.prototype.toggleSelectedValue = function (value, optionData) {
+PickMe.prototype.toggleSelectedValue = function (value, optionData) {
   if (this.selectedValues[value]) {
     this.removeSelectedValue(value, optionData)
   } else {
@@ -393,7 +393,7 @@ SyncPick.prototype.toggleSelectedValue = function (value, optionData) {
   }
 }
 
-SyncPick.prototype.addSelectedValue = function (value, optionData) {
+PickMe.prototype.addSelectedValue = function (value, optionData) {
   this.selectedValues[value] = optionData
 
   this.markup.selectItem(value)
@@ -401,13 +401,13 @@ SyncPick.prototype.addSelectedValue = function (value, optionData) {
   this.logDebugMessage('Value added:', optionData)
 }
 
-SyncPick.prototype.removeSelectedValue = function (value, optionData) {
+PickMe.prototype.removeSelectedValue = function (value, optionData) {
   delete this.selectedValues[value]
   this.markup.deselectItem(value)
   this.logDebugMessage('Value removed:', optionData)
 }
 
-SyncPick.prototype.setSelectedValue = function (value, optionData) {
+PickMe.prototype.setSelectedValue = function (value, optionData) {
   if (Object.keys(this.selectedValues).length > 0) {
     this.removeSelectedValue(Object.keys(this.selectedValues)[0])
     const selected = this.markup.getSelected()
@@ -417,42 +417,42 @@ SyncPick.prototype.setSelectedValue = function (value, optionData) {
   this.logDebugMessage('Value set:', optionData)
 }
 
-SyncPick.prototype.logDebugMessage = function (msg, someObject) {
+PickMe.prototype.logDebugMessage = function (msg, someObject) {
   if (this.debug) {
-    if (msg) console.log('SyncPick#' + this.id, msg)
+    if (msg) console.log('PickMe#' + this.id, msg)
     if (someObject) console.log(someObject)
     if (typeof this.customDebugHandler === 'function') this.customDebugHandler(this)
   }
 }
 
-SyncPick.prototype.register = function () {
-  SyncPick.elements[this.id] = this
+PickMe.prototype.register = function () {
+  PickMe.elements[this.id] = this
 }
 
-SyncPick.prototype.isInitialized = function () {
-  if (typeof window.SyncPick === 'undefined') {
+PickMe.prototype.isInitialized = function () {
+  if (typeof window.PickMe === 'undefined') {
     return false
   } else {
-    return !!SyncPick.elements[this.id]
+    return !!PickMe.elements[this.id]
   }
 }
 
-SyncPick.prototype.resetSearch = function () {
+PickMe.prototype.resetSearch = function () {
   this.markup.searchInput.value = ''
   this.search()
 }
 
-SyncPick.prototype.destroy = function () {
+PickMe.prototype.destroy = function () {
   if (!this.disabled) this.removeEvents()
   this.markup.destroy()
   this.selectedValues = null
   this.dropdownValues = null
   delete this.markup
-  delete SyncPick.elements[this.id]
+  delete PickMe.elements[this.id]
   this.element.classList.remove('visually-hidden')
 }
 
-SyncPick.prototype.reload = function () {
+PickMe.prototype.reload = function () {
   Object.keys(this.selectedValues).forEach(value => {
     this.markup.deselectItem(value)
   })
