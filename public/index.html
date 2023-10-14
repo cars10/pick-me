@@ -18,6 +18,11 @@
           border-bottom: 2px solid grey;
       }
 
+      .container {
+          width: 50%;
+          margin: auto;
+      }
+
       .card {
           background-color: #eee;
           border: 1px solid #ccc;
@@ -27,27 +32,37 @@
           margin-bottom: 20px;
       }
 
-      .visually-hidden, .visually-hidden-focusable:not(:focus):not(:focus-within) {
-          position: absolute !important;
-          width: 1px !important;
-          height: 1px !important;
-          padding: 0 !important;
-          margin: -1px !important;
-          overflow: hidden !important;
-          clip: rect(0, 0, 0, 0) !important;
-          white-space: nowrap !important;
-          border: 0 !important;
+      .form-group {
+          margin-top: 10px;
+          margin-bottom: 10px;
+      }
+
+      h2 {
+          margin-top: 14px;
+          margin-bottom: 14px;
+      }
+
+      .w-50 {
+          width: 50%;
+      }
+
+      .flex {
+          display: flex;
+      }
+
+      table {
+          border-collapse: collapse;
+      }
+
+      table, th, td {
+          border: 1px solid #aaa;
+      }
+
+      table th, table td {
+          padding: 6px 12px;
+          text-align: left;
       }
   </style>
-  <script crossorigin="anonymous"
-          integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
-          src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" rel="stylesheet">
-  <script crossorigin="anonymous"
-          integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-          src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -55,26 +70,11 @@
   <h1>Demo</h1>
 
   <div class="card">
-    <a data-toggle="collapse" href="#collapseExample">Settings</a>
-    <div class="collapse in" id="collapseExample">
-      <h2>Settings</h2>
+    <div class="flex">
+      <div class="w-50">
+        <h2>Settings</h2>
 
-      <div class="row" id="settings">
-        <div class="col-sm-3">
-          <div class="form-group">
-            <label for="set_id">ID</label>
-            <input class="form-control" disabled id="set_id" value="picker">
-          </div>
-        </div>
-
-        <div class="col-sm-3">
-          <div class="form-group">
-            <label for="set_container">Container</label>
-            <input class="form-control" disabled id="set_container" value="">
-          </div>
-        </div>
-
-        <div class="col-sm-3">
+        <div id="settings">
           <div class="form-group">
             <label for="set_language">Language</label>
             <select class="form-control" id="set_language">
@@ -82,9 +82,7 @@
               <option value="en">English</option>
             </select>
           </div>
-        </div>
 
-        <div class="col-sm-3">
           <div class="form-group">
             <label for="set_selected_text_format">Selected text format</label>
             <input class="form-control" id="set_selected_text_format" value="count>2">
@@ -113,22 +111,31 @@
               </label>
             </div>
           </div>
+
+          <div class="form-group">
+            <div class="checkbox">
+              <label for="multiple">
+                <input id="multiple" type="checkbox"> Multiple
+              </label>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div class="w-50">
+        <h2>Debug information</h2>
+        <table class="table">
+          <tr>
+            <th># Entries</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td id="amount">0</td>
+            <td id="value"></td>
+          </tr>
+        </table>
+      </div>
     </div>
-
-
-    <h2>Debug information</h2>
-    <table class="table table-bordered">
-      <tr>
-        <th># Entries</th>
-        <th>Value</th>
-      </tr>
-      <tr>
-        <td id="amount">0</td>
-        <td id="value"></td>
-      </tr>
-    </table>
   </div>
 
   <h2>Output</h2>
@@ -136,9 +143,8 @@
     <div class="col-sm-4 col-sm-offset-2">
       <form>
         <button type="button" id="reset-form">Reset</button>
-        <select id="picker" name="picker" title="Select something" multiple="multiple"> </select>
+        <select id="picker" name="picker" title="Select something"> </select>
       </form>
-
     </div>
   </div>
 </div>
@@ -215,6 +221,7 @@
       dropdownAlignRight: document.getElementById('set_dropdown_align_right').checked,
       disabled: document.getElementById('set_disabled').checked,
       withSearch: document.getElementById('search_option').checked,
+      multiple: document.getElementById('multiple').checked,
       withSelectAllButton: false,
       selectAllButtonClasses: ['btn', 'btn-default'],
       selectAllButtonGroupClasses: ['btn-group'],

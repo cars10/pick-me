@@ -1,5 +1,5 @@
 .sync-pick {
-    z-index: 2500;
+    z-index: 5;
     position: relative;
     display: inline-block;
 }
@@ -131,4 +131,8 @@
 .sp__hr {
     margin-top: 8px;
     margin-bottom: 4px;
+}
+
+.visually-hidden {
+    display: none
 }

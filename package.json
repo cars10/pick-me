@@ -1,15 +1,16 @@
 {
   "name": "sync-pick",
-  "version": "0.3.8",
-  "description": "",
+  "version": "1.0.0",
   "main": "dist/sync-pick.js",
   "scripts": {
     "build": "rm -rf dist && esbuild src/sync-pick.js --bundle --minify --target=es2020 --sourcemap --format=esm --outdir=dist",
-    "dev": "esbuild public/main.js --bundle --target=es2020 --sourcemap --outdir=public/dist --servedir=public"
+    "dev": "esbuild public/main.js --bundle --target=es2020 --sourcemap --outdir=public/dist --servedir=public",
+    "mock": "json-server users.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Carsten König <carstenkoenig92@gmail.com>",
+  "license": "MIT",
   "devDependencies": {
-    "esbuild": "^0.15.9"
+    "esbuild": "^0.19.4",
+    "json-server": "^0.17.4"
   }
 }
