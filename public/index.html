@@ -180,7 +180,7 @@
 
   Array.apply(null, document.getElementById('settings').querySelectorAll('input,select')).forEach(function (input) {
     input.addEventListener('input', function () {
-      window.PickMe.elements[selectId].destroy()
+      pickme.destroy()
       reload()
     })
   })
@@ -239,7 +239,7 @@
   function debugHandler () {
     try {
       document.getElementById('amount').innerHTML = pickme.ui.resultsWrapper.querySelectorAll('li').length.toString()
-      document.getElementById('value').innerHTML = Object.keys(pickme.selectedValues).toString()
+      document.getElementById('value').innerHTML = Array.from(pickme.options.selected.keys()).toString()
     } catch (e) {
       console.log(e)
       console.warn('could not show debug')

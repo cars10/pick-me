@@ -17,11 +17,6 @@ export default function PickMeMarkup (options) {
   this.noResultsText = options.noResultsText
   this.container = options.container
   this.withSearch = options.withSearch
-  this.withSelectAllButton = options.withSelectAllButton
-  this.selectAllButtonClasses = options.selectAllButtonClasses
-  this.selectAllButtonGroupClasses = options.selectAllButtonGroupClasses
-  this.selectAllButtonText = options.selectAllButtonText
-  this.deselectAllButtonText = options.deselectAllButtonText
   this.dropdownAlignRight = options.dropdownAlignRight
   this.popupWidth = options.popupWidth
   this.open = false
@@ -144,7 +139,6 @@ PickMeMarkup.prototype.buildPopup = function () {
   if (this.dropdownAlignRight) popup.classList.add('pm__popup--right')
 
   if (this.withSearch) popup.appendChild(this.buildSearchInput())
-  if (this.withSelectAllButton) popup.appendChild(this.buildSelectAllButtons())
   popup.appendChild(this.buildResultsScrollWrapper())
 
   return popup
@@ -167,28 +161,6 @@ PickMeMarkup.prototype.buildSearchInput = function () {
   return wrapper
 }
 
-PickMeMarkup.prototype.buildSelectAllButtons = function () {
-  const buttongroup = document.createElement('div')
-  this.selectAllButtonGroupClasses.forEach(function (buttonGroupClass) {
-    buttongroup.classList.add(buttonGroupClass)
-  })
-  this.selectAllButton = document.createElement('button')
-  this.selectAllButton.setAttribute('type', 'button')
-  this.deselectAllButton = document.createElement('button')
-  this.deselectAllButton.setAttribute('type', 'button')
-  this.selectAllButton.innerHTML = this.selectAllButtonText
-  this.deselectAllButton.innerHTML = this.deselectAllButtonText
-  let self = this
-  this.selectAllButtonClasses.forEach(function (buttonClass) {
-    self.selectAllButton.classList.add(buttonClass)
-    self.deselectAllButton.classList.add(buttonClass)
-  })
-  buttongroup.appendChild(this.selectAllButton)
-  buttongroup.appendChild(this.deselectAllButton)
-
-  return buttongroup
-}
-
 PickMeMarkup.prototype.buildResultsScrollWrapper = function () {
   this.resultsScrollWrapper = document.createElement('div')
   this.resultsScrollWrapper.classList.add('pm__results-scroll-wrapper')
@@ -199,9 +171,10 @@ PickMeMarkup.prototype.buildResultsScrollWrapper = function () {
   return this.resultsScrollWrapper
 }
 
-PickMeMarkup.prototype.appendEntries = function (dropdownValues, selectedValues, valuesOrder) {
-  if (Object.keys(dropdownValues).length > 0) {
-    Object.entries(dropdownValues).forEach(([optGroupLabel, options], index, arr) => {
+PickMeMarkup.prototype.appendEntries = function (allOptions, selectedValues) {
+  if (allOptions.size > 0) {
+
+    for (let [optGroupLabel, options] of allOptions) {
       if (optGroupLabel && optGroupLabel.length > 0) {
         const label = document.createElement('span')
         label.classList.add('pm__opt-group-label')
@@ -210,15 +183,13 @@ PickMeMarkup.prototype.appendEntries = function (dropdownValues, selectedValues,
       }
       const pageUl = buildUl(this.listClasses)
       pageUl.setAttribute('data-label', optGroupLabel)
-      const order = valuesOrder[optGroupLabel]
-      this.renderNewEntries(options, pageUl, selectedValues, order)
+      this.renderNewEntries(options, pageUl, selectedValues)
       this.resultsWrapper.appendChild(pageUl)
-      if (optGroupLabel && optGroupLabel.length > 0 && arr[index + 1]) {
-        const hr = document.createElement('hr')
-        hr.classList.add('pm__hr')
-        this.resultsWrapper.appendChild(hr)
-      }
-    })
+      //if (optGroupLabel && optGroupLabel.length > 0 && arr[index + 1]) {
+      const hr = document.createElement('hr')
+      hr.classList.add('pm__hr')
+      this.resultsWrapper.appendChild(hr)
+    }
   } else {
     const li = buildLi({ text: this.noResultsText })
     li.classList.add('pm__results-list__item--muted')
@@ -229,20 +200,17 @@ PickMeMarkup.prototype.appendEntries = function (dropdownValues, selectedValues,
 
 }
 
-PickMeMarkup.prototype.renderNewEntries = function (options, ul, selectedValues, order) {
-  let self = this
-  order.forEach(value => {
-    const element = options[value]
-    if (!element) return
+PickMeMarkup.prototype.renderNewEntries = function (options, ul, selectedValues) {
+  for (let [value, element] of options) {
     const li = buildLi({
       value,
       ...element,
       selected: selectedValues.indexOf(value) > -1,
-      multiple: self.multiple,
-      checkedIconClasses: self.checkedIconClasses
+      multiple: this.multiple,
+      checkedIconClasses: this.checkedIconClasses
     })
     ul.appendChild(li)
-  })
+  }
 }
 
 PickMeMarkup.prototype.selectItem = function (value) {
@@ -339,7 +307,7 @@ PickMeMarkup.prototype.scrollEntryIntoView = function (entry) {
 }
 
 PickMeMarkup.prototype.setButtonText = function (selectedValues) {
-  if (selectedValues && Object.keys(selectedValues).length > 0) {
+  if (selectedValues && selectedValues.size > 0) {
     this.buttonText.innerHTML = this.renderButtonText(selectedValues)
   } else {
     this.buttonText.innerHTML = this.emptySelectButtonText
@@ -351,8 +319,8 @@ PickMeMarkup.prototype.renderButtonText = function (selectedValues) {
     const match = this.selectedTextFormat.match(/count\s?>\s?([0-9]*)/)
     const count = match && match[1] && parseInt(match[1])
 
-    if (count && count < Object.keys(selectedValues).length) {
-      return this.selectedText.replace(this.selectedTextVariable, Object.keys(selectedValues).length)
+    if (count && count < selectedValues.size) {
+      return this.selectedText.replace(this.selectedTextVariable, selectedValues.size)
     } else {
       return joinSelectedTexts(selectedValues)
     }
@@ -363,9 +331,9 @@ PickMeMarkup.prototype.renderButtonText = function (selectedValues) {
 
 function joinSelectedTexts (selectedValues) {
   let selected = []
-  Object.keys(selectedValues).forEach(function (key) {
-    selected.push(selectedValues[key].text)
-  })
+  for (let [value, optionData] of selectedValues) {
+    selected.push(optionData.text)
+  }
   return selected.join(', ')
 }
 

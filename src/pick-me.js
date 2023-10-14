@@ -9,7 +9,6 @@ export default class PickMe {
 
     this.settings = new PickMeSettings(options)
 
-    this.selectedValues = options.values || null
     this.debug = options.debug || false
 
     this.initialSelectedValues = []
@@ -28,10 +27,10 @@ export default class PickMe {
     this.addEvents()
     this.setupValues()
 
-    this.ui.appendEntries(this.dropdownValues, Object.keys(this.selectedValues), this.selectedValuesOrder)
+    this.ui.appendEntries(this.options.all, Array.from(this.options.selected.keys()))
     this.addEventListenersForPage()
 
-    this.ui.setButtonText(this.selectedValues)
+    this.ui.setButtonText(this.options.selected)
   }
 
   setupInitialValues () {
@@ -53,10 +52,6 @@ export default class PickMe {
   addEvents () {
     this.ui.button.addEventListener('click', () => (this.togglePopup()))
     this.ui.popup.addEventListener('click', e => (e.stopPropagation()))
-    if (this.settings.selectAll.enabled) {
-      this.ui.selectAllButton.addEventListener('click', () => (this.selectAllEntries()))
-      this.ui.deselectAllButton.addEventListener('click', () => (this.deselectAllEntries()))
-    }
     if (this.settings.search.enabled) {
       this.ui.searchInput.addEventListener('input', () => (this.search()))
       this.ui.button.addEventListener('keydown', e => (this.onButtonKeyDown(e)))
@@ -73,35 +68,32 @@ export default class PickMe {
   }
 
   setupValues () {
-    if (!this.selectedValues) {
-      this.selectedValues = {}
-      this.dropdownValues = {}
-      this.selectedValuesOrder = {}
-      Array.apply(null, this.element.options).forEach(option => {
-        let optgrouplabel
-        if (option.parentNode.nodeName === 'OPTGROUP') {
-          optgrouplabel = option.parentNode.label
-        } else {
-          optgrouplabel = ''
-        }
-        if (!this.selectedValuesOrder[optgrouplabel]) this.selectedValuesOrder[optgrouplabel] = []
-
-        this.selectedValuesOrder[optgrouplabel].push(option.value)
-        if (!this.dropdownValues[optgrouplabel]) this.dropdownValues[optgrouplabel] = {}
-
-        const newValue = {
-          text: option.innerHTML,
-          subtext: option.getAttribute('data-subtext'),
-          img: JSON.parse(option.getAttribute('data-img'))
-        }
-        this.dropdownValues[optgrouplabel][option.value] = newValue
-
-        if (option.selected || option.hasAttribute('selected')) {
-          this.selectedValues[option.value] = newValue
-          option.setAttribute('data-selected', true)
-        }
-      })
+    this.options = {
+      all: new Map(),
+      selected: new Map()
     }
+    Array.apply(null, this.element.options).forEach(option => {
+      let optgrouplabel
+      if (option.parentNode.nodeName === 'OPTGROUP') {
+        optgrouplabel = option.parentNode.label
+      } else {
+        optgrouplabel = ''
+      }
+
+      if (!this.options.all.get(optgrouplabel)) this.options.all.set(optgrouplabel, new Map())
+
+      const newValue = {
+        text: option.innerHTML,
+        subtext: option.getAttribute('data-subtext'),
+        img: JSON.parse(option.getAttribute('data-img'))
+      }
+      this.options.all.get(optgrouplabel).set(option.value, newValue)
+
+      if (option.selected || option.hasAttribute('selected')) {
+        this.options.selected.set(option.value, newValue)
+        option.setAttribute('data-selected', true)
+      }
+    })
   }
 
   buildMarkup () {
@@ -124,12 +116,7 @@ export default class PickMe {
       container: this.settings.base.popup.containerSelector,
       withSearch: this.settings.search.enabled,
       dropdownAlignRight: this.settings.base.popup.alignRight,
-      popupWidth: this.settings.base.popup.width,
-      withSelectAllButton: this.settings.selectAll.enabled,
-      selectAllButtonClasses: this.settings.selectAll.classList,
-      selectAllButtonGroupClasses: this.settings.selectAll.wrapperClassList,
-      selectAllButtonText: this.settings.selectAll.selectText,
-      deselectAllButtonText: this.settings.selectAll.deselectText
+      popupWidth: this.settings.base.popup.width
     })
   }
 
@@ -186,17 +173,17 @@ export default class PickMe {
       this.previousSearchValue = inputValue
       const lowerInputValue = inputValue.toLowerCase()
       this.searchInputTimer = setTimeout(() => {
-        let filteredValues = {}
-        Object.entries(this.dropdownValues).forEach(([optGroupLabel, options]) => {
-          Object.entries(options).forEach(([value, optionData]) => {
+        let filteredValues = new Map()
+        for (let [optGroupLabel, options] of this.options.all) {
+          for (let [value, optionData] of options) {
             if (optionData.text.toLowerCase().includes(lowerInputValue)) {
-              if (!filteredValues[optGroupLabel]) filteredValues[optGroupLabel] = {}
-              filteredValues[optGroupLabel][value] = optionData
+              if (!filteredValues.get(optGroupLabel)) filteredValues.set(optGroupLabel, new Map())
+              filteredValues.get(optGroupLabel).set(value, optionData)
             }
-          })
-        })
+          }
+        }
         this.ui.resultsWrapper.innerHTML = ''
-        this.ui.appendEntries(filteredValues, Object.keys(this.selectedValues), this.selectedValuesOrder)
+        this.ui.appendEntries(filteredValues, Array.from(this.options.selected.keys()))
         this.addEventListenersForPage()
       }, this.settings.search.debounce)
     }
@@ -227,27 +214,6 @@ export default class PickMe {
     this.ui.button.focus()
   }
 
-  selectAllEntries () {
-    const keysOfSelectedValues = Object.keys(this.selectedValues)
-    this.selectedValues = Object.assign({}, ...Object.values(this.dropdownValues))
-    Object.keys(this.selectedValues).forEach(value => {
-      if (!keysOfSelectedValues.includes(value)) {
-        this.ui.selectItem(value)
-      }
-    })
-    this.ui.setButtonText(this.selectedValues)
-    this.triggerChange()
-  }
-
-  deselectAllEntries () {
-    Object.keys(this.selectedValues).forEach(value => {
-      this.ui.deselectItem(value)
-    })
-    this.selectedValues = {}
-    this.ui.setButtonText(this.selectedValues)
-    this.triggerChange()
-  }
-
   addEventListenersForPage () {
     Array.apply(null, this.ui.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]:not(.pm__results-list__item--disabled)')).forEach(li => {
       li.addEventListener('click', this.handlers.selectHandler)
@@ -274,20 +240,20 @@ export default class PickMe {
       this.setSelectedValue(value, optionData)
     }
 
-    this.ui.setButtonText(this.selectedValues)
+    this.ui.setButtonText(this.options.selected)
     if (!this.settings.base.multiple) this.closePopupAndFocus()
     this.triggerChange()
   }
 
   triggerChange () {
-    let event = new CustomEvent('Event', { detail: this.selectedValues })
+    let event = new CustomEvent('Event', { detail: this.options.selected })
     event.initEvent('change', true, true)
     this.element.dispatchEvent(event)
     this.logDebugMessage('changeTriggered')
   }
 
   toggleSelectedValue (value, optionData) {
-    if (this.selectedValues[value]) {
+    if (this.options.selected.get(value)) {
       this.removeSelectedValue(value, optionData)
     } else {
       this.addSelectedValue(value, optionData)
@@ -295,23 +261,22 @@ export default class PickMe {
   }
 
   addSelectedValue (value, optionData) {
-    this.selectedValues[value] = optionData
+    this.options.selected.set(value, optionData)
 
     this.ui.selectItem(value)
     if (this.settings.search.enabled) this.ui.searchInput.focus()
     this.logDebugMessage('Value added:', optionData)
   }
 
-
   removeSelectedValue (value, optionData) {
-    delete this.selectedValues[value]
+    this.options.selected.delete(value)
     this.ui.deselectItem(value)
     this.logDebugMessage('Value removed:', optionData)
   }
 
   setSelectedValue (value, optionData) {
-    if (Object.keys(this.selectedValues).length > 0) {
-      this.removeSelectedValue(Object.keys(this.selectedValues)[0])
+    if (this.options.selected.size > 0) {
+      this.removeSelectedValue(this.options.selected.entries().next().value[0])
       const selected = this.ui.getSelected()
       if (selected) selected.classList.remove('pm__results-list__item--selected')
     }
@@ -333,16 +298,15 @@ export default class PickMe {
   destroy () {
     this.removeEvents()
     this.ui.destroy()
-    this.selectedValues = null
-    this.dropdownValues = null
+    this.options = null
     delete this.ui
     this.element.classList.remove('visually-hidden')
   }
 
   reload () {
-    Object.keys(this.selectedValues).forEach(value => {
+    for (let [value, optionData] of this.options.selected) {
       this.ui.deselectItem(value)
-    })
+    }
     this.destroy()
 
     this.initialSelectedValues.forEach(value => {

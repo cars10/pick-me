@@ -7,7 +7,6 @@ type Settings = {
   search?: SearchSettings
   button?: ButtonSettings
   list?: ListSettings
-  selectAll?: SelectAllSettings
 }
 
 type BaseSettings = {
@@ -74,7 +73,6 @@ export default class PickMeSettings {
     this.setSearch(props.search)
     this.setButton(props.button)
     this.setList(props.list)
-    this.setSelectAll(props.selectAll)
   }
 
   setBase (props: BaseSettings) {
@@ -121,14 +119,5 @@ export default class PickMeSettings {
 
     this.list.checkedIconHtml = props?.checkedIconHtml || '✓'
     this.list.classList = props?.classList || []
-  }
-
-  setSelectAll (props: SelectAllSettings) {
-    this.selectAll = {}
-    this.selectAll.enabled = !!props?.enabled
-    this.selectAll.classList = props?.classList || []
-    this.selectAll.wrapperClassList = props?.wrapperClassList || []
-    this.selectAll.selectText = props?.selectText || this.language.i18n?.selectAllButtonText || 'Select all'
-    this.selectAll.deselectText = props?.deselectText || this.language.i18n?.deselectAllButtonText || 'Deselect all'
   }
 }
