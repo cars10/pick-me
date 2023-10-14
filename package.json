@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "dist/pick-me.min.js",
   "scripts": {
-    "build:js": "esbuild src/pick-me.js --bundle --minify --target=es2020 --sourcemap --format=esm --outfile=dist/pick-me.min.js",
+    "build:js": "esbuild src/pick-me.js --bundle --minify --target=es2022 --sourcemap --format=esm --outfile=dist/pick-me.min.js",
     "build:css": "esbuild public/style.css --bundle --minify --outfile=dist/style.min.css",
     "build": "rm -rf dist && yarn build:js && yarn build:css",
-    "dev": "esbuild public/main.js --bundle --target=es2020 --sourcemap --outdir=public/dist --servedir=public",
+    "dev": "esbuild public/main.js --bundle --target=es2022 --sourcemap --outdir=public/dist --servedir=public",
     "lint": "eslint src --fix"
   },
   "author": "Carsten König <carstenkoenig92@gmail.com>",
