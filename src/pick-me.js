@@ -85,7 +85,8 @@ export default class PickMe {
       const newValue = {
         text: option.innerHTML,
         subtext: option.getAttribute('data-subtext'),
-        img: JSON.parse(option.getAttribute('data-img'))
+        img: JSON.parse(option.getAttribute('data-img')),
+        searchData: option.innerText.toLowerCase().trim()
       }
       this.options.all.get(optgrouplabel).set(option.value, newValue)
 
@@ -176,7 +177,7 @@ export default class PickMe {
         let filteredValues = new Map()
         for (let [optGroupLabel, options] of this.options.all) {
           for (let [value, optionData] of options) {
-            if (optionData.text.toLowerCase().includes(lowerInputValue)) {
+            if (optionData.searchData.includes(lowerInputValue)) {
               if (!filteredValues.get(optGroupLabel)) filteredValues.set(optGroupLabel, new Map())
               filteredValues.get(optGroupLabel).set(value, optionData)
             }
