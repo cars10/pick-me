@@ -42,74 +42,77 @@ import de from "./pick-me/i18n/de"
  *                                                       Receives the instance of pick-me as first arg.
  * @constructor
  */
-export default function PickMe (options) {
-  this.id = options.id
-  this.label = document.querySelector('label[for="' + this.id + '"]')
-  if (this.isInitialized()) PickMe.elements[this.id].destroy()
 
-  this.element = document.getElementById(this.id)
-  this.language = options.language || document.documentElement.lang || 'en'
-  this.i18n = PickMe.i18n ? PickMe.i18n[this.language] : {}
+export default class PickMe {
+  constructor (options) {
+    this.id = options.id
+    this.label = document.querySelector('label[for="' + this.id + '"]')
+    if (this.isInitialized()) PickMe.elements[this.id].destroy()
 
-  this.searchTimeout = options.searchTimeout || 50
-  this.searchPlaceholder = options.searchPlaceholder || this.i18n.searchPlaceholder || 'Search'
-  this.searchInputClasses = options.searchInputClasses || []
-  this.buttonClasses = options.buttonClasses || []
-  this.emptySelectButtonText = options.emptySelectButtonText || this.i18n.emptySelectButtonText || 'Select'
-  this.buttonDisabledClasses = options.buttonDisabledClasses || []
-  this.buttonIconClasses = options.buttonIconClasses || ['fas', 'fa-fw', 'fa-caret-down']
-  this.checkedIconClasses = options.checkedIconClasses || ['fas', 'fa-fw', 'fa-check']
-  this.listClasses = options.listClasses || []
-  this.selectedTextFormat = options.selectedTextFormat || null
-  this.selectedTextVariable = options.selectedTextVariable || '%num%'
-  this.selectedText = options.selectedText || this.i18n.selectedText || this.selectedTextVariable + ' selected'
-  this.noResultsText = options.noResultsText || this.i18n.noResultsText || 'No results'
-  this.container = options.container || null
-  this.withSearch = !!options.withSearch
-  this.dropdownAlignRight = !!options.dropdownAlignRight
-  this.popupWidth = options.popupWidth || '300px'
-  this.selectedValues = options.values || null
-  this.withSelectAllButton = options.withSelectAllButton || false
-  this.selectAllButtonClasses = options.selectAllButtonClasses || []
-  this.selectAllButtonGroupClasses = options.selectAllButtonGroupClasses || []
-  this.selectAllButtonText = options.selectAllButtonText || this.i18n.selectAllButtonText || 'Select all'
-  this.deselectAllButtonText = options.deselectAllButtonText || this.i18n.deselectAllButtonText || 'Deselect all'
-  this.debug = options.debug || false
-  this.customDebugHandler = options.customDebugHandler || null
-  this.originallySelectedValues = []
+    this.element = document.getElementById(this.id)
+    this.language = options.language || document.documentElement.lang || 'en'
+    this.i18n = PickMe.i18n ? PickMe.i18n[this.language] : {}
 
-  const self = this
-  Array.apply(null, this.element.options).filter(function (option) {
-    return option.hasAttribute('selected') && ['', 'true', true, 'selected'].includes(option.getAttribute('selected'))
-  }).forEach(option => {
-    self.originallySelectedValues.push(option.value)
-  })
+    this.searchTimeout = options.searchTimeout || 50
+    this.searchPlaceholder = options.searchPlaceholder || this.i18n.searchPlaceholder || 'Search'
+    this.searchInputClasses = options.searchInputClasses || []
+    this.buttonClasses = options.buttonClasses || []
+    this.emptySelectButtonText = options.emptySelectButtonText || this.i18n.emptySelectButtonText || 'Select'
+    this.buttonDisabledClasses = options.buttonDisabledClasses || []
+    this.buttonIconClasses = options.buttonIconClasses || ['fas', 'fa-fw', 'fa-caret-down']
+    this.checkedIconClasses = options.checkedIconClasses || ['fas', 'fa-fw', 'fa-check']
+    this.listClasses = options.listClasses || []
+    this.selectedTextFormat = options.selectedTextFormat || null
+    this.selectedTextVariable = options.selectedTextVariable || '%num%'
+    this.selectedText = options.selectedText || this.i18n.selectedText || this.selectedTextVariable + ' selected'
+    this.noResultsText = options.noResultsText || this.i18n.noResultsText || 'No results'
+    this.container = options.container || null
+    this.withSearch = !!options.withSearch
+    this.dropdownAlignRight = !!options.dropdownAlignRight
+    this.popupWidth = options.popupWidth || '300px'
+    this.selectedValues = options.values || null
+    this.withSelectAllButton = options.withSelectAllButton || false
+    this.selectAllButtonClasses = options.selectAllButtonClasses || []
+    this.selectAllButtonGroupClasses = options.selectAllButtonGroupClasses || []
+    this.selectAllButtonText = options.selectAllButtonText || this.i18n.selectAllButtonText || 'Select all'
+    this.deselectAllButtonText = options.deselectAllButtonText || this.i18n.deselectAllButtonText || 'Deselect all'
+    this.debug = options.debug || false
+    this.customDebugHandler = options.customDebugHandler || null
+    this.originallySelectedValues = []
 
-  this.multiple = !!this.element.multiple || !!options.multiple
-  this.disabled = !!this.element.disabled || !!options.disabled
-  this.open = false
+    const self = this
+    Array.apply(null, this.element.options).filter(function (option) {
+      return option.hasAttribute('selected') && ['', 'true', true, 'selected'].includes(option.getAttribute('selected'))
+    }).forEach(option => {
+      self.originallySelectedValues.push(option.value)
+    })
 
-  this.initialize()
-  this.logDebugMessage('initialized with options:', this)
-  return this
+    this.multiple = !!this.element.multiple || !!options.multiple
+    this.disabled = !!this.element.disabled || !!options.disabled
+    this.open = false
+
+    this.initialize()
+    this.logDebugMessage('initialized with options:', this)
+    return this
+  }
+
+  initialize() {
+    this.markup = this.buildMarkup()
+    if (!this.disabled) {
+      this.addHandlers()
+      this.addEvents()
+    }
+    this.setupValues()
+    if (!this.disabled) {
+      this.markup.appendEntries(this.dropdownValues, Object.keys(this.selectedValues), this.selectedValuesOrder)
+      this.addEventListenersForPage()
+    }
+    this.register()
+    this.markup.setButtonText(this.selectedValues)
+  }
 }
 PickMe.i18n = { de, en }
 PickMe.elements = {}
-
-PickMe.prototype.initialize = function () {
-  this.markup = this.buildMarkup()
-  if (!this.disabled) {
-    this.addHandlers()
-    this.addEvents()
-  }
-  this.setupValues()
-  if (!this.disabled) {
-    this.markup.appendEntries(this.dropdownValues, Object.keys(this.selectedValues), this.selectedValuesOrder)
-    this.addEventListenersForPage()
-  }
-  this.register()
-  this.markup.setButtonText(this.selectedValues)
-}
 
 PickMe.prototype.buildMarkup = function () {
   return new PickMeMarkup({
