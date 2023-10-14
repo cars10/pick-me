@@ -27,7 +27,7 @@ export default class PickMe {
     this.addEvents()
     this.setupValues()
 
-    this.ui.appendEntries(this.options.all, Array.from(this.options.selected.keys()))
+    this.ui.renderEntries(this.options.all, this.options.selected, this.options.optgroups)
     this.addEventListenersForPage()
 
     this.ui.setButtonText(this.options.selected)
@@ -69,29 +69,26 @@ export default class PickMe {
 
   setupValues () {
     this.options = {
-      all: new Map(),
-      selected: new Map()
+      all: new Map(), // Map<value, optionData>
+      selected: new Map(), // Map<value, optionData>
+      optgroups: new Map() // Map<label, value[]>
     }
     Array.apply(null, this.element.options).forEach(option => {
-      let optgrouplabel
-      if (option.parentNode.nodeName === 'OPTGROUP') {
-        optgrouplabel = option.parentNode.label
-      } else {
-        optgrouplabel = ''
-      }
+      let optgroupLabel = option.parentNode.nodeName === 'OPTGROUP' ? option.parentNode.label : ''
 
-      if (!this.options.all.get(optgrouplabel)) this.options.all.set(optgrouplabel, new Map())
+      if (!this.options.optgroups.has(optgroupLabel)) this.options.optgroups.set(optgroupLabel, [])
 
-      const newValue = {
+      const optionData = {
         text: option.innerHTML,
         subtext: option.getAttribute('data-subtext'),
         img: JSON.parse(option.getAttribute('data-img')),
         searchData: option.innerText.toLowerCase().trim()
       }
-      this.options.all.get(optgrouplabel).set(option.value, newValue)
+      this.options.all.set(option.value, optionData)
+      this.options.optgroups.get(optgroupLabel).push(option.value)
 
       if (option.selected || option.hasAttribute('selected')) {
-        this.options.selected.set(option.value, newValue)
+        this.options.selected.set(option.value, optionData)
         option.setAttribute('data-selected', true)
       }
     })
@@ -169,25 +166,30 @@ export default class PickMe {
     if (this.searchInputTimer) clearTimeout(this.searchInputTimer)
     if (this.ui.hovered) this.ui.hovered.classList.remove('pm__results-list__item--hover')
     this.ui.hovered = false
+
+    this.searchInputTimer = setTimeout(() => {
+      this.doSearch()
+    }, this.settings.search.debounce)
+  }
+
+  doSearch () {
     let inputValue = this.ui.searchInput.value
-    if (this.shouldSearch(inputValue)) {
-      this.previousSearchValue = inputValue
-      const lowerInputValue = inputValue.toLowerCase()
-      this.searchInputTimer = setTimeout(() => {
-        let filteredValues = new Map()
-        for (let [optGroupLabel, options] of this.options.all) {
-          for (let [value, optionData] of options) {
-            if (optionData.searchData.includes(lowerInputValue)) {
-              if (!filteredValues.get(optGroupLabel)) filteredValues.set(optGroupLabel, new Map())
-              filteredValues.get(optGroupLabel).set(value, optionData)
-            }
-          }
+    const lowerInputValue = inputValue.toLowerCase()
+
+    let filteredValues = new Map()
+    for (let [optGroupLabel, values] of this.options.optgroups) {
+      for (let value of values) {
+        const optionData = this.options.all.get(value)
+        if (optionData.searchData.includes(lowerInputValue)) {
+          if (!filteredValues.get(optGroupLabel)) filteredValues.set(optGroupLabel, [])
+          filteredValues.get(optGroupLabel).push(value)
         }
-        this.ui.resultsWrapper.innerHTML = ''
-        this.ui.appendEntries(filteredValues, Array.from(this.options.selected.keys()))
-        this.addEventListenersForPage()
-      }, this.settings.search.debounce)
+      }
     }
+
+    this.ui.resultsWrapper.innerHTML = ''
+    this.ui.renderEntries(this.options.all, this.options.selected, filteredValues)
+    this.addEventListenersForPage()
   }
 
   openPopup () {
@@ -221,19 +223,10 @@ export default class PickMe {
     })
   }
 
-  shouldSearch (newValue) {
-    return this.previousSearchValue !== newValue
-  }
-
   select (e) {
     const li = e.currentTarget
     const value = li.getAttribute('data-value')
-    const optionData = {
-      text: li.getAttribute('data-text'),
-      subtext: li.getAttribute('data-subtext'),
-      disabled: li.getAttribute('data-disabled'),
-      img: li.getAttribute('data-img') ? JSON.parse(li.getAttribute('data-img')) : null
-    }
+    const optionData = this.options.all.get(value)
 
     if (this.settings.base.multiple) {
       this.toggleSelectedValue(value, optionData)

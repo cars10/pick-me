@@ -171,21 +171,21 @@ PickMeMarkup.prototype.buildResultsScrollWrapper = function () {
   return this.resultsScrollWrapper
 }
 
-PickMeMarkup.prototype.appendEntries = function (allOptions, selectedValues) {
+// dynamic part: optgroups Map<label, value[]>
+PickMeMarkup.prototype.renderEntries = function (allOptions, selectedOptions, optgroups) {
   if (allOptions.size > 0) {
-
-    for (let [optGroupLabel, options] of allOptions) {
-      if (optGroupLabel && optGroupLabel.length > 0) {
+    for (let optgroupLabel of optgroups.keys()) {
+      if (optgroupLabel && optgroupLabel.length > 0) {
         const label = document.createElement('span')
         label.classList.add('pm__opt-group-label')
-        label.innerText = optGroupLabel
+        label.innerText = optgroupLabel
         this.resultsWrapper.appendChild(label)
       }
       const pageUl = buildUl(this.listClasses)
-      pageUl.setAttribute('data-label', optGroupLabel)
-      this.renderNewEntries(options, pageUl, selectedValues)
+      pageUl.setAttribute('data-label', optgroupLabel)
+      this.renderNewEntries(allOptions, selectedOptions, optgroups.get(optgroupLabel), pageUl)
       this.resultsWrapper.appendChild(pageUl)
-      //if (optGroupLabel && optGroupLabel.length > 0 && arr[index + 1]) {
+      //if (optgroupLabel && optgroupLabel.length > 0 && arr[index + 1]) {
       const hr = document.createElement('hr')
       hr.classList.add('pm__hr')
       this.resultsWrapper.appendChild(hr)
@@ -197,15 +197,15 @@ PickMeMarkup.prototype.appendEntries = function (allOptions, selectedValues) {
     pageUl.appendChild(li)
     this.resultsWrapper.appendChild(pageUl)
   }
-
 }
 
-PickMeMarkup.prototype.renderNewEntries = function (options, ul, selectedValues) {
-  for (let [value, element] of options) {
+PickMeMarkup.prototype.renderNewEntries = function (allOptions, selectedOptions, optgroupValues, ul) {
+  for (let value of optgroupValues) {
+    const optionData = allOptions.get(value)
     const li = buildLi({
       value,
-      ...element,
-      selected: selectedValues.indexOf(value) > -1,
+      ...optionData,
+      selected: selectedOptions.has(value),
       multiple: this.multiple,
       checkedIconClasses: this.checkedIconClasses
     })
@@ -362,7 +362,6 @@ function buildLi (options) {
   if (typeof text !== 'undefined' && text !== null) {
     li.setAttribute('aria-label', text)
     li.setAttribute('title', textSpan.innerText)
-    li.setAttribute('data-text', text)
   }
 
   li.setAttribute('aria-role', 'listitem')
@@ -375,14 +374,12 @@ function buildLi (options) {
     })
 
     imageTag.classList.add('pm__results-list__item__image')
-    li.setAttribute('data-img', JSON.stringify(imgAttributes))
     li.appendChild(imageTag)
   }
 
   li.appendChild(textSpan)
 
   if (typeof subtext !== 'undefined' && subtext !== null) {
-    li.setAttribute('data-subtext', subtext)
     const subtextDom = document.createElement('small')
     subtextDom.innerHTML = subtext
     subtextDom.classList.add('pm__results-list__item__subtext')
