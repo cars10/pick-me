@@ -1,6 +1,13 @@
-# SyncPick
+# PickMe
 
-SyncPick is a synchronous replacement for `bootstrap-select`. It tries to offer the best of both worlds - you can immediately scroll without searching and you can search your remote api.
+PickMe is customizable html select picker written in pure javascript. 
+
+## Development
+
+1. `make build`
+2. `make dev`
+3. <http://localhost:8000>
+
 
 1. [Usage](#markdown-header-usage)
     * [Native without JQuery](#markdown-header-native-without-jquery)

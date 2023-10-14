@@ -1,9 +1,11 @@
 {
   "name": "sync-pick",
   "version": "1.0.0",
-  "main": "dist/sync-pick.js",
+  "main": "dist/sync-pick.min.js",
   "scripts": {
-    "build": "rm -rf dist && esbuild src/sync-pick.js --bundle --minify --target=es2020 --sourcemap --format=esm --outdir=dist",
+    "build:js": "esbuild src/sync-pick.js --bundle --minify --target=es2020 --sourcemap --format=esm --outfile=dist/sync-pick.min.js",
+    "build:css": "esbuild public/style.css --bundle --minify --outfile=dist/style.min.css",
+    "build": "rm -rf dist && yarn build:js && yarn build:css",
     "dev": "esbuild public/main.js --bundle --target=es2020 --sourcemap --outdir=public/dist --servedir=public",
     "lint": "eslint src --fix"
   },
