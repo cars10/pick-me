@@ -46,7 +46,7 @@ SyncPickMarkup.prototype.showOriginalSelect = function () {
 SyncPickMarkup.prototype.assemble = function () {
     this.wrapper.appendChild(this.button)
     if (!this.disabled) {
-        if (!!this.container) {
+        if (this.container) {
             const container = document.querySelector(this.container)
             if (container) {
                 container.appendChild(this.popup)
@@ -62,7 +62,7 @@ SyncPickMarkup.prototype.assemble = function () {
 
 SyncPickMarkup.prototype.positionPopup = function () {
     if (!this.open) return
-    if (!!this.container) {
+    if (this.container) {
         const pos = this.wrapper.getBoundingClientRect()
         const offset = getOffsetFromBoundingBox(pos)
         const top = offset.top + this.wrapper.offsetHeight
@@ -270,7 +270,7 @@ SyncPickMarkup.prototype.removeSelectedClassByValue = function (value) {
 
 SyncPickMarkup.prototype.destroy = function () {
     this.showOriginalSelect()
-    if (!!this.container) {
+    if (this.container) {
         const container = document.querySelector(this.container)
         if (container) container.removeChild(this.popup)
     }
