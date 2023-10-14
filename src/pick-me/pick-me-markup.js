@@ -40,7 +40,7 @@ PickMeMarkup.prototype.hideOriginalSelect = function () {
 }
 
 PickMeMarkup.prototype.showOriginalSelect = function () {
-  this.element.style.display = 'initial'
+  this.element.classList.remove('visuallyhidden')
 }
 
 PickMeMarkup.prototype.assemble = function () {
@@ -110,6 +110,7 @@ PickMeMarkup.prototype.buildWrapper = function () {
 PickMeMarkup.prototype.buildButton = function () {
   const button = document.createElement('button')
   button.setAttribute('type', 'button')
+  button.classList.add('pm__button')
   this.buttonClasses.forEach(function (buttonClass) {
     button.classList.add(buttonClass)
   })
@@ -121,7 +122,7 @@ PickMeMarkup.prototype.buildButton = function () {
   }
 
   this.buttonText = document.createElement('span')
-  this.buttonText.classList.add('sp__button-text')
+  this.buttonText.classList.add('pm__button-text')
 
   if (this.buttonIconClasses && this.buttonIconClasses.length > 0) {
     let buttonIcon = document.createElement('i')
@@ -139,8 +140,8 @@ PickMeMarkup.prototype.buildButton = function () {
 
 PickMeMarkup.prototype.buildPopup = function () {
   const popup = document.createElement('div')
-  popup.classList.add('sp__popup')
-  if (this.dropdownAlignRight) popup.classList.add('sp__popup--right')
+  popup.classList.add('pm__popup')
+  if (this.dropdownAlignRight) popup.classList.add('pm__popup--right')
 
   if (this.withSearch) popup.appendChild(this.buildSearchInput())
   if (this.withSelectAllButton) popup.appendChild(this.buildSelectAllButtons())
@@ -151,11 +152,11 @@ PickMeMarkup.prototype.buildPopup = function () {
 
 PickMeMarkup.prototype.buildSearchInput = function () {
   const wrapper = document.createElement('div')
-  wrapper.classList.add('sp__search-input__wrapper')
+  wrapper.classList.add('pm__search-input__wrapper')
   this.searchInput = document.createElement('input')
   this.searchInput.type = 'search'
   this.searchInput.setAttribute('placeholder', this.searchPlaceholder)
-  this.searchInput.classList.add('sp__search-input')
+  this.searchInput.classList.add('pm__search-input')
 
   let self = this
   this.searchInputClasses.forEach(function (searchInputClass) {
@@ -190,9 +191,9 @@ PickMeMarkup.prototype.buildSelectAllButtons = function () {
 
 PickMeMarkup.prototype.buildResultsScrollWrapper = function () {
   this.resultsScrollWrapper = document.createElement('div')
-  this.resultsScrollWrapper.classList.add('sp__results-scroll-wrapper')
+  this.resultsScrollWrapper.classList.add('pm__results-scroll-wrapper')
   this.resultsWrapper = document.createElement('div')
-  this.resultsWrapper.classList.add('sp__results')
+  this.resultsWrapper.classList.add('pm__results')
   this.resultsWrapper.setAttribute('aria-role', 'list')
   this.resultsScrollWrapper.appendChild(this.resultsWrapper)
   return this.resultsScrollWrapper
@@ -203,7 +204,7 @@ PickMeMarkup.prototype.appendEntries = function (dropdownValues, selectedValues,
     Object.entries(dropdownValues).forEach(([optGroupLabel, options], index, arr) => {
       if (optGroupLabel && optGroupLabel.length > 0) {
         const label = document.createElement('span')
-        label.classList.add('sp__opt-group-label')
+        label.classList.add('pm__opt-group-label')
         label.innerText = optGroupLabel
         this.resultsWrapper.appendChild(label)
       }
@@ -214,13 +215,13 @@ PickMeMarkup.prototype.appendEntries = function (dropdownValues, selectedValues,
       this.resultsWrapper.appendChild(pageUl)
       if (optGroupLabel && optGroupLabel.length > 0 && arr[index + 1]) {
         const hr = document.createElement('hr')
-        hr.classList.add('sp__hr')
+        hr.classList.add('pm__hr')
         this.resultsWrapper.appendChild(hr)
       }
     })
   } else {
     const li = buildLi({ text: this.noResultsText })
-    li.classList.add('sp__results-list__item--muted')
+    li.classList.add('pm__results-list__item--muted')
     const pageUl = buildUl(this.listClasses)
     pageUl.appendChild(li)
     this.resultsWrapper.appendChild(pageUl)
@@ -278,7 +279,7 @@ PickMeMarkup.prototype.destroy = function () {
 }
 
 PickMeMarkup.prototype.getSelected = function () {
-  return this.resultsWrapper.querySelectorAll('li.sp__results-list__item--selected')[0]
+  return this.resultsWrapper.querySelectorAll('li.pm__results-list__item--selected')[0]
 }
 
 PickMeMarkup.prototype.getHovered = function () {
@@ -287,19 +288,19 @@ PickMeMarkup.prototype.getHovered = function () {
 
 PickMeMarkup.prototype.focusPreviousEntry = function () {
   if (!this.hovered) this.hovered = this.getSelected()
-  const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]'))
+  const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]'))
   if (this.hovered) {
     const hoveredIndex = allLis.indexOf(this.hovered)
     if (hoveredIndex > 0) {
-      this.hovered.classList.remove('sp__results-list__item--hover')
+      this.hovered.classList.remove('pm__results-list__item--hover')
       this.hovered = allLis[hoveredIndex - 1]
-      this.hovered.classList.add('sp__results-list__item--hover')
+      this.hovered.classList.add('pm__results-list__item--hover')
       this.scrollEntryIntoView(this.hovered)
     }
   } else {
     const first = allLis[0]
     if (!first) return
-    first.classList.add('sp__results-list__item--hover')
+    first.classList.add('pm__results-list__item--hover')
     this.hovered = first
     this.scrollEntryIntoView(first)
   }
@@ -307,19 +308,19 @@ PickMeMarkup.prototype.focusPreviousEntry = function () {
 
 PickMeMarkup.prototype.focusNextEntry = function () {
   if (!this.hovered) this.hovered = this.getSelected()
-  const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]'))
+  const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]'))
   if (this.hovered) {
     const hoveredIndex = allLis.indexOf(this.hovered)
     if (hoveredIndex < allLis.length - 1) {
-      this.hovered.classList.remove('sp__results-list__item--hover')
+      this.hovered.classList.remove('pm__results-list__item--hover')
       this.hovered = allLis[hoveredIndex + 1]
-      this.hovered.classList.add('sp__results-list__item--hover')
+      this.hovered.classList.add('pm__results-list__item--hover')
       this.scrollEntryIntoView(this.hovered)
     }
   } else {
     const first = allLis[0]
     if (!first) return
-    first.classList.add('sp__results-list__item--hover')
+    first.classList.add('pm__results-list__item--hover')
     this.hovered = first
     this.scrollEntryIntoView(first)
   }
@@ -370,7 +371,7 @@ function joinSelectedTexts (selectedValues) {
 
 function buildUl (additionalClasses) {
   const pageUl = document.createElement('ul')
-  pageUl.classList.add('sp__results-list')
+  pageUl.classList.add('pm__results-list')
   pageUl.setAttribute('aria-role', 'listbox')
   additionalClasses.forEach(function (listClass) {
     pageUl.classList.add(listClass)
@@ -386,7 +387,7 @@ function buildLi (options) {
   const li = document.createElement('li')
 
   const textSpan = document.createElement('span')
-  textSpan.classList.add('sp__results-list__item__text')
+  textSpan.classList.add('pm__results-list__item__text')
   textSpan.innerHTML = text
 
   if (typeof value !== 'undefined' && value !== null) li.setAttribute('data-value', value)
@@ -399,12 +400,12 @@ function buildLi (options) {
     li.setAttribute('data-subtext', subtext)
     const subtextDom = document.createElement('small')
     subtextDom.innerHTML = subtext
-    subtextDom.classList.add('sp__results-list__item__subtext')
+    subtextDom.classList.add('pm__results-list__item__subtext')
     textSpan.appendChild(subtextDom)
   }
 
   li.setAttribute('aria-role', 'listitem')
-  li.classList.add('sp__results-list__item')
+  li.classList.add('pm__results-list__item')
 
   if (typeof imgAttributes !== 'undefined' && imgAttributes !== null) {
     const imageTag = document.createElement('img')
@@ -412,7 +413,7 @@ function buildLi (options) {
       imageTag.setAttribute(attr, imgAttributes[attr])
     })
 
-    imageTag.classList.add('sp__results-list__item__image')
+    imageTag.classList.add('pm__results-list__item__image')
     li.setAttribute('data-img', JSON.stringify(imgAttributes))
     li.appendChild(imageTag)
   }
@@ -431,18 +432,18 @@ function setLiSelected (li, selected, addCheck, checkedIconClasses) {
       checkedIconClasses.forEach(function (checkedIconClass) {
         check.classList.add(checkedIconClass)
       })
-      check.classList.add('sp__results-list__item__check-mark')
+      check.classList.add('pm__results-list__item__check-mark')
       li.appendChild(check)
     } else {
-      li.classList.remove('sp__results-list__item--hover')
-      li.classList.add('sp__results-list__item--selected')
+      li.classList.remove('pm__results-list__item--hover')
+      li.classList.add('pm__results-list__item--selected')
     }
   } else {
     if (addCheck) {
-      const check = li.querySelector('.sp__results-list__item__check-mark')
+      const check = li.querySelector('.pm__results-list__item__check-mark')
       if (check) li.removeChild(check)
     } else {
-      li.classList.remove('sp__results-list__item--selected')
+      li.classList.remove('pm__results-list__item--selected')
     }
   }
 }

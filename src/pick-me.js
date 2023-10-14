@@ -1,473 +1,357 @@
 import PickMeMarkup from './pick-me/pick-me-markup'
-import en from "./pick-me/i18n/en"
-import de from "./pick-me/i18n/de"
-
-/**
- * PickMe
- * @param {Object}   options
- * @param {String}   options.id - id of the select to use
- * @param {String}  [options.language='en'] - set language. defaults to document language or 'en'
- * @param {String}  [options.valueProp='id'] - name of the json key that holds the data to use as option value
- * @param {Number}  [options.searchTimeout=50] - timeout after the last keydown when to start searching
- * @param {String}  [options.searchPlaceholder='Search'] - placeholder for the search input
- * @param {Array}   [options.searchInputClasses=[]] - additional classes to add to the search input
- * @param {String}  [options.emptySelectButtonText=[]] - set the text of the select button before something is selected
- * @param {Array}   [options.buttonClasses=[]] - additional classes to add to the "open" button
- * @param {Array}   [options.buttonDisabledClasses=[]] - additional classes to add to the disabled button
- * @param {Array}   [options.buttonIconClasses=[]] - additional classes to add to "open" buttons icon
- * @param {Array}   [options.checkedIconClasses=[]] - additional classes to add to "checked" icon
- * @param {Array}   [options.listClasses=[]] - additional classes to add to each list built from loaded data
- * @param {String}  [options.selectedTextFormat=null] - set to 'count > X' where X is a number to show all texts if the
- *                                                      selected count is below X, otherwise show `selectedText`
- * @param {String}  [options.selectedTextVariable='%num%'] - set to some placeholder that is included in `selectedText`
- *                                                        that gets replaced by the actual count when displaying text
- * @param {String}  [options.selectedText=options.selectedTextVariable + 'selected'] - the actual text
- * @param {String}  [options.noResultsText='No results'] - text to display when api returns no results
- * @param {String}  [options.container=null] - container to append the html to
- * @param {Boolean} [options.withSearch=false] - set to true to active the searchbar
- * @param {Boolean} [options.dropdownAlignRight=false] - set to true to align the dropdown on the right
- * @param {Boolean} [options.popupWidth='300px'] - set width for popup when container option is set
- * @param {Boolean} [options.multiple=false] - to enable multiple. alternatively set your select to multiple
- * @param {Boolean} [options.disabled=false] - to disabled the select. alternatively set your select to disabled
- * @param {Object}  [options.values] - hash with preselected values, overrides possible <option selected> elements.
- *                                    This is an alternative to adding actual <option selected> elements to the dom.
- *                                    Structure has to be {value: {text: <text>, subtext: <subtext>}}.
- * @param {Object}  [options.withSelectAllButton] - enables buttons to select and deselect all entries
- * @param {Array}   [options.selectAllButtonClasses=[]] - additional classes to add to "select all" buttons
- * @param {Array}   [options.selectAllButtonGroupClasses=[]] - additional classes to add to "select all" buttongroup
- * @param {String}  [options.selectAllButtonText='Select all'] - text to display on button to select all
- * @param {String}  [options.deselectAllButtonText='Deselect all'] - text to display on button to deselect all
- * @param {Boolean} [options.debug=false] - enable to log debug messages
- * @param {Function} [options.customDebugHandler=null] - additional function to call when debug messages are logged.
- *                                                       Receives the instance of pick-me as first arg.
- * @constructor
- */
+import PickMeSettings from './pick-me/settings'
 
 export default class PickMe {
   constructor (options) {
     this.id = options.id
-    this.label = document.querySelector('label[for="' + this.id + '"]')
-    if (this.isInitialized()) PickMe.elements[this.id].destroy()
-
     this.element = document.getElementById(this.id)
-    this.language = options.language || document.documentElement.lang || 'en'
-    this.i18n = PickMe.i18n ? PickMe.i18n[this.language] : {}
+    this.label = document.querySelector('label[for="' + this.id + '"]')
 
-    this.searchTimeout = options.searchTimeout || 50
-    this.searchPlaceholder = options.searchPlaceholder || this.i18n.searchPlaceholder || 'Search'
-    this.searchInputClasses = options.searchInputClasses || []
-    this.buttonClasses = options.buttonClasses || []
-    this.emptySelectButtonText = options.emptySelectButtonText || this.i18n.emptySelectButtonText || 'Select'
-    this.buttonDisabledClasses = options.buttonDisabledClasses || []
-    this.buttonIconClasses = options.buttonIconClasses || ['fas', 'fa-fw', 'fa-caret-down']
-    this.checkedIconClasses = options.checkedIconClasses || ['fas', 'fa-fw', 'fa-check']
-    this.listClasses = options.listClasses || []
-    this.selectedTextFormat = options.selectedTextFormat || null
-    this.selectedTextVariable = options.selectedTextVariable || '%num%'
-    this.selectedText = options.selectedText || this.i18n.selectedText || this.selectedTextVariable + ' selected'
-    this.noResultsText = options.noResultsText || this.i18n.noResultsText || 'No results'
-    this.container = options.container || null
-    this.withSearch = !!options.withSearch
-    this.dropdownAlignRight = !!options.dropdownAlignRight
-    this.popupWidth = options.popupWidth || '300px'
+    this.settings = new PickMeSettings(options)
+
     this.selectedValues = options.values || null
-    this.withSelectAllButton = options.withSelectAllButton || false
-    this.selectAllButtonClasses = options.selectAllButtonClasses || []
-    this.selectAllButtonGroupClasses = options.selectAllButtonGroupClasses || []
-    this.selectAllButtonText = options.selectAllButtonText || this.i18n.selectAllButtonText || 'Select all'
-    this.deselectAllButtonText = options.deselectAllButtonText || this.i18n.deselectAllButtonText || 'Deselect all'
     this.debug = options.debug || false
-    this.customDebugHandler = options.customDebugHandler || null
-    this.originallySelectedValues = []
 
-    const self = this
-    Array.apply(null, this.element.options).filter(function (option) {
-      return option.hasAttribute('selected') && ['', 'true', true, 'selected'].includes(option.getAttribute('selected'))
-    }).forEach(option => {
-      self.originallySelectedValues.push(option.value)
-    })
-
-    this.multiple = !!this.element.multiple || !!options.multiple
-    this.disabled = !!this.element.disabled || !!options.disabled
+    this.initialSelectedValues = []
     this.open = false
+    this.handlers = {}
 
     this.initialize()
-    this.logDebugMessage('initialized with options:', this)
+    this.logDebugMessage('initialized with options:', this.settings)
     return this
   }
 
-  initialize() {
-    this.markup = this.buildMarkup()
-    if (!this.disabled) {
-      this.addHandlers()
-      this.addEvents()
-    }
+  initialize () {
+    this.setupInitialValues()
+    this.ui = this.buildMarkup()
+    this.addHandlers()
+    this.addEvents()
     this.setupValues()
-    if (!this.disabled) {
-      this.markup.appendEntries(this.dropdownValues, Object.keys(this.selectedValues), this.selectedValuesOrder)
-      this.addEventListenersForPage()
+
+    this.ui.appendEntries(this.dropdownValues, Object.keys(this.selectedValues), this.selectedValuesOrder)
+    this.addEventListenersForPage()
+
+    this.ui.setButtonText(this.selectedValues)
+  }
+
+  setupInitialValues () {
+    const options = this.element.querySelectorAll('option[selected]')
+    options.forEach(option => (this.initialSelectedValues.push(option.value)))
+  }
+
+  addHandlers () {
+    this.handlers.closePopupHandler = e => (this.closePopup(e))
+    this.handlers.selectHandler = e => (this.select(e))
+    this.handlers.containerPositionHandler = () => (this.ui.positionPopup())
+    this.handlers.resetFormHandler = () => (this.resetAndReload())
+    this.handlers.labelClickHandler = e => {
+      e.preventDefault()
+      this.ui.button.focus()
     }
-    this.register()
-    this.markup.setButtonText(this.selectedValues)
   }
-}
-PickMe.i18n = { de, en }
-PickMe.elements = {}
 
-PickMe.prototype.buildMarkup = function () {
-  return new PickMeMarkup({
-    element: this.element,
-    multiple: this.multiple,
-    disabled: this.disabled,
-    searchPlaceholder: this.searchPlaceholder,
-    searchInputClasses: this.searchInputClasses,
-    buttonClasses: this.buttonClasses,
-    buttonDisabledClasses: this.buttonDisabledClasses,
-    emptySelectButtonText: this.emptySelectButtonText,
-    buttonIconClasses: this.buttonIconClasses,
-    checkedIconClasses: this.checkedIconClasses,
-    listClasses: this.listClasses,
-    selectedTextFormat: this.selectedTextFormat,
-    selectedTextVariable: this.selectedTextVariable,
-    selectedText: this.selectedText,
-    noResultsText: this.noResultsText,
-    container: this.container,
-    withSearch: this.withSearch,
-    dropdownAlignRight: this.dropdownAlignRight,
-    popupWidth: this.popupWidth,
-    withSelectAllButton: this.withSelectAllButton,
-    selectAllButtonClasses: this.selectAllButtonClasses,
-    selectAllButtonGroupClasses: this.selectAllButtonGroupClasses,
-    selectAllButtonText: this.selectAllButtonText,
-    deselectAllButtonText: this.deselectAllButtonText
-  })
-}
-
-PickMe.prototype.addHandlers = function () {
-  this.togglePopupHandler = this.togglePopup.bind(this)
-  this.searchHandler = this.search.bind(this)
-  this.closePopupHandler = this.closePopup.bind(this)
-  this.selectHandler = this.select.bind(this)
-  this.stopPropagationHandler = function (e) {
-    e.stopPropagation()
-  }
-  this.buttonKeyHandler = this.onButtonKeyDown.bind(this)
-  this.markupKeyHandler = this.onMarkupKeyDown.bind(this)
-  this.selectAllHandler = this.selectAllEntries.bind(this)
-  this.deselectAllHandler = this.deselectAllEntries.bind(this)
-  this.labelClickHandler = function (e) {
-    e.preventDefault()
-    this.markup.button.focus()
-  }.bind(this)
-  this.containerPositionHandler = this.markup.positionPopup.bind(this.markup)
-  this.resetFormHandler = this.resetAndReload.bind(this)
-}
-
-PickMe.prototype.resetAndReload = function () {
-  this.logDebugMessage('form reset! reloading pick-me')
-  this.reload()
-}
-
-PickMe.prototype.onButtonKeyDown = function (e) {
-  if (e.keyCode === 13) { // enter
-    e.preventDefault()
-    this.togglePopup(e)
-  }
-}
-
-PickMe.prototype.onMarkupKeyDown = function (e) {
-  if (e.keyCode === 9 || e.keyCode === 27) { // tab || esc
-    this.closePopupAndFocus()
-  } else if (e.keyCode === 40) { // arrow down
-    e.preventDefault()
-    this.markup.focusNextEntry()
-  } else if (e.keyCode === 38) { // arrow up
-    e.preventDefault()
-    this.markup.focusPreviousEntry()
-  } else if (e.keyCode === 13) { // enter
-    e.preventDefault()
-    if (this.open) {
-      const li = this.markup.getHovered()
-      if (li) this.select({ currentTarget: li })
+  addEvents () {
+    this.ui.button.addEventListener('click', () => (this.togglePopup()))
+    this.ui.popup.addEventListener('click', e => (e.stopPropagation()))
+    if (this.settings.selectAll.enabled) {
+      this.ui.selectAllButton.addEventListener('click', () => (this.selectAllEntries()))
+      this.ui.deselectAllButton.addEventListener('click', () => (this.deselectAllEntries()))
+    }
+    if (this.settings.search.enabled) {
+      this.ui.searchInput.addEventListener('input', () => (this.search()))
+      this.ui.button.addEventListener('keydown', e => (this.onButtonKeyDown(e)))
+      this.ui.popup.addEventListener('keydown', e => (this.onMarkupKeyDown(e)))
     } else {
-      this.openPopup()
+      this.ui.button.addEventListener('keydown', e => (this.onMarkupKeyDown(e)))
     }
+    document.addEventListener('click', this.handlers.closePopupHandler)
+    window.addEventListener('resize', this.handlers.containerPositionHandler)
+    window.addEventListener('scroll', this.handlers.containerPositionHandler)
+    if (this.label) this.label.addEventListener('click', this.handlers.labelClickHandler)
+    if (this.element.form) this.element.form.addEventListener('reset', this.handlers.resetFormHandler)
+    onDomRemove(this.ui.element, this.destroy.bind(this))
   }
-}
 
-PickMe.prototype.addEvents = function () {
-  this.markup.button.addEventListener('click', this.togglePopupHandler)
-  if (this.withSearch) this.markup.searchInput.addEventListener('input', this.searchHandler)
-  this.markup.popup.addEventListener('click', this.stopPropagationHandler)
-  if (this.withSelectAllButton) {
-    this.markup.selectAllButton.addEventListener('click', this.selectAllHandler)
-    this.markup.deselectAllButton.addEventListener('click', this.deselectAllHandler)
-  }
-  if (this.withSearch) {
-    this.markup.button.addEventListener('keydown', this.buttonKeyHandler)
-    this.markup.popup.addEventListener('keydown', this.markupKeyHandler)
-  } else {
-    this.markup.button.addEventListener('keydown', this.markupKeyHandler)
-  }
-  document.addEventListener('click', this.closePopupHandler)
-  window.addEventListener('resize', this.containerPositionHandler)
-  window.addEventListener('scroll', this.containerPositionHandler)
-  if (this.label) this.label.addEventListener('click', this.labelClickHandler)
-  if (this.element.form) this.element.form.addEventListener('reset', this.resetFormHandler)
-  let self = this
-  onDomRemove(this.markup.element, function () {
-    self.destroy()
-  })
-}
+  setupValues () {
+    if (!this.selectedValues) {
+      this.selectedValues = {}
+      this.dropdownValues = {}
+      this.selectedValuesOrder = {}
+      Array.apply(null, this.element.options).forEach(option => {
+        let optgrouplabel
+        if (option.parentNode.nodeName === 'OPTGROUP') {
+          optgrouplabel = option.parentNode.label
+        } else {
+          optgrouplabel = ''
+        }
+        if (!this.selectedValuesOrder[optgrouplabel]) this.selectedValuesOrder[optgrouplabel] = []
 
-PickMe.prototype.removeEvents = function () {
-  let self = this
-  if (this.markup) { // sometimes markup is already removed from the DOM
-    this.markup.button.removeEventListener('click', this.togglePopupHandler)
-    if (this.withSearch) this.markup.searchInput.removeEventListener('input', this.searchHandler)
-    Array.apply(null, this.markup.resultsWrapper.querySelectorAll('li')).forEach(function (li) {
-      li.removeEventListener('click', self.selectHandler)
-    })
-    this.markup.popup.removeEventListener('click', this.stopPropagationHandler)
-    this.markup.button.removeEventListener('keydown', this.buttonKeyHandler)
-    this.markup.popup.removeEventListener('keydown', this.markupKeyHandler)
-  }
-  document.removeEventListener('click', this.closePopupHandler)
-  window.removeEventListener('resize', this.containerPositionHandler)
-  window.removeEventListener('scroll', this.containerPositionHandler)
-  if (this.label) this.label.removeEventListener('click', this.labelClickHandler)
-  if (this.element.form) this.element.form.removeEventListener('reset', this.resetFormHandler)
-}
+        this.selectedValuesOrder[optgrouplabel].push(option.value)
+        if (!this.dropdownValues[optgrouplabel]) this.dropdownValues[optgrouplabel] = {}
 
-PickMe.prototype.setupValues = function () {
-  if (!this.selectedValues) {
-    this.selectedValues = {}
-    this.dropdownValues = {}
-    this.selectedValuesOrder = {}
-    let self = this
-    Array.apply(null, this.element.options).forEach(function (option) {
-      let optgrouplabel
-      if (option.parentNode.nodeName === 'OPTGROUP') {
-        optgrouplabel = option.parentNode.label
-      } else {
-        optgrouplabel = ''
-      }
-      if (!self.selectedValuesOrder[optgrouplabel]) self.selectedValuesOrder[optgrouplabel] = []
+        const newValue = {
+          text: option.innerHTML,
+          subtext: option.getAttribute('data-subtext'),
+          img: JSON.parse(option.getAttribute('data-img'))
+        }
+        this.dropdownValues[optgrouplabel][option.value] = newValue
 
-      self.selectedValuesOrder[optgrouplabel].push(option.value)
-      if (!self.dropdownValues[optgrouplabel]) self.dropdownValues[optgrouplabel] = {}
-
-      const newValue = {
-        text: option.innerHTML,
-        subtext: option.getAttribute('data-subtext'),
-        img: JSON.parse(option.getAttribute('data-img'))
-      }
-      self.dropdownValues[optgrouplabel][option.value] = newValue
-
-      if (option.selected || (option.hasAttribute('selected') && ['', 'true', true, 'selected'].includes(option.getAttribute('selected')))) {
-        self.selectedValues[option.value] = newValue
-        option.setAttribute('data-selected', true)
-      }
-    })
-  }
-}
-
-PickMe.prototype.togglePopup = function () {
-  this.open ? this.closePopupAndFocus() : this.openPopup()
-}
-
-PickMe.prototype.search = function () {
-  if (this.searchInputTimer) clearTimeout(this.searchInputTimer)
-  if (this.markup.hovered) this.markup.hovered.classList.remove('sp__results-list__item--hover')
-  this.markup.hovered = false
-
-  let inputValue = this.markup.searchInput.value
-  if (this.shouldSearch(inputValue)) {
-    let self = this
-    self.previousSearchValue = inputValue
-    const lowerInputValue = inputValue.toLowerCase()
-    this.searchInputTimer = setTimeout(function () {
-      let filteredValues = {}
-      Object.entries(self.dropdownValues).forEach(([optGroupLabel, options]) => {
-        Object.entries(options).forEach(([value, optionData]) => {
-          if (optionData.text.toLowerCase().includes(lowerInputValue)) {
-            if (!filteredValues[optGroupLabel]) filteredValues[optGroupLabel] = {}
-            filteredValues[optGroupLabel][value] = optionData
-          }
-        })
+        if (option.selected || option.hasAttribute('selected')) {
+          this.selectedValues[option.value] = newValue
+          option.setAttribute('data-selected', true)
+        }
       })
-      self.markup.resultsWrapper.innerHTML = ''
-      self.markup.appendEntries(filteredValues, Object.keys(self.selectedValues), self.selectedValuesOrder)
-      self.addEventListenersForPage()
-    }, self.searchTimeout)
-  }
-}
-
-PickMe.prototype.openPopup = function () {
-  this.markup.popup.classList.add('sp__popup--visible')
-  this.open = true
-  this.markup.open = true
-  this.markup.positionPopup()
-  if (this.withSearch) this.markup.searchInput.focus()
-}
-
-PickMe.prototype.closePopupAndFocus = function (e) {
-  this.closePopup(e)
-  this.markup.button.focus()
-}
-
-PickMe.prototype.closePopup = function (e) {
-  let clickedButton = e && (e.target === this.markup.button || e.target.parentElement === this.markup.button)
-  if (this.open && !clickedButton) {
-    this.markup.popup.classList.remove('sp__popup--visible')
-    this.open = false
-    this.markup.open = false
-    if (this.markup.hovered) this.markup.hovered.classList.remove('sp__results-list__item--hover')
-    this.markup.hovered = false
-    if (this.withSearch) this.resetSearch()
-  }
-}
-
-PickMe.prototype.selectAllEntries = function () {
-  const keysOfSelectedValues = Object.keys(this.selectedValues)
-  this.selectedValues = Object.assign({}, ...Object.values(this.dropdownValues))
-  Object.keys(this.selectedValues).forEach(value => {
-    if (!keysOfSelectedValues.includes(value)) {
-      this.markup.selectItem(value)
     }
-  })
-  this.markup.setButtonText(this.selectedValues)
-  this.triggerChange()
-}
-
-PickMe.prototype.deselectAllEntries = function () {
-  Object.keys(this.selectedValues).forEach(value => {
-    this.markup.deselectItem(value)
-  })
-  this.selectedValues = {}
-  this.markup.setButtonText(this.selectedValues)
-  this.triggerChange()
-}
-
-PickMe.prototype.addEventListenersForPage = function () {
-  let self = this
-  Array.apply(null, self.markup.resultsWrapper.querySelectorAll('li.sp__results-list__item[data-value]:not(.sp__results-list__item--disabled)')).forEach(function (li) {
-    li.addEventListener('click', self.selectHandler)
-  })
-}
-
-PickMe.prototype.shouldSearch = function (newValue) {
-  return this.previousSearchValue !== newValue
-}
-
-PickMe.prototype.select = function (e) {
-  const li = e.currentTarget
-  const value = li.getAttribute('data-value')
-  const optionData = {
-    text: li.getAttribute('data-text'),
-    subtext: li.getAttribute('data-subtext'),
-    disabled: li.getAttribute('data-disabled'),
-    img: li.getAttribute('data-img') ? JSON.parse(li.getAttribute('data-img')) : null
   }
 
-  if (this.multiple) {
-    this.toggleSelectedValue(value, optionData)
-  } else {
-    this.setSelectedValue(value, optionData)
+  buildMarkup () {
+    return new PickMeMarkup({
+      element: this.element,
+      multiple: this.settings.base.multiple,
+      disabled: false,
+      searchPlaceholder: this.settings.search.input.placeholderText,
+      searchInputClasses: this.settings.search.input.classList,
+      buttonClasses: this.settings.button.classList,
+      buttonDisabledClasses: [],
+      emptySelectButtonText: this.settings.button.placeholderText,
+      buttonIconClasses: [],
+      checkedIconClasses: [],
+      listClasses: this.settings.list.classList,
+      selectedTextFormat: this.settings.button.selectedText.format,
+      selectedTextVariable: this.settings.button.selectedText.variable,
+      selectedText: this.settings.button.selectedText.text,
+      noResultsText: this.settings.search.noResultsText,
+      container: this.settings.base.popup.containerSelector,
+      withSearch: this.settings.search.enabled,
+      dropdownAlignRight: this.settings.base.popup.alignRight,
+      popupWidth: this.settings.base.popup.width,
+      withSelectAllButton: this.settings.selectAll.enabled,
+      selectAllButtonClasses: this.settings.selectAll.classList,
+      selectAllButtonGroupClasses: this.settings.selectAll.wrapperClassList,
+      selectAllButtonText: this.settings.selectAll.selectText,
+      deselectAllButtonText: this.settings.selectAll.deselectText
+    })
   }
 
-  this.markup.setButtonText(this.selectedValues)
-  if (!this.multiple) this.closePopupAndFocus()
-  this.triggerChange()
-}
+  resetAndReload () {
+    this.logDebugMessage('form reset! reloading pick-me')
+    this.reload()
+  }
 
-PickMe.prototype.triggerChange = function () {
-  let event = new CustomEvent('Event', { detail: this.selectedValues })
-  event.initEvent('change', true, true)
-  this.element.dispatchEvent(event)
-  this.logDebugMessage('changeTriggered')
-}
+  onButtonKeyDown (e) {
+    if (e.keyCode === 13) { // enter
+      e.preventDefault()
+      this.togglePopup(e)
+    }
+  }
 
-PickMe.prototype.toggleSelectedValue = function (value, optionData) {
-  if (this.selectedValues[value]) {
-    this.removeSelectedValue(value, optionData)
-  } else {
+  onMarkupKeyDown (e) {
+    if (e.keyCode === 9 || e.keyCode === 27) { // tab || esc
+      this.closePopupAndFocus()
+    } else if (e.keyCode === 40) { // arrow down
+      e.preventDefault()
+      this.ui.focusNextEntry()
+    } else if (e.keyCode === 38) { // arrow up
+      e.preventDefault()
+      this.ui.focusPreviousEntry()
+    } else if (e.keyCode === 13) { // enter
+      e.preventDefault()
+      if (this.open) {
+        const li = this.ui.getHovered()
+        if (li) this.select({ currentTarget: li })
+      } else {
+        this.openPopup()
+      }
+    }
+  }
+
+  removeEvents () {
+    document.removeEventListener('click', this.handlers.closePopupHandler)
+    window.removeEventListener('resize', this.handlers.containerPositionHandler)
+    window.removeEventListener('scroll', this.handlers.containerPositionHandler)
+    if (this.label) this.label.removeEventListener('click', this.handlers.labelClickHandler)
+    if (this.element.form) this.element.form.removeEventListener('reset', this.handlers.resetFormHandler)
+  }
+
+  togglePopup () {
+    this.open ? this.closePopupAndFocus() : this.openPopup()
+  }
+
+  search () {
+    if (this.searchInputTimer) clearTimeout(this.searchInputTimer)
+    if (this.ui.hovered) this.ui.hovered.classList.remove('pm__results-list__item--hover')
+    this.ui.hovered = false
+    let inputValue = this.ui.searchInput.value
+    if (this.shouldSearch(inputValue)) {
+      this.previousSearchValue = inputValue
+      const lowerInputValue = inputValue.toLowerCase()
+      this.searchInputTimer = setTimeout(() => {
+        let filteredValues = {}
+        Object.entries(this.dropdownValues).forEach(([optGroupLabel, options]) => {
+          Object.entries(options).forEach(([value, optionData]) => {
+            if (optionData.text.toLowerCase().includes(lowerInputValue)) {
+              if (!filteredValues[optGroupLabel]) filteredValues[optGroupLabel] = {}
+              filteredValues[optGroupLabel][value] = optionData
+            }
+          })
+        })
+        this.ui.resultsWrapper.innerHTML = ''
+        this.ui.appendEntries(filteredValues, Object.keys(this.selectedValues), this.selectedValuesOrder)
+        this.addEventListenersForPage()
+      }, this.settings.search.debounce)
+    }
+  }
+
+  openPopup () {
+    this.ui.popup.classList.add('pm__popup--visible')
+    this.open = true
+    this.ui.open = true
+    this.ui.positionPopup()
+    if (this.settings.search.enabled) this.ui.searchInput.focus()
+  }
+
+  closePopup (e) {
+    let clickedButton = e && (e.target === this.ui.button || e.target.parentElement === this.ui.button)
+    if (this.open && !clickedButton) {
+      this.ui.popup.classList.remove('pm__popup--visible')
+      this.open = false
+      this.ui.open = false
+      if (this.ui.hovered) this.ui.hovered.classList.remove('pm__results-list__item--hover')
+      this.ui.hovered = false
+      if (this.settings.search.enabled) this.resetSearch()
+    }
+  }
+
+  closePopupAndFocus (e) {
+    this.closePopup(e)
+    this.ui.button.focus()
+  }
+
+  selectAllEntries () {
+    const keysOfSelectedValues = Object.keys(this.selectedValues)
+    this.selectedValues = Object.assign({}, ...Object.values(this.dropdownValues))
+    Object.keys(this.selectedValues).forEach(value => {
+      if (!keysOfSelectedValues.includes(value)) {
+        this.ui.selectItem(value)
+      }
+    })
+    this.ui.setButtonText(this.selectedValues)
+    this.triggerChange()
+  }
+
+  deselectAllEntries () {
+    Object.keys(this.selectedValues).forEach(value => {
+      this.ui.deselectItem(value)
+    })
+    this.selectedValues = {}
+    this.ui.setButtonText(this.selectedValues)
+    this.triggerChange()
+  }
+
+  addEventListenersForPage () {
+    Array.apply(null, this.ui.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]:not(.pm__results-list__item--disabled)')).forEach(li => {
+      li.addEventListener('click', this.handlers.selectHandler)
+    })
+  }
+
+  shouldSearch (newValue) {
+    return this.previousSearchValue !== newValue
+  }
+
+  select (e) {
+    const li = e.currentTarget
+    const value = li.getAttribute('data-value')
+    const optionData = {
+      text: li.getAttribute('data-text'),
+      subtext: li.getAttribute('data-subtext'),
+      disabled: li.getAttribute('data-disabled'),
+      img: li.getAttribute('data-img') ? JSON.parse(li.getAttribute('data-img')) : null
+    }
+
+    if (this.settings.base.multiple) {
+      this.toggleSelectedValue(value, optionData)
+    } else {
+      this.setSelectedValue(value, optionData)
+    }
+
+    this.ui.setButtonText(this.selectedValues)
+    if (!this.settings.base.multiple) this.closePopupAndFocus()
+    this.triggerChange()
+  }
+
+  triggerChange () {
+    let event = new CustomEvent('Event', { detail: this.selectedValues })
+    event.initEvent('change', true, true)
+    this.element.dispatchEvent(event)
+    this.logDebugMessage('changeTriggered')
+  }
+
+  toggleSelectedValue (value, optionData) {
+    if (this.selectedValues[value]) {
+      this.removeSelectedValue(value, optionData)
+    } else {
+      this.addSelectedValue(value, optionData)
+    }
+  }
+
+  addSelectedValue (value, optionData) {
+    this.selectedValues[value] = optionData
+
+    this.ui.selectItem(value)
+    if (this.settings.search.enabled) this.ui.searchInput.focus()
+    this.logDebugMessage('Value added:', optionData)
+  }
+
+
+  removeSelectedValue (value, optionData) {
+    delete this.selectedValues[value]
+    this.ui.deselectItem(value)
+    this.logDebugMessage('Value removed:', optionData)
+  }
+
+  setSelectedValue (value, optionData) {
+    if (Object.keys(this.selectedValues).length > 0) {
+      this.removeSelectedValue(Object.keys(this.selectedValues)[0])
+      const selected = this.ui.getSelected()
+      if (selected) selected.classList.remove('pm__results-list__item--selected')
+    }
     this.addSelectedValue(value, optionData)
+    this.logDebugMessage('Value set:', optionData)
   }
-}
 
-PickMe.prototype.addSelectedValue = function (value, optionData) {
-  this.selectedValues[value] = optionData
-
-  this.markup.selectItem(value)
-  if (this.withSearch) this.markup.searchInput.focus()
-  this.logDebugMessage('Value added:', optionData)
-}
-
-PickMe.prototype.removeSelectedValue = function (value, optionData) {
-  delete this.selectedValues[value]
-  this.markup.deselectItem(value)
-  this.logDebugMessage('Value removed:', optionData)
-}
-
-PickMe.prototype.setSelectedValue = function (value, optionData) {
-  if (Object.keys(this.selectedValues).length > 0) {
-    this.removeSelectedValue(Object.keys(this.selectedValues)[0])
-    const selected = this.markup.getSelected()
-    if (selected) selected.classList.remove('sp__results-list__item--selected')
-  }
-  this.addSelectedValue(value, optionData)
-  this.logDebugMessage('Value set:', optionData)
-}
-
-PickMe.prototype.logDebugMessage = function (msg, someObject) {
-  if (this.debug) {
+  logDebugMessage (msg, someObject) {
+    if (!this.debug) return
     if (msg) console.log('PickMe#' + this.id, msg)
     if (someObject) console.log(someObject)
-    if (typeof this.customDebugHandler === 'function') this.customDebugHandler(this)
   }
-}
 
-PickMe.prototype.register = function () {
-  PickMe.elements[this.id] = this
-}
-
-PickMe.prototype.isInitialized = function () {
-  if (typeof window.PickMe === 'undefined') {
-    return false
-  } else {
-    return !!PickMe.elements[this.id]
+  resetSearch () {
+    this.ui.searchInput.value = ''
+    this.search()
   }
-}
 
-PickMe.prototype.resetSearch = function () {
-  this.markup.searchInput.value = ''
-  this.search()
-}
+  destroy () {
+    this.removeEvents()
+    this.ui.destroy()
+    this.selectedValues = null
+    this.dropdownValues = null
+    delete this.ui
+    this.element.classList.remove('visually-hidden')
+  }
 
-PickMe.prototype.destroy = function () {
-  if (!this.disabled) this.removeEvents()
-  this.markup.destroy()
-  this.selectedValues = null
-  this.dropdownValues = null
-  delete this.markup
-  delete PickMe.elements[this.id]
-  this.element.classList.remove('visually-hidden')
-}
+  reload () {
+    Object.keys(this.selectedValues).forEach(value => {
+      this.ui.deselectItem(value)
+    })
+    this.destroy()
 
-PickMe.prototype.reload = function () {
-  Object.keys(this.selectedValues).forEach(value => {
-    this.markup.deselectItem(value)
-  })
-  this.destroy()
-  this.disabled = !!this.element.disabled
+    this.initialSelectedValues.forEach(value => {
+      const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
+      option.selected = true
+    })
 
-  this.originallySelectedValues.forEach(value => {
-    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
-    option.selected = true
-  })
-
-  this.initialize()
+    this.initialize()
+  }
 }
 
 /**

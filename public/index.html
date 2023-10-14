@@ -12,10 +12,13 @@
           padding: 0;
       }
 
+      html, body {
+          height: 100%
+      }
+
       body {
           font-family: sans-serif;
           margin: 10px auto;
-          border-bottom: 2px solid grey;
       }
 
       .container {
@@ -38,8 +41,7 @@
       }
 
       h2 {
-          margin-top: 14px;
-          margin-bottom: 14px;
+          margin-bottom: 20px;
       }
 
       .w-50 {
@@ -142,7 +144,7 @@
   <div class="row" style="margin-bottom: 400px;">
     <div class="col-sm-4 col-sm-offset-2">
       <form>
-        <button type="button" id="reset-form">Reset</button>
+        <label for="picker">Select</label>
         <select id="picker" name="picker" title="Select something"> </select>
       </form>
     </div>
@@ -151,6 +153,7 @@
 
 <script src="./dist/main.js"></script>
 <script>
+  let pickme
   const selectId = 'picker'
 
   const userData = {
@@ -173,11 +176,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     setupSelect(userData, true)
     reload()
-  })
-  document.getElementById('reset-form').addEventListener('click', function (e) {
-    e.target.form.reset()
-    debugHandler(window.PickMe.elements[selectId])
-    console.log(document.getElementById(selectId).value)
   })
 
   Array.apply(null, document.getElementById('settings').querySelectorAll('input,select')).forEach(function (input) {
@@ -214,26 +212,34 @@
   }
 
   function reload () {
-    new PickMe({
+    pickme = new PickMe({
       id: selectId,
-      selectedTextFormat: document.getElementById('set_selected_text_format').value,
-      language: document.getElementById('set_language').value,
-      dropdownAlignRight: document.getElementById('set_dropdown_align_right').checked,
-      disabled: document.getElementById('set_disabled').checked,
-      withSearch: document.getElementById('search_option').checked,
-      multiple: document.getElementById('multiple').checked,
-      withSelectAllButton: false,
-      selectAllButtonClasses: ['btn', 'btn-default'],
-      selectAllButtonGroupClasses: ['btn-group'],
-      customDebugHandler: debugHandler,
+      base: {
+        multiple: document.getElementById('multiple').checked,
+        popup: {
+          alignRight: document.getElementById('set_dropdown_align_right').checked
+        }
+      },
+      button: {
+        selectedText: {
+          format: document.getElementById('set_selected_text_format').value
+        }
+      },
+      language: {
+        locale: document.getElementById('set_language').value
+      },
+      search: {
+        enabled: document.getElementById('search_option').checked
+      },
       debug: true
     })
+    debugHandler()
   }
 
-  function debugHandler (context) {
+  function debugHandler () {
     try {
-      document.getElementById('amount').innerHTML = context.markup.resultsWrapper.querySelectorAll('li').length.toString()
-      document.getElementById('value').innerHTML = Object.keys(context.selectedValues).toString()
+      document.getElementById('amount').innerHTML = pickme.ui.resultsWrapper.querySelectorAll('li').length.toString()
+      document.getElementById('value').innerHTML = Object.keys(pickme.selectedValues).toString()
     } catch (e) {
       console.log(e)
       console.warn('could not show debug')
@@ -241,6 +247,7 @@
   }
 
   document.getElementById('picker').addEventListener('change', function (e) {
+    debugHandler()
     console.log('Picker changed, new value:', e.detail)
   })
 </script>
