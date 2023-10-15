@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/pick-me.min.js",
   "scripts": {
-    "build:js": "esbuild src/pick-me.js --bundle --minify --target=es2022 --sourcemap --format=esm --outfile=dist/pick-me.min.js",
+    "build:js": "esbuild src/pick-me.ts --bundle --minify --target=es2022 --sourcemap --format=esm --outfile=dist/pick-me.min.js",
     "build:css": "esbuild public/style.css --bundle --minify --outfile=dist/style.min.css",
     "build": "rm -rf dist && yarn build:js && yarn build:css",
     "dev": "esbuild public/main.js --bundle --target=es2022 --sourcemap --outdir=public/dist --servedir=public",
@@ -16,6 +16,7 @@
     "@typescript-eslint/parser": "^6.7.5",
     "esbuild": "^0.19.4",
     "eslint": "^8.51.0",
+    "eslint-plugin-autofix": "^1.1.0",
     "typescript": "^5.2.2"
   }
 }

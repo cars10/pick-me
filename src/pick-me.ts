@@ -1,16 +1,37 @@
 import PickMeUi from './pick-me/ui'
 import PickMeSettings from './pick-me/settings'
 
+type OptionData = {
+  text: string
+  subtext: string
+  img: string
+  searchData: string
+}
+
+type Options = {
+  all: Map<string, OptionData>
+  selected: Map<string, OptionData>
+  optgroups: Map<string, string[]>
+}
+
 export default class PickMe {
+  id: string
+  element: HTMLSelectElement
+  label: HTMLLabelElement
+  settings: PickMeSettings
+  initialSelectedValues: string[]
+  open: boolean
+  handlers: Record<string, (e?: Event) => void>
+  ui: PickMeUi
+  options: Options
+  searchInputTimer: number
+
   constructor (options) {
     this.id = options.id
-    this.element = document.getElementById(this.id)
+    this.element = document.getElementById(this.id) as HTMLSelectElement
     this.label = document.querySelector('label[for="' + this.id + '"]')
 
     this.settings = new PickMeSettings(options)
-
-    this.debug = options.debug || false
-
     this.initialSelectedValues = []
     this.open = false
     this.handlers = {}
@@ -34,23 +55,23 @@ export default class PickMe {
   }
 
   setupInitialValues () {
-    const options = this.element.querySelectorAll('option[selected]')
+    const options = this.element.querySelectorAll('option[selected]') as NodeListOf<HTMLOptionElement>
     options.forEach(option => (this.initialSelectedValues.push(option.value)))
   }
 
   addHandlers () {
-    this.handlers.closePopupHandler = e => (this.closePopup(e))
-    this.handlers.selectHandler = e => (this.select(e))
+    this.handlers.closePopupHandler = (e: Event) => (this.closePopup(e))
+    this.handlers.selectHandler = (e: Event) => (this.select(e))
     this.handlers.containerPositionHandler = () => (this.ui.positionPopup())
     this.handlers.resetFormHandler = () => (this.resetAndReload())
-    this.handlers.labelClickHandler = e => {
+    this.handlers.labelClickHandler = (e: Event) => {
       e.preventDefault()
       this.ui.button.focus()
     }
   }
 
   addEvents () {
-    this.ui.button.addEventListener('click', () => (this.togglePopup()))
+    this.ui.button.addEventListener('click', (e: Event) => (this.togglePopup(e)))
     this.ui.popup.addEventListener('click', e => (e.stopPropagation()))
     if (this.settings.search.enabled) {
       this.ui.searchInput.addEventListener('input', () => (this.search()))
@@ -73,8 +94,9 @@ export default class PickMe {
       selected: new Map(), // Map<value, optionData>
       optgroups: new Map() // Map<label, value[]>
     }
-    Array.apply(null, this.element.options).forEach(option => {
-      let optgroupLabel = option.parentNode.nodeName === 'OPTGROUP' ? option.parentNode.label : ''
+    Array(...this.element.options).forEach(option => {
+      const parentNode = option.parentNode as HTMLOptGroupElement
+      const optgroupLabel = parentNode.nodeName === 'OPTGROUP' ? parentNode.label : ''
 
       if (!this.options.optgroups.has(optgroupLabel)) this.options.optgroups.set(optgroupLabel, [])
 
@@ -89,7 +111,7 @@ export default class PickMe {
 
       if (option.selected || option.hasAttribute('selected')) {
         this.options.selected.set(option.value, optionData)
-        option.setAttribute('data-selected', true)
+        option.setAttribute('data-selected', 'true')
       }
     })
   }
@@ -103,16 +125,16 @@ export default class PickMe {
     this.reload()
   }
 
-  onButtonKeyDown (e) {
+  onButtonKeyDown (e: KeyboardEvent) {
     if (e.keyCode === 13) { // enter
       e.preventDefault()
       this.togglePopup(e)
     }
   }
 
-  onMarkupKeyDown (e) {
+  onMarkupKeyDown (e: KeyboardEvent) {
     if (e.keyCode === 9 || e.keyCode === 27) { // tab || esc
-      this.closePopupAndFocus()
+      this.closePopupAndFocus(e)
     } else if (e.keyCode === 40) { // arrow down
       e.preventDefault()
       this.ui.focusNextEntry()
@@ -123,7 +145,7 @@ export default class PickMe {
       e.preventDefault()
       if (this.open) {
         const li = this.ui.getHovered()
-        if (li) this.select({ currentTarget: li })
+        if (li) this.select({ currentTarget: li } as unknown as Event)
       } else {
         this.openPopup()
       }
@@ -138,14 +160,14 @@ export default class PickMe {
     if (this.element.form) this.element.form.removeEventListener('reset', this.handlers.resetFormHandler)
   }
 
-  togglePopup () {
-    this.open ? this.closePopupAndFocus() : this.openPopup()
+  togglePopup (e: Event) {
+    this.open ? this.closePopupAndFocus(e) : this.openPopup()
   }
 
   search () {
     if (this.searchInputTimer) clearTimeout(this.searchInputTimer)
     if (this.ui.hovered) this.ui.hovered.classList.remove('pm__results-list__item--hover')
-    this.ui.hovered = false
+    this.ui.hovered = null
 
     this.searchInputTimer = setTimeout(() => {
       this.doSearch()
@@ -153,12 +175,12 @@ export default class PickMe {
   }
 
   doSearch () {
-    let inputValue = this.ui.searchInput.value
+    const inputValue = this.ui.searchInput.value
     const lowerInputValue = inputValue.toLowerCase()
 
-    let filteredValues = new Map()
-    for (let [optGroupLabel, values] of this.options.optgroups) {
-      for (let value of values) {
+    const filteredValues = new Map()
+    for (const [optGroupLabel, values] of this.options.optgroups) {
+      for (const value of values) {
         const optionData = this.options.all.get(value)
         if (optionData.searchData.includes(lowerInputValue)) {
           if (!filteredValues.get(optGroupLabel)) filteredValues.set(optGroupLabel, [])
@@ -175,36 +197,35 @@ export default class PickMe {
   openPopup () {
     this.ui.popup.classList.add('pm__popup--visible')
     this.open = true
-    this.ui.open = true
     this.ui.positionPopup()
     if (this.settings.search.enabled) this.ui.searchInput.focus()
   }
 
-  closePopup (e) {
-    let clickedButton = e && (e.target === this.ui.button || e.target.parentElement === this.ui.button)
+  closePopup (e: Event) {
+    const target = e.target as HTMLButtonElement
+    const clickedButton = e && (target === this.ui.button || target.parentElement === this.ui.button)
     if (this.open && !clickedButton) {
       this.ui.popup.classList.remove('pm__popup--visible')
       this.open = false
-      this.ui.open = false
       if (this.ui.hovered) this.ui.hovered.classList.remove('pm__results-list__item--hover')
-      this.ui.hovered = false
+      this.ui.hovered = null
       if (this.settings.search.enabled) this.resetSearch()
     }
   }
 
-  closePopupAndFocus (e) {
+  closePopupAndFocus (e: Event) {
     this.closePopup(e)
     this.ui.button.focus()
   }
 
   addEventListenersForPage () {
-    Array.apply(null, this.ui.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]:not(.pm__results-list__item--disabled)')).forEach(li => {
+    Array(...this.ui.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]:not(.pm__results-list__item--disabled)')).forEach(li => {
       li.addEventListener('click', this.handlers.selectHandler)
     })
   }
 
-  select (e) {
-    const li = e.currentTarget
+  select (e: Event) {
+    const li = e.currentTarget as HTMLLIElement
     const value = li.getAttribute('data-value')
     const optionData = this.options.all.get(value)
 
@@ -215,51 +236,45 @@ export default class PickMe {
     }
 
     this.ui.setButtonText(this.options.selected)
-    if (!this.settings.base.multiple) this.closePopupAndFocus()
+    if (!this.settings.base.multiple) this.closePopupAndFocus(e)
     this.triggerChange()
   }
 
   triggerChange () {
-    let event = new CustomEvent('Event', { detail: this.options.selected })
-    event.initEvent('change', true, true)
-    this.element.dispatchEvent(event)
-    this.logDebugMessage('changeTriggered')
+    this.element.dispatchEvent(new CustomEvent('change', { detail: this.options.selected }))
   }
 
-  toggleSelectedValue (value, optionData) {
+  toggleSelectedValue (value: string, optionData: OptionData) {
     if (this.options.selected.get(value)) {
-      this.removeSelectedValue(value, optionData)
+      this.removeSelectedValue(value)
     } else {
       this.addSelectedValue(value, optionData)
     }
   }
 
-  addSelectedValue (value, optionData) {
+  addSelectedValue (value: string, optionData: OptionData) {
     this.options.selected.set(value, optionData)
 
     this.ui.selectItem(value)
     if (this.settings.search.enabled) this.ui.searchInput.focus()
-    this.logDebugMessage('Value added:', optionData)
   }
 
-  removeSelectedValue (value, optionData) {
+  removeSelectedValue (value: string) {
     this.options.selected.delete(value)
     this.ui.deselectItem(value)
-    this.logDebugMessage('Value removed:', optionData)
   }
 
-  setSelectedValue (value, optionData) {
+  setSelectedValue (value: string, optionData: OptionData) {
     if (this.options.selected.size > 0) {
       this.removeSelectedValue(this.options.selected.entries().next().value[0])
       const selected = this.ui.getSelected()
       if (selected) selected.classList.remove('pm__results-list__item--selected')
     }
     this.addSelectedValue(value, optionData)
-    this.logDebugMessage('Value set:', optionData)
   }
 
-  logDebugMessage (msg, someObject) {
-    if (!this.debug) return
+  logDebugMessage (msg: string, someObject?: object) {
+    if (!this.settings.base.debug) return
     if (msg) console.log('PickMe#' + this.id, msg)
     if (someObject) console.log(someObject)
   }
@@ -278,13 +293,13 @@ export default class PickMe {
   }
 
   reload () {
-    for (let [value, optionData] of this.options.selected) {
+    for (const value of this.options.selected.keys()) {
       this.ui.deselectItem(value)
     }
     this.destroy()
 
     this.initialSelectedValues.forEach(value => {
-      const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
+      const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]') as HTMLOptionElement
       option.selected = true
     })
 
@@ -296,9 +311,9 @@ export default class PickMe {
  * Helpers
  */
 
-function onDomRemove (element, onDetachCallback) {
+function onDomRemove (element: HTMLElement, onDetachCallback: () => void) {
   const observer = new MutationObserver(function () {
-    function isDetached (el) {
+    function isDetached (el: ParentNode) {
       if (el.parentNode === document) {
         return false
       } else if (el.parentNode === null) {

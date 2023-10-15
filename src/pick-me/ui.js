@@ -3,7 +3,6 @@ export default class PickMeUi {
     this.element = options.element
     this.settings = options.settings
     this.disabled = false
-    this.open = false
 
     this.wrapper = this.buildWrapper()
     this.button = this.buildButton()
@@ -41,7 +40,6 @@ export default class PickMeUi {
   }
 
   positionPopup () {
-    if (!this.open) return
     if (this.settings.base.popup.containerSelector) {
       const pos = this.wrapper.getBoundingClientRect()
       const offset = getOffsetFromBoundingBox(pos)

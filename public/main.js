@@ -1,3 +1,3 @@
-import PickMe from '../src/pick-me.js'
+import PickMe from '../src/pick-me.ts'
 
 window.PickMe = PickMe
