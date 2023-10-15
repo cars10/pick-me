@@ -95,27 +95,7 @@ export default class PickMe {
   }
 
   buildMarkup () {
-    return new PickMeMarkup({
-      element: this.element,
-      multiple: this.settings.base.multiple,
-      disabled: false,
-      searchPlaceholder: this.settings.search.input.placeholderText,
-      searchInputClasses: this.settings.search.input.classList,
-      buttonClasses: this.settings.button.classList,
-      buttonDisabledClasses: [],
-      emptySelectButtonText: this.settings.button.placeholderText,
-      buttonIconClasses: [],
-      checkedIconClasses: [],
-      listClasses: this.settings.list.classList,
-      selectedTextFormat: this.settings.button.selectedText.format,
-      selectedTextVariable: this.settings.button.selectedText.variable,
-      selectedText: this.settings.button.selectedText.text,
-      noResultsText: this.settings.search.noResultsText,
-      container: this.settings.base.popup.containerSelector,
-      withSearch: this.settings.search.enabled,
-      dropdownAlignRight: this.settings.base.popup.alignRight,
-      popupWidth: this.settings.base.popup.width
-    })
+    return new PickMeMarkup({ element: this.element, settings: this.settings })
   }
 
   resetAndReload () {
@@ -294,7 +274,7 @@ export default class PickMe {
     this.ui.destroy()
     this.options = null
     delete this.ui
-    this.element.classList.remove('visually-hidden')
+    this.element.classList.remove('pm__hidden')
   }
 
   reload () {

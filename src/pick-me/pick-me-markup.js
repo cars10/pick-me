@@ -1,331 +1,314 @@
-export default function PickMeMarkup (options) {
-  this.element = options.element
-  this.multiple = options.multiple || false
-  this.disabled = options.disabled || false
-  this.valueProp = options.valueProp
-  this.searchPlaceholder = options.searchPlaceholder
-  this.searchInputClasses = options.searchInputClasses
-  this.buttonClasses = options.buttonClasses
-  this.buttonDisabledClasses = options.buttonDisabledClasses
-  this.emptySelectButtonText = options.emptySelectButtonText
-  this.buttonIconClasses = options.buttonIconClasses
-  this.checkedIconClasses = options.checkedIconClasses
-  this.listClasses = options.listClasses
-  this.selectedTextFormat = options.selectedTextFormat
-  this.selectedTextVariable = options.selectedTextVariable
-  this.selectedText = options.selectedText
-  this.noResultsText = options.noResultsText
-  this.container = options.container
-  this.withSearch = options.withSearch
-  this.dropdownAlignRight = options.dropdownAlignRight
-  this.popupWidth = options.popupWidth
-  this.open = false
+export default class PickMeMarkup {
+  constructor (options) {
+    this.element = options.element
+    this.settings = options.settings
+    this.disabled = false
+    this.open = false
 
-  this.wrapper = this.buildWrapper()
-  this.button = this.buildButton()
-  if (!this.disabled) this.popup = this.buildPopup()
+    this.wrapper = this.buildWrapper()
+    this.button = this.buildButton()
+    if (!this.disabled) this.popup = this.buildPopup()
 
-  this.hideOriginalSelect()
-  this.assemble()
-}
+    this.hideOriginalSelect()
+    this.assemble()
+  }
 
-PickMeMarkup.prototype.hideOriginalSelect = function () {
-  this.element.classList.add('visually-hidden')
-  this.element.setAttribute('tabindex', '-1')
-}
+  hideOriginalSelect () {
+    this.element.classList.add('pm__hidden')
+    this.element.setAttribute('tabindex', '-1')
+  }
 
-PickMeMarkup.prototype.showOriginalSelect = function () {
-  this.element.classList.remove('visuallyhidden')
-}
+  showOriginalSelect () {
+    this.element.classList.remove('pm__hidden')
+    this.element.removeAttribute('tabindex')
+  }
 
-PickMeMarkup.prototype.assemble = function () {
-  this.wrapper.appendChild(this.button)
-  if (!this.disabled) {
-    if (this.container) {
-      const container = document.querySelector(this.container)
-      if (container) {
-        container.appendChild(this.popup)
-        this.popup.style.position = 'absolute'
-        this.popup.style.top = '0'
+  assemble () {
+    this.wrapper.appendChild(this.button)
+    if (!this.disabled) {
+      if (this.settings.base.popup.containerSelector) {
+        const container = document.querySelector(this.settings.base.popup.containerSelector)
+        if (container) {
+          container.appendChild(this.popup)
+          this.popup.style.position = 'absolute'
+          this.popup.style.top = '0'
+        }
+      } else {
+        this.wrapper.appendChild(this.popup)
       }
+    }
+    this.element.parentNode.insertBefore(this.wrapper, this.element)
+  }
+
+  positionPopup () {
+    if (!this.open) return
+    if (this.settings.base.popup.containerSelector) {
+      const pos = this.wrapper.getBoundingClientRect()
+      const offset = getOffsetFromBoundingBox(pos)
+      const top = offset.top + this.wrapper.offsetHeight
+
+      if (this.shouldDropUp()) {
+        this.popup.style.top = (top - this.popup.offsetHeight - this.button.offsetHeight - parseInt(window.getComputedStyle(this.popup).marginTop)).toString() + 'px'
+      } else {
+        this.popup.style.top = top.toString() + 'px'
+      }
+      if (this.settings.base.popup.alignRight) {
+        const right = window.innerWidth - pos.left - this.wrapper.offsetWidth
+        this.popup.style.right = right + 'px'
+      } else {
+        this.popup.style.left = offset.left.toString() + 'px'
+      }
+      this.popup.style.minWidth = this.wrapper.offsetWidth + 'px'
+      this.popup.style.width = this.settings.base.popup.width
+      this.popup.style.position = 'absolute'
     } else {
-      this.wrapper.appendChild(this.popup)
+      if (this.shouldDropUp()) {
+        this.popup.style.top = 'auto'
+        this.popup.style.bottom = (this.button.offsetHeight + parseInt(window.getComputedStyle(this.popup).marginTop)).toString() + 'px'
+      } else {
+        this.popup.style.top = '100%'
+        this.popup.style.bottom = 'auto'
+      }
     }
   }
-  this.element.parentNode.insertBefore(this.wrapper, this.element)
-}
 
-PickMeMarkup.prototype.positionPopup = function () {
-  if (!this.open) return
-  if (this.container) {
-    const pos = this.wrapper.getBoundingClientRect()
+  shouldDropUp () {
+    const pos = this.button.getBoundingClientRect()
     const offset = getOffsetFromBoundingBox(pos)
-    const top = offset.top + this.wrapper.offsetHeight
-
-    if (this.shouldDropUp()) {
-      this.popup.style.top = (top - this.popup.offsetHeight - this.button.offsetHeight - parseInt(window.getComputedStyle(this.popup).marginTop)).toString() + 'px'
-    } else {
-      this.popup.style.top = top.toString() + 'px'
-    }
-    if (this.dropdownAlignRight) {
-      const right = window.innerWidth - pos.left - this.wrapper.offsetWidth
-      this.popup.style.right = right + 'px'
-    } else {
-      this.popup.style.left = offset.left.toString() + 'px'
-    }
-    this.popup.style.minWidth = this.wrapper.offsetWidth + 'px'
-    this.popup.style.width = this.popupWidth
-    this.popup.style.position = 'absolute'
-  } else {
-    if (this.shouldDropUp()) {
-      this.popup.style.top = 'auto'
-      this.popup.style.bottom = (this.button.offsetHeight + parseInt(window.getComputedStyle(this.popup).marginTop)).toString() + 'px'
-    } else {
-      this.popup.style.top = '100%'
-      this.popup.style.bottom = 'auto'
-    }
+    const selectOffsetTop = offset.top - document.documentElement.scrollTop
+    const selectOffsetBot = window.innerHeight - selectOffsetTop - this.button.offsetHeight
+    return selectOffsetTop > selectOffsetBot && selectOffsetBot < this.popup.offsetHeight
   }
-}
 
-PickMeMarkup.prototype.shouldDropUp = function () {
-  const pos = this.button.getBoundingClientRect()
-  const offset = getOffsetFromBoundingBox(pos)
-  const selectOffsetTop = offset.top - document.documentElement.scrollTop
-  const selectOffsetBot = window.innerHeight - selectOffsetTop - this.button.offsetHeight
-  return selectOffsetTop > selectOffsetBot && selectOffsetBot < this.popup.offsetHeight
-}
+  buildWrapper () {
+    const wrapper = document.createElement('div')
+    wrapper.classList.add('pick-me')
+    if (this.settings.base.multiple) wrapper.classList.add('pick-me--multiple')
+    return wrapper
+  }
 
-PickMeMarkup.prototype.buildWrapper = function () {
-  const wrapper = document.createElement('div')
-  wrapper.classList.add('pick-me')
-  if (this.multiple) wrapper.classList.add('pick-me--multiple')
-  return wrapper
-}
-
-PickMeMarkup.prototype.buildButton = function () {
-  const button = document.createElement('button')
-  button.setAttribute('type', 'button')
-  button.classList.add('pm__button')
-  this.buttonClasses.forEach(function (buttonClass) {
-    button.classList.add(buttonClass)
-  })
-  if (this.disabled) {
-    button.disabled = true
-    this.buttonDisabledClasses.forEach(function (buttonDisabledClass) {
-      button.classList.add(buttonDisabledClass)
+  buildButton () {
+    const button = document.createElement('button')
+    button.setAttribute('type', 'button')
+    button.classList.add('pm__button')
+    this.settings.button.classList.forEach(buttonClass => {
+      button.classList.add(buttonClass)
     })
+    if (this.disabled) {
+      button.disabled = true
+      this.settings.button.disabledClassList.forEach(buttonDisabledClass => {
+        button.classList.add(buttonDisabledClass)
+      })
+    }
+
+    this.buttonText = document.createElement('span')
+    this.buttonText.classList.add('pm__button-text')
+
+    if (this.settings.button.iconHtml && this.settings.button.iconHtml.length > 0) {
+      button.appendChild(this.buttonText)
+      button.insertAdjacentHTML('beforeend', this.settings.button.iconHtml)
+    } else {
+      button.appendChild(this.buttonText)
+    }
+
+    return button
   }
 
-  this.buttonText = document.createElement('span')
-  this.buttonText.classList.add('pm__button-text')
 
-  if (this.buttonIconClasses && this.buttonIconClasses.length > 0) {
-    let buttonIcon = document.createElement('i')
-    this.buttonIconClasses.forEach(function (buttonIconClass) {
-      buttonIcon.classList.add(buttonIconClass)
+  buildPopup () {
+    const popup = document.createElement('div')
+    popup.classList.add('pm__popup')
+    if (this.settings.base.popup.alignRight) popup.classList.add('pm__popup--right')
+
+    if (this.settings.search.enabled) popup.appendChild(this.buildSearchInput())
+    popup.appendChild(this.buildResultsScrollWrapper())
+
+    return popup
+  }
+
+  buildSearchInput () {
+    const wrapper = document.createElement('div')
+    wrapper.classList.add('pm__search-input__wrapper')
+    this.searchInput = document.createElement('input')
+    this.searchInput.type = 'search'
+    this.searchInput.setAttribute('placeholder', this.settings.search.input.placeholderText)
+    this.searchInput.classList.add('pm__search-input')
+
+    this.settings.search.input.classList.forEach(searchInputClass => {
+      this.searchInput.classList.add(searchInputClass)
     })
-    button.appendChild(this.buttonText)
-    button.appendChild(buttonIcon)
-  } else {
-    button.appendChild(this.buttonText)
+
+    wrapper.appendChild(this.searchInput)
+    return wrapper
   }
 
-  return button
-}
+  buildResultsScrollWrapper () {
+    this.resultsScrollWrapper = document.createElement('div')
+    this.resultsScrollWrapper.classList.add('pm__results-scroll-wrapper')
+    this.resultsWrapper = document.createElement('div')
+    this.resultsWrapper.classList.add('pm__results')
+    this.resultsWrapper.setAttribute('aria-role', 'list')
+    this.resultsScrollWrapper.appendChild(this.resultsWrapper)
+    return this.resultsScrollWrapper
+  }
 
-PickMeMarkup.prototype.buildPopup = function () {
-  const popup = document.createElement('div')
-  popup.classList.add('pm__popup')
-  if (this.dropdownAlignRight) popup.classList.add('pm__popup--right')
-
-  if (this.withSearch) popup.appendChild(this.buildSearchInput())
-  popup.appendChild(this.buildResultsScrollWrapper())
-
-  return popup
-}
-
-PickMeMarkup.prototype.buildSearchInput = function () {
-  const wrapper = document.createElement('div')
-  wrapper.classList.add('pm__search-input__wrapper')
-  this.searchInput = document.createElement('input')
-  this.searchInput.type = 'search'
-  this.searchInput.setAttribute('placeholder', this.searchPlaceholder)
-  this.searchInput.classList.add('pm__search-input')
-
-  let self = this
-  this.searchInputClasses.forEach(function (searchInputClass) {
-    self.searchInput.classList.add(searchInputClass)
-  })
-
-  wrapper.appendChild(this.searchInput)
-  return wrapper
-}
-
-PickMeMarkup.prototype.buildResultsScrollWrapper = function () {
-  this.resultsScrollWrapper = document.createElement('div')
-  this.resultsScrollWrapper.classList.add('pm__results-scroll-wrapper')
-  this.resultsWrapper = document.createElement('div')
-  this.resultsWrapper.classList.add('pm__results')
-  this.resultsWrapper.setAttribute('aria-role', 'list')
-  this.resultsScrollWrapper.appendChild(this.resultsWrapper)
-  return this.resultsScrollWrapper
-}
-
-// dynamic part: optgroups Map<label, value[]>
-PickMeMarkup.prototype.renderEntries = function (allOptions, selectedOptions, optgroups) {
-  if (allOptions.size > 0) {
-    for (let optgroupLabel of optgroups.keys()) {
-      if (optgroupLabel && optgroupLabel.length > 0) {
-        const label = document.createElement('span')
-        label.classList.add('pm__opt-group-label')
-        label.innerText = optgroupLabel
-        this.resultsWrapper.appendChild(label)
+  // dynamic part: optgroups Map<label, value[]>
+  renderEntries (allOptions, selectedOptions, optgroups) {
+    if (optgroups.size > 0) {
+      for (let optgroupLabel of optgroups.keys()) {
+        if (optgroupLabel && optgroupLabel.length > 0) {
+          const label = document.createElement('span')
+          label.classList.add('pm__opt-group-label')
+          label.innerText = optgroupLabel
+          this.resultsWrapper.appendChild(label)
+        }
+        const pageUl = buildUl(this.settings.list.classList)
+        pageUl.setAttribute('data-label', optgroupLabel)
+        this.renderNewEntries(allOptions, selectedOptions, optgroups.get(optgroupLabel), pageUl)
+        this.resultsWrapper.appendChild(pageUl)
+        //if (optgroupLabel && optgroupLabel.length > 0 && arr[index + 1]) {
+        const hr = document.createElement('hr')
+        hr.classList.add('pm__hr')
+        this.resultsWrapper.appendChild(hr)
       }
-      const pageUl = buildUl(this.listClasses)
-      pageUl.setAttribute('data-label', optgroupLabel)
-      this.renderNewEntries(allOptions, selectedOptions, optgroups.get(optgroupLabel), pageUl)
+    } else {
+      console.log(this.settings.search.noResultsText)
+      const li = buildLi({ text: this.settings.search.noResultsText })
+      li.classList.add('pm__results-list__item--muted')
+      const pageUl = buildUl(this.settings.list.classList)
+      pageUl.appendChild(li)
       this.resultsWrapper.appendChild(pageUl)
-      //if (optgroupLabel && optgroupLabel.length > 0 && arr[index + 1]) {
-      const hr = document.createElement('hr')
-      hr.classList.add('pm__hr')
-      this.resultsWrapper.appendChild(hr)
     }
-  } else {
-    const li = buildLi({ text: this.noResultsText })
-    li.classList.add('pm__results-list__item--muted')
-    const pageUl = buildUl(this.listClasses)
-    pageUl.appendChild(li)
-    this.resultsWrapper.appendChild(pageUl)
   }
-}
 
-PickMeMarkup.prototype.renderNewEntries = function (allOptions, selectedOptions, optgroupValues, ul) {
-  for (let value of optgroupValues) {
-    const optionData = allOptions.get(value)
-    const li = buildLi({
-      value,
-      ...optionData,
-      selected: selectedOptions.has(value),
-      multiple: this.multiple,
-      checkedIconClasses: this.checkedIconClasses
-    })
-    ul.appendChild(li)
-  }
-}
-
-PickMeMarkup.prototype.selectItem = function (value) {
-  const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
-  option.selected = true
-  option.setAttribute('data-selected', '')
-  this.addSelectedClassByValue(value)
-}
-
-PickMeMarkup.prototype.deselectItem = function (value) {
-  const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
-  option.selected = false
-  option.removeAttribute('data-selected')
-  this.removeSelectedClassByValue(value)
-}
-
-PickMeMarkup.prototype.addSelectedClassByValue = function (value) {
-  const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
-  if (li) setLiSelected(li, true, this.multiple, this.checkedIconClasses)
-}
-
-PickMeMarkup.prototype.removeSelectedClassByValue = function (value) {
-  const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
-  if (li) setLiSelected(li, false, this.multiple, this.checkedIconClasses)
-}
-
-PickMeMarkup.prototype.destroy = function () {
-  this.showOriginalSelect()
-  if (this.container) {
-    const container = document.querySelector(this.container)
-    if (container) container.removeChild(this.popup)
-  }
-  if (this.element && this.element.parentNode) this.element.parentNode.removeChild(this.wrapper)
-}
-
-PickMeMarkup.prototype.getSelected = function () {
-  return this.resultsWrapper.querySelectorAll('li.pm__results-list__item--selected')[0]
-}
-
-PickMeMarkup.prototype.getHovered = function () {
-  return this.hovered
-}
-
-PickMeMarkup.prototype.focusPreviousEntry = function () {
-  if (!this.hovered) this.hovered = this.getSelected()
-  const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]'))
-  if (this.hovered) {
-    const hoveredIndex = allLis.indexOf(this.hovered)
-    if (hoveredIndex > 0) {
-      this.hovered.classList.remove('pm__results-list__item--hover')
-      this.hovered = allLis[hoveredIndex - 1]
-      this.hovered.classList.add('pm__results-list__item--hover')
-      this.scrollEntryIntoView(this.hovered)
+  renderNewEntries (allOptions, selectedOptions, optgroupValues, ul) {
+    for (let value of optgroupValues) {
+      const optionData = allOptions.get(value)
+      const li = buildLi({
+        value,
+        ...optionData,
+        selected: selectedOptions.has(value),
+        multiple: this.settings.base.multiple,
+        checkedIconHtml: this.settings.list.checkedIconHtml
+      })
+      ul.appendChild(li)
     }
-  } else {
-    const first = allLis[0]
-    if (!first) return
-    first.classList.add('pm__results-list__item--hover')
-    this.hovered = first
-    this.scrollEntryIntoView(first)
   }
-}
 
-PickMeMarkup.prototype.focusNextEntry = function () {
-  if (!this.hovered) this.hovered = this.getSelected()
-  const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]'))
-  if (this.hovered) {
-    const hoveredIndex = allLis.indexOf(this.hovered)
-    if (hoveredIndex < allLis.length - 1) {
-      this.hovered.classList.remove('pm__results-list__item--hover')
-      this.hovered = allLis[hoveredIndex + 1]
-      this.hovered.classList.add('pm__results-list__item--hover')
-      this.scrollEntryIntoView(this.hovered)
+  selectItem (value) {
+    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
+    option.selected = true
+    option.setAttribute('data-selected', '')
+    this.addSelectedClassByValue(value)
+  }
+
+  deselectItem (value) {
+    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
+    option.selected = false
+    option.removeAttribute('data-selected')
+    this.removeSelectedClassByValue(value)
+  }
+
+  addSelectedClassByValue (value) {
+    const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
+    if (li) setLiSelected(li, true, this.settings.base.multiple, this.settings.list.checkedIconHtml)
+  }
+
+  removeSelectedClassByValue (value) {
+    const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
+    if (li) setLiSelected(li, false, this.settings.base.multiple, this.settings.list.checkedIconHtml)
+  }
+
+  destroy () {
+    this.showOriginalSelect()
+    if (this.settings.base.popup.containerSelector) {
+      const container = document.querySelector(this.settings.base.popup.containerSelector)
+      if (container) container.removeChild(this.popup)
     }
-  } else {
-    const first = allLis[0]
-    if (!first) return
-    first.classList.add('pm__results-list__item--hover')
-    this.hovered = first
-    this.scrollEntryIntoView(first)
+    if (this.element && this.element.parentNode) this.element.parentNode.removeChild(this.wrapper)
   }
-}
 
-PickMeMarkup.prototype.scrollEntryIntoView = function (entry) {
-  const entryOffsetTop = entry.offsetTop - this.resultsScrollWrapper.offsetTop
-  const shouldScrollDown = this.resultsScrollWrapper.offsetHeight + this.resultsScrollWrapper.scrollTop < entryOffsetTop + entry.offsetHeight
-  const shouldScrollUp = entryOffsetTop < this.resultsScrollWrapper.scrollTop
-
-  if (shouldScrollDown) {
-    this.resultsScrollWrapper.scrollTop = entryOffsetTop - this.resultsScrollWrapper.offsetHeight + entry.offsetHeight
-  } else if (shouldScrollUp) {
-    this.resultsScrollWrapper.scrollTop = entryOffsetTop
+  getSelected () {
+    return this.resultsWrapper.querySelectorAll('li.pm__results-list__item--selected')[0]
   }
-}
 
-PickMeMarkup.prototype.setButtonText = function (selectedValues) {
-  if (selectedValues && selectedValues.size > 0) {
-    this.buttonText.innerHTML = this.renderButtonText(selectedValues)
-  } else {
-    this.buttonText.innerHTML = this.emptySelectButtonText
+  getHovered () {
+    return this.hovered
   }
-}
 
-PickMeMarkup.prototype.renderButtonText = function (selectedValues) {
-  if (this.selectedTextFormat) {
-    const match = this.selectedTextFormat.match(/count\s?>\s?([0-9]*)/)
-    const count = match && match[1] && parseInt(match[1])
+  focusPreviousEntry () {
+    if (!this.hovered) this.hovered = this.getSelected()
+    const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]'))
+    if (this.hovered) {
+      const hoveredIndex = allLis.indexOf(this.hovered)
+      if (hoveredIndex > 0) {
+        this.hovered.classList.remove('pm__results-list__item--hover')
+        this.hovered = allLis[hoveredIndex - 1]
+        this.hovered.classList.add('pm__results-list__item--hover')
+        this.scrollEntryIntoView(this.hovered)
+      }
+    } else {
+      const first = allLis[0]
+      if (!first) return
+      first.classList.add('pm__results-list__item--hover')
+      this.hovered = first
+      this.scrollEntryIntoView(first)
+    }
+  }
 
-    if (count && count < selectedValues.size) {
-      return this.selectedText.replace(this.selectedTextVariable, selectedValues.size)
+  focusNextEntry () {
+    if (!this.hovered) this.hovered = this.getSelected()
+    const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]'))
+    if (this.hovered) {
+      const hoveredIndex = allLis.indexOf(this.hovered)
+      if (hoveredIndex < allLis.length - 1) {
+        this.hovered.classList.remove('pm__results-list__item--hover')
+        this.hovered = allLis[hoveredIndex + 1]
+        this.hovered.classList.add('pm__results-list__item--hover')
+        this.scrollEntryIntoView(this.hovered)
+      }
+    } else {
+      const first = allLis[0]
+      if (!first) return
+      first.classList.add('pm__results-list__item--hover')
+      this.hovered = first
+      this.scrollEntryIntoView(first)
+    }
+  }
+
+  scrollEntryIntoView (entry) {
+    const entryOffsetTop = entry.offsetTop - this.resultsScrollWrapper.offsetTop
+    const shouldScrollDown = this.resultsScrollWrapper.offsetHeight + this.resultsScrollWrapper.scrollTop < entryOffsetTop + entry.offsetHeight
+    const shouldScrollUp = entryOffsetTop < this.resultsScrollWrapper.scrollTop
+
+    if (shouldScrollDown) {
+      this.resultsScrollWrapper.scrollTop = entryOffsetTop - this.resultsScrollWrapper.offsetHeight + entry.offsetHeight
+    } else if (shouldScrollUp) {
+      this.resultsScrollWrapper.scrollTop = entryOffsetTop
+    }
+  }
+
+  setButtonText (selectedValues) {
+    if (selectedValues && selectedValues.size > 0) {
+      this.buttonText.innerHTML = this.renderButtonText(selectedValues)
+    } else {
+      this.buttonText.innerHTML = this.settings.button.placeholderText
+    }
+  }
+
+  renderButtonText (selectedValues) {
+    if (this.settings.button.selectedText.format) {
+      const match = this.settings.button.selectedText.format.match(/count\s?>\s?([0-9]*)/)
+      const count = match && match[1] && parseInt(match[1])
+
+      if (count && count < selectedValues.size) {
+        return this.settings.button.selectedText.text.replace(this.settings.button.selectedText.variable, selectedValues.size)
+      } else {
+        return joinSelectedTexts(selectedValues)
+      }
     } else {
       return joinSelectedTexts(selectedValues)
     }
-  } else {
-    return joinSelectedTexts(selectedValues)
   }
 }
 
@@ -387,20 +370,19 @@ function buildLi (options) {
   }
 
   if (options.selected) {
-    setLiSelected(li, true, options.multiple, options.checkedIconClasses)
+    setLiSelected(li, true, options.multiple, options.checkedIconHtml)
   }
   return li
 }
 
-function setLiSelected (li, selected, addCheck, checkedIconClasses) {
+function setLiSelected (li, selected, addCheck, checkedIconHtml) {
   if (selected) {
     if (addCheck) {
-      const check = document.createElement('i')
-      checkedIconClasses.forEach(function (checkedIconClass) {
-        check.classList.add(checkedIconClass)
-      })
-      check.classList.add('pm__results-list__item__check-mark')
-      li.appendChild(check)
+      const wrap = document.createElement('span')
+      wrap.classList.add('pm__results-list__item__check-mark')
+      li.appendChild(wrap)
+
+      wrap.insertAdjacentHTML('beforeend', checkedIconHtml)
     } else {
       li.classList.remove('pm__results-list__item--hover')
       li.classList.add('pm__results-list__item--selected')

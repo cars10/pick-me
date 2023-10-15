@@ -1,123 +1,125 @@
 import i18n from './i18n/i18n'
 
 type Settings = {
-  id: string
-  base?: BaseSettings
-  language?: LanguageSettings
-  search?: SearchSettings
-  button?: ButtonSettings
-  list?: ListSettings
+    id: string
+    base?: BaseSettings
+    language?: LanguageSettings
+    search?: SearchSettings
+    button?: ButtonSettings
+    list?: ListSettings
 }
 
 type BaseSettings = {
-  multiple?: boolean
-  popup?: {
-    containerSelector?: string
-    alignRight?: boolean
-    width?: string
-  }
+    multiple?: boolean
+    popup?: {
+        containerSelector?: string
+        alignRight?: boolean
+        width?: string
+    }
 }
 
 type LanguageSettings = {
-  locale?: string
-  i18n?: Record<string, string>
+    locale?: string
+    i18n?: Record<string, string>
 }
 
 type SearchSettings = {
-  enabled?: boolean
-  debounce?: number
-  input?: {
-    placeholderText?: string
-    classList?: string[]
-  }
-  noResultsText?: string
+    enabled?: boolean
+    debounce?: number
+    input?: {
+        placeholderText?: string
+        classList?: string[]
+    }
+    noResultsText?: string
 }
 
 type ButtonSettings = {
-  placeholderText?: string
-  classList?: string[]
-  iconHtml?: string
-  selectedText?: {
-    format?: string
-    variable?: string
-    text?: string
-  }
+    placeholderText?: string
+    classList?: string[]
+    disabledClassList?: string[]
+    iconHtml?: string
+    selectedText?: {
+        format?: string
+        variable?: string
+        text?: string
+    }
 }
 
 type ListSettings = {
-  checkedIconHtml?: string,
-  classList?: string[]
+    checkedIconHtml?: string,
+    classList?: string[]
 }
 
 type SelectAllSettings = {
-  enabled?: boolean
-  classList?: string[]
-  wrapperClassList?: string[]
-  selectText?: string
-  deselectText?: string
+    enabled?: boolean
+    classList?: string[]
+    wrapperClassList?: string[]
+    selectText?: string
+    deselectText?: string
 }
 
 export default class PickMeSettings {
-  element: HTMLSelectElement
-  base?: BaseSettings
-  language: LanguageSettings
-  search: SearchSettings
-  button: ButtonSettings
-  list: ListSettings
-  selectAll: SelectAllSettings
+    element: HTMLSelectElement
+    base?: BaseSettings
+    language: LanguageSettings
+    search: SearchSettings
+    button: ButtonSettings
+    list: ListSettings
+    selectAll: SelectAllSettings
 
-  constructor (props: Settings) {
-    this.element = document.getElementById(props.id) as HTMLSelectElement
-    this.setBase(props.base)
-    this.setLanguage(props.language)
-    this.setSearch(props.search)
-    this.setButton(props.button)
-    this.setList(props.list)
-  }
+    constructor (props: Settings) {
+        this.element = document.getElementById(props.id) as HTMLSelectElement
+        this.setBase(props.base)
+        this.setLanguage(props.language)
+        this.setSearch(props.search)
+        this.setButton(props.button)
+        this.setList(props.list)
+    }
 
-  setBase (props: BaseSettings) {
-    this.base = {}
-    this.base.multiple = !!this.element.multiple || !!props?.multiple
+    setBase (props: BaseSettings) {
+        this.base = {}
+        this.base.multiple = !!this.element.multiple || !!props?.multiple
 
-    this.base.popup = {}
-    this.base.popup.containerSelector = props?.popup?.containerSelector
-    this.base.popup.alignRight = props?.popup?.alignRight
-    this.base.popup.width = props?.popup?.width || '300px'
-  }
+        this.base.popup = {}
+        this.base.popup.containerSelector = props?.popup?.containerSelector
+        this.base.popup.alignRight = props?.popup?.alignRight
+        this.base.popup.width = props?.popup?.width || '300px'
+    }
 
-  setLanguage (props: LanguageSettings) {
-    this.language = {}
-    this.language.locale = props?.locale || document.documentElement.lang || 'en'
-    this.language.i18n = props?.i18n || i18n[props?.locale] || i18n.en
-  }
+    setLanguage (props: LanguageSettings) {
+        this.language = {}
+        this.language.locale = props?.locale || document.documentElement.lang || 'en'
+        this.language.i18n = props?.i18n || i18n[props?.locale] || i18n.en
+    }
 
-  setSearch (props: SearchSettings) {
-    this.search = {}
+    setSearch (props: SearchSettings) {
+        this.search = {}
 
-    this.search.enabled = !!props?.enabled
-    this.search.debounce = props?.debounce || 50
-    this.search.input = {}
-    this.search.input.placeholderText = props?.input?.placeholderText || this.language.i18n?.searchPlaceholder || 'Search'
-    this.search.input.classList = props?.input?.classList || []
-    this.search.noResultsText = props?.noResultsText || this.language.i18n.noResultsText || 'No results'
-  }
+        this.search.enabled = !!props?.enabled
+        this.search.debounce = props?.debounce || 50
+        this.search.input = {}
+        this.search.input.placeholderText = props?.input?.placeholderText || this.language.i18n?.searchPlaceholder || 'Search'
+        this.search.input.classList = props?.input?.classList || []
+        this.search.noResultsText = props?.noResultsText || this.language.i18n.noResultsText || 'No results'
+    }
 
-  setButton (props: ButtonSettings) {
-    this.button = {}
-    this.button.placeholderText = props?.placeholderText || this.language.i18n?.emptySelectButtonText || 'Select'
-    this.button.classList = props?.classList || []
-    this.button.iconHtml = props?.iconHtml || '⯆'
+    setButton (props: ButtonSettings) {
+        this.button = {}
+        this.button.placeholderText = props?.placeholderText || this.language.i18n?.emptySelectButtonText || 'Select'
+        this.button.classList = props?.classList || []
+        this.button.disabledClassList = props?.disabledClassList || []
+        this.button.iconHtml = props?.iconHtml || '⯆'
 
-    this.button.selectedText = {}
-    this.button.selectedText.format = props?.selectedText?.format
-    this.button.selectedText.variable = props?.selectedText?.variable || '%num%'
-    this.button.selectedText.text = props?.selectedText?.text || this.language.i18n?.selectedText || `%num% selected`
-  }
+        this.button.selectedText = {}
+        this.button.selectedText.format = props?.selectedText?.format
+        this.button.selectedText.variable = props?.selectedText?.variable || '%num%'
+        this.button.selectedText.text = props?.selectedText?.text || this.language.i18n?.selectedText || `%num% selected`
+    }
 
-  setList (props: ListSettings) {
-    this.list = {}
+    setList (props: ListSettings) {
+        this.list = {}
 
-    this.list.checkedIconHtml = props?.checkedIconHtml || '✓'
-    this.list.classList = props?.classList || []
-  }
+        this.list.checkedIconHtml = props?.checkedIconHtml || '✓'
+        this.list.classList = props?.classList || []
+    }
 }
