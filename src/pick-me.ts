@@ -73,7 +73,7 @@ export default class PickMe {
   }
 
   addEvents () {
-    this.ui.button.addEventListener('click', (e: Event) => (this.togglePopup(e)))
+    this.ui.button.addEventListener('click', () => (this.togglePopup()))
     this.ui.popup.addEventListener('click', e => (e.stopPropagation()))
     if (this.settings.search.enabled) {
       this.ui.searchInput.addEventListener('input', () => (this.search()))
@@ -162,7 +162,7 @@ export default class PickMe {
     if (this.element.form) this.element.form.removeEventListener('reset', this.handlers.resetFormHandler)
   }
 
-  togglePopup (e: Event) {
+  togglePopup (e?: Event) {
     this.open ? this.closePopupAndFocus(e) : this.openPopup()
   }
 
@@ -203,9 +203,9 @@ export default class PickMe {
     if (this.settings.search.enabled) this.ui.searchInput.focus()
   }
 
-  closePopup (e: Event) {
-    const target = e.target as HTMLButtonElement
-    const clickedButton = e && (target === this.ui.button || target.parentElement === this.ui.button)
+  closePopup (e?: Event) {
+    const target = e?.target as HTMLButtonElement
+    const clickedButton = e && (target === this.ui.button || target?.parentElement === this.ui.button)
     if (this.open && !clickedButton) {
       this.ui.popup.classList.remove('pm__popup--visible')
       this.open = false
