@@ -168,7 +168,9 @@ export default class PickMeUi {
   // dynamic part: optgroups Map<label, value[]>
   renderEntries (allOptions: OptionMap, selectedOptions: OptionMap, optgroups: OptgroupMap) {
     if (optgroups.size > 0) {
+      let index = 0
       for (const optgroupLabel of optgroups.keys()) {
+        index = index + 1
         if (optgroupLabel && optgroupLabel.length > 0) {
           const label = document.createElement('span')
           label.classList.add('pm__opt-group-label')
@@ -179,10 +181,11 @@ export default class PickMeUi {
         pageUl.setAttribute('data-label', optgroupLabel)
         this.renderNewEntries(allOptions, selectedOptions, optgroups.get(optgroupLabel), pageUl)
         this.resultsWrapper.appendChild(pageUl)
-        //if (optgroupLabel && optgroupLabel.length > 0 && arr[index + 1]) {
-        const hr = document.createElement('hr')
-        hr.classList.add('pm__hr')
-        this.resultsWrapper.appendChild(hr)
+        if (optgroupLabel && optgroupLabel.length > 0 && index < optgroups.size) {
+          const hr = document.createElement('hr')
+          hr.classList.add('pm__hr')
+          this.resultsWrapper.appendChild(hr)
+        }
       }
     } else {
       console.log(this.settings.search.noResultsText)
