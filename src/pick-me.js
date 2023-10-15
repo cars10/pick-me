@@ -1,4 +1,4 @@
-import PickMeMarkup from './pick-me/pick-me-markup'
+import PickMeUi from './pick-me/ui'
 import PickMeSettings from './pick-me/settings'
 
 export default class PickMe {
@@ -95,7 +95,7 @@ export default class PickMe {
   }
 
   buildMarkup () {
-    return new PickMeMarkup({ element: this.element, settings: this.settings })
+    return new PickMeUi({ element: this.element, settings: this.settings })
   }
 
   resetAndReload () {

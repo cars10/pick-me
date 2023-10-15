@@ -1,4 +1,4 @@
-export default class PickMeMarkup {
+export default class PickMeUi {
   constructor (options) {
     this.element = options.element
     this.settings = options.settings
