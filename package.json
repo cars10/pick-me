@@ -7,7 +7,8 @@
     "build:css": "esbuild public/style.css --bundle --minify --outfile=dist/style.min.css",
     "build": "rm -rf dist && yarn build:js && yarn build:css",
     "dev": "esbuild public/main.js --bundle --target=es2022 --sourcemap --outdir=public/dist --servedir=public",
-    "lint": "eslint src --fix"
+    "lint": "eslint src --fix",
+    "tsc": "tsc --noEmit"
   },
   "author": "Carsten König <carstenkoenig92@gmail.com>",
   "license": "MIT",

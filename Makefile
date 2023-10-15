@@ -7,6 +7,9 @@ prod:
 lint:
 	docker compose run --rm app yarn lint
 
+tsc:
+	docker compose run --rm app yarn tsc
+
 build:
 	docker compose build
 

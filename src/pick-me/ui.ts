@@ -1,7 +1,22 @@
+import PickMeSettings from './settings'
+import { OptgroupMap, OptionMap } from "../pick-me"
+
 export default class PickMeUi {
-  constructor (options) {
-    this.element = options.element
-    this.settings = options.settings
+  element: HTMLSelectElement
+  settings: PickMeSettings
+  disabled: boolean
+  wrapper: HTMLDivElement
+  button: HTMLButtonElement
+  popup: HTMLDivElement
+  buttonText: HTMLSpanElement
+  searchInput: HTMLInputElement
+  resultsScrollWrapper: HTMLDivElement
+  resultsWrapper: HTMLDivElement
+  hovered: Element
+
+  constructor ({ element, settings }: { element: HTMLSelectElement, settings: PickMeSettings }) {
+    this.element = element
+    this.settings = settings
     this.disabled = false
 
     this.wrapper = this.buildWrapper()
@@ -151,9 +166,9 @@ export default class PickMeUi {
   }
 
   // dynamic part: optgroups Map<label, value[]>
-  renderEntries (allOptions, selectedOptions, optgroups) {
+  renderEntries (allOptions: OptionMap, selectedOptions: OptionMap, optgroups: OptgroupMap) {
     if (optgroups.size > 0) {
-      for (let optgroupLabel of optgroups.keys()) {
+      for (const optgroupLabel of optgroups.keys()) {
         if (optgroupLabel && optgroupLabel.length > 0) {
           const label = document.createElement('span')
           label.classList.add('pm__opt-group-label')
@@ -179,8 +194,8 @@ export default class PickMeUi {
     }
   }
 
-  renderNewEntries (allOptions, selectedOptions, optgroupValues, ul) {
-    for (let value of optgroupValues) {
+  renderNewEntries (allOptions: OptionMap, selectedOptions: OptionMap, optgroupValues: string[], ul: HTMLUListElement) {
+    for (const value of optgroupValues) {
       const optionData = allOptions.get(value)
       const li = buildLi({
         value,
@@ -193,27 +208,27 @@ export default class PickMeUi {
     }
   }
 
-  selectItem (value) {
-    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
+  selectItem (value: string) {
+    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]') as HTMLOptionElement
     option.selected = true
     option.setAttribute('data-selected', '')
     this.addSelectedClassByValue(value)
   }
 
-  deselectItem (value) {
-    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]')
+  deselectItem (value: string) {
+    const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]') as HTMLOptionElement
     option.selected = false
     option.removeAttribute('data-selected')
     this.removeSelectedClassByValue(value)
   }
 
-  addSelectedClassByValue (value) {
-    const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
+  addSelectedClassByValue (value: string) {
+    const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]') as HTMLLIElement
     if (li) setLiSelected(li, true, this.settings.base.multiple, this.settings.list.checkedIconHtml)
   }
 
-  removeSelectedClassByValue (value) {
-    const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]')
+  removeSelectedClassByValue (value: string) {
+    const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]') as HTMLLIElement
     if (li) setLiSelected(li, false, this.settings.base.multiple, this.settings.list.checkedIconHtml)
   }
 
@@ -228,10 +243,6 @@ export default class PickMeUi {
 
   getSelected () {
     return this.resultsWrapper.querySelectorAll('li.pm__results-list__item--selected')[0]
-  }
-
-  getHovered () {
-    return this.hovered
   }
 
   focusPreviousEntry () {
@@ -286,7 +297,7 @@ export default class PickMeUi {
     }
   }
 
-  setButtonText (selectedValues) {
+  setButtonText (selectedValues: OptionMap) {
     if (selectedValues && selectedValues.size > 0) {
       this.buttonText.innerHTML = this.renderButtonText(selectedValues)
     } else {
@@ -294,13 +305,13 @@ export default class PickMeUi {
     }
   }
 
-  renderButtonText (selectedValues) {
+  renderButtonText (selectedValues: OptionMap) {
     if (this.settings.button.selectedText.format) {
       const match = this.settings.button.selectedText.format.match(/count\s?>\s?([0-9]*)/)
       const count = match && match[1] && parseInt(match[1])
 
       if (count && count < selectedValues.size) {
-        return this.settings.button.selectedText.text.replace(this.settings.button.selectedText.variable, selectedValues.size)
+        return this.settings.button.selectedText.text.replace(this.settings.button.selectedText.variable, selectedValues.size.toString())
       } else {
         return joinSelectedTexts(selectedValues)
       }
@@ -310,15 +321,15 @@ export default class PickMeUi {
   }
 }
 
-function joinSelectedTexts (selectedValues) {
-  let selected = []
-  for (let [value, optionData] of selectedValues) {
+function joinSelectedTexts (selectedValues: OptionMap) {
+  const selected = []
+  for (const optionData of selectedValues.values()) {
     selected.push(optionData.text)
   }
   return selected.join(', ')
 }
 
-function buildUl (additionalClasses) {
+function buildUl (additionalClasses: string[]) {
   const pageUl = document.createElement('ul')
   pageUl.classList.add('pm__results-list')
   pageUl.setAttribute('aria-role', 'listbox')
@@ -328,7 +339,7 @@ function buildUl (additionalClasses) {
   return pageUl
 }
 
-function buildLi (options) {
+function buildLi (options: { text: string; selected?: boolean; multiple?: boolean; checkedIconHtml?: string; subtext?: string; img?: string; searchData?: string; value?: string }) {
   const text = options.text
   const value = options.value
   const subtext = options.subtext
@@ -373,7 +384,7 @@ function buildLi (options) {
   return li
 }
 
-function setLiSelected (li, selected, addCheck, checkedIconHtml) {
+function setLiSelected (li: HTMLLIElement, selected: boolean, addCheck: boolean, checkedIconHtml: string) {
   if (selected) {
     if (addCheck) {
       const wrap = document.createElement('span')

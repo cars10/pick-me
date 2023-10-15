@@ -1,18 +1,20 @@
 import PickMeUi from './pick-me/ui'
-import PickMeSettings from './pick-me/settings'
+import PickMeSettings, { Settings } from './pick-me/settings'
 
-type OptionData = {
+export type OptionData = {
   text: string
   subtext: string
   img: string
   searchData: string
 }
 
-type Options = {
-  all: Map<string, OptionData>
-  selected: Map<string, OptionData>
-  optgroups: Map<string, string[]>
+export type Options = {
+  all: OptionMap
+  selected: OptionMap
+  optgroups: OptgroupMap
 }
+export type OptionMap = Map<string, OptionData>
+export type OptgroupMap = Map<string, string[]>
 
 export default class PickMe {
   id: string
@@ -26,7 +28,7 @@ export default class PickMe {
   options: Options
   searchInputTimer: number
 
-  constructor (options) {
+  constructor (options: Settings) {
     this.id = options.id
     this.element = document.getElementById(this.id) as HTMLSelectElement
     this.label = document.querySelector('label[for="' + this.id + '"]')
@@ -144,7 +146,7 @@ export default class PickMe {
     } else if (e.keyCode === 13) { // enter
       e.preventDefault()
       if (this.open) {
-        const li = this.ui.getHovered()
+        const li = this.ui.hovered
         if (li) this.select({ currentTarget: li } as unknown as Event)
       } else {
         this.openPopup()

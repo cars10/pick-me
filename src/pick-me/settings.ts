@@ -1,6 +1,6 @@
 import i18n from './i18n/i18n'
 
-type Settings = {
+export type Settings = {
   id: string
   base?: BaseSettings
   language?: LanguageSettings
