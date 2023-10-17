@@ -1,8 +1,14 @@
 export default {
-  searchPlaceholder: 'Search',
-  emptySelectButtonText: 'Show all',
-  noResultsText: 'No results found',
-  selectedText: '%num% selected',
-  selectAllButtonText: 'Select all',
-  deselectAllButtonText: 'Deselect all'
+    search: {
+        input: {
+            placeholderText: 'Search'
+        },
+        noResultsText: 'No results found'
+    },
+    button: {
+        placeholderText: 'Chose',
+        selectedText: {
+            text: '%num% selected'
+        }
+    },
 }

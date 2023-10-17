@@ -6,64 +6,64 @@
   <meta content="ie=edge" http-equiv="X-UA-Compatible">
   <title>PickMe</title>
   <style>
-      * {
-          box-sizing: border-box;
-          margin: 0;
-          padding: 0;
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      html, body {
-          height: 100%
-      }
+    html, body {
+      height: 100%
+    }
 
-      body {
-          font-family: sans-serif;
-          margin: 10px auto;
-      }
+    body {
+      font-family: sans-serif;
+      margin: 10px auto;
+    }
 
-      .container {
-          width: 50%;
-          margin: auto;
-      }
+    .container {
+      width: 50%;
+      margin: auto;
+    }
 
-      .card {
-          background-color: #eee;
-          border: 1px solid #ccc;
-          border-radius: 2px;
-          padding: 18px 20px;
-          box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
-          margin-bottom: 20px;
-      }
+    .card {
+      background-color: #eee;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      padding: 18px 20px;
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+      margin-bottom: 20px;
+    }
 
-      .form-group {
-          margin-top: 10px;
-          margin-bottom: 10px;
-      }
+    .form-group {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
 
-      h2 {
-          margin-bottom: 20px;
-      }
+    h2 {
+      margin-bottom: 20px;
+    }
 
-      .w-50 {
-          width: 50%;
-      }
+    .w-50 {
+      width: 50%;
+    }
 
-      .flex {
-          display: flex;
-      }
+    .flex {
+      display: flex;
+    }
 
-      table {
-          border-collapse: collapse;
-      }
+    table {
+      border-collapse: collapse;
+    }
 
-      table, th, td {
-          border: 1px solid #aaa;
-      }
+    table, th, td {
+      border: 1px solid #aaa;
+    }
 
-      table th, table td {
-          padding: 6px 12px;
-          text-align: left;
-      }
+    table th, table td {
+      padding: 6px 12px;
+      text-align: left;
+    }
   </style>
   <link rel="stylesheet" href="./style.css">
 </head>
@@ -145,7 +145,23 @@
     <div class="col-sm-4 col-sm-offset-2">
       <form>
         <label for="picker">Select</label>
-        <select id="picker" name="picker" title="Select something"> </select>
+        <select id="picker" name="picker" title="Select something">
+          <option value="">bitte wählen</option>
+          <option value="1" data-subtext="awesome"
+                  data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=1&quot;}">Anna Müller
+          </option>
+          <option value="2" data-subtext="cool" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=2&quot;}">
+            Jim Knopf
+          </option>
+          <option value="42" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=3&quot;}" data-selected="true">
+            Max Mustermann
+          </option>
+          <option value="13" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=13&quot;}">Günther Jauch
+          </option>
+          <option value="17" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=17&quot;}">
+            Thomas Gottschalk
+          </option>
+        </select>
       </form>
     </div>
   </div>
@@ -174,7 +190,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    setupSelect(userData, true)
+    //setupSelect(userData, true)
     reload()
   })
 
