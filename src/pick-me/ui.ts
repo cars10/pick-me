@@ -9,6 +9,7 @@ export default class PickMeUi {
     button: HTMLButtonElement
     popup: HTMLDivElement
     buttonText: HTMLSpanElement
+    buttonLabel: HTMLSpanElement
     searchInput: HTMLInputElement
     resultsScrollWrapper: HTMLDivElement
     resultsWrapper: HTMLDivElement
@@ -117,11 +118,20 @@ export default class PickMeUi {
         this.buttonText = document.createElement('span')
         this.buttonText.classList.add('pm__button-text')
 
+        if (this.settings.button.labelText?.length > 0) {
+            this.buttonLabel = document.createElement('span')
+            this.buttonLabel.classList.add('pm__button-label')
+            this.buttonLabel.innerText = this.settings.button.labelText
+            button.appendChild(this.buttonLabel)
+        }
+
+        button.appendChild(this.buttonText)
+
         if (this.settings.button.iconHtml && this.settings.button.iconHtml.length > 0) {
-            button.appendChild(this.buttonText)
-            button.insertAdjacentHTML('beforeend', this.settings.button.iconHtml)
-        } else {
-            button.appendChild(this.buttonText)
+            const wrap = document.createElement('span')
+            wrap.classList.add('pm__icon-wrapper')
+            wrap.insertAdjacentHTML('beforeend', this.settings.button.iconHtml)
+            button.appendChild(wrap)
         }
 
         return button

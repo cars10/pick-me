@@ -7,6 +7,7 @@ export default {
     },
     button: {
         placeholderText: 'Bitte wählen',
+        labelText: 'Eintrag',
         selectedText: {
             text: '%num% Einträge ausgewählt'
         }

@@ -9,6 +9,7 @@ type I18n = {
     },
     button: {
         placeholderText: string,
+        labelText: string,
         selectedText: {
             text: string
         }
@@ -51,6 +52,7 @@ type SearchSettings = {
 
 type ButtonSettings = {
     placeholderText?: string
+    labelText?: string
     classList?: string[]
     disabledClassList?: string[]
     iconHtml?: string
@@ -123,6 +125,7 @@ export default class PickMeSettings {
     setButton (props: ButtonSettings) {
         this.button = {}
         this.button.placeholderText = props?.placeholderText || this.language.i18n?.button?.placeholderText || 'Select'
+        this.button.labelText = props?.labelText
         this.button.classList = props?.classList || []
         this.button.disabledClassList = props?.disabledClassList || []
         this.button.iconHtml = props?.iconHtml || '⯆'
