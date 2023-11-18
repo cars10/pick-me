@@ -73,7 +73,7 @@
 
 .pm__popup .pm__results-scroll-wrapper {
     max-height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
     width: 100%;
 }
 

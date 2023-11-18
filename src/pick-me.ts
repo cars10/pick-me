@@ -59,6 +59,9 @@ export default class PickMe {
     setupInitialValues() {
         const options = this.element.querySelectorAll('option[selected]') as NodeListOf<HTMLOptionElement>
         options.forEach(option => (this.initialSelectedValues.push(option.value)))
+
+        if (this.initialSelectedValues.length > 0 || this.settings.base.multiple) return
+        if (this.element.options[0]) this.initialSelectedValues.push(this.element.options[0].value)
     }
 
     addHandlers() {
@@ -115,6 +118,16 @@ export default class PickMe {
                 this.options.selected.set(option.value, optionData)
                 option.setAttribute('data-selected', 'true')
             }
+        })
+
+        if (this.options.selected.size > 0 || this.settings.base.multiple) return
+
+        const option = this.element.options[0]
+        this.options.selected.set(option.value, {
+            text: option.innerHTML,
+            subtext: option.getAttribute('data-subtext'),
+            img: JSON.parse(option.getAttribute('data-img')),
+            searchData: option.innerText.toLowerCase().trim()
         })
     }
 
