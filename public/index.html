@@ -38,31 +38,12 @@
     .form-group {
       margin-top: 10px;
       margin-bottom: 10px;
+      width: 40%;
+      display: inline-block;
     }
 
     h2 {
       margin-bottom: 20px;
-    }
-
-    .w-50 {
-      width: 50%;
-    }
-
-    .flex {
-      display: flex;
-    }
-
-    table {
-      border-collapse: collapse;
-    }
-
-    table, th, td {
-      border: 1px solid #aaa;
-    }
-
-    table th, table td {
-      padding: 6px 12px;
-      text-align: left;
     }
   </style>
   <link rel="stylesheet" href="./style.css">
@@ -72,96 +53,51 @@
   <h1>Demo</h1>
 
   <div class="card">
-    <div class="flex">
-      <div class="w-50">
-        <h2>Settings</h2>
-
-        <div id="settings">
-          <div class="form-group">
-            <label for="set_language">Language</label>
-            <select class="form-control" id="set_language">
-              <option selected value="de">German</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="set_selected_text_format">Selected text format</label>
-            <input class="form-control" id="set_selected_text_format" value="count>2">
-          </div>
-
-          <div class="form-group">
-            <div class="checkbox">
-              <label for="set_dropdown_align_right">
-                <input id="set_dropdown_align_right" type="checkbox"> Align dropdown right
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="checkbox">
-              <label for="set_disabled">
-                <input id="set_disabled" type="checkbox"> Disable select
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="checkbox">
-              <label for="search_option">
-                <input id="search_option" type="checkbox"> Enable search
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="checkbox">
-              <label for="multiple">
-                <input id="multiple" type="checkbox"> Multiple
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="w-50">
-        <h2>Debug information</h2>
-        <table class="table">
-          <tr>
-            <th># Entries</th>
-            <th>Value</th>
-          </tr>
-          <tr>
-            <td id="amount">0</td>
-            <td id="value"></td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <h2>Output</h2>
-  <div class="row" style="margin-bottom: 400px;">
-    <div class="col-sm-4 col-sm-offset-2">
+    <h2>Output</h2>
+    <div class="row" style="margin-bottom: 400px;">
       <form>
-        <label for="picker">Select</label>
-        <select id="picker" name="picker" title="Select something">
-          <option value="">bitte wählen</option>
-          <option value="1" data-subtext="awesome"
-                  data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=1&quot;}">Anna Müller
-          </option>
-          <option value="2" data-subtext="cool" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=2&quot;}">
-            Jim Knopf
-          </option>
-          <option value="42" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=3&quot;}" data-selected="true">
-            Max Mustermann
-          </option>
-          <option value="13" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=13&quot;}">Günther Jauch
-          </option>
-          <option value="17" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=17&quot;}">
-            Thomas Gottschalk
-          </option>
-        </select>
+        <div class="form-group">
+          <label for="single">Single</label>
+          <select id="single" name="single" title="Select something">
+            <option value="">bitte wählen</option>
+            <option value="1" data-subtext="awesome"
+                    data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=1&quot;}">Anna Müller
+            </option>
+            <option value="2" data-subtext="cool"
+                    data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=2&quot;}" selected>
+              Jim Knopf
+            </option>
+            <option value="42" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=3&quot;}">
+              Max Mustermann
+            </option>
+            <option value="13" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=13&quot;}">Günther Jauch
+            </option>
+            <option value="17" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=17&quot;}">
+              Thomas Gottschalk
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="multiple">Multi</label>
+          <select id="multiple" name="multiple" title="Select something">
+            <option value="1" data-subtext="awesome"
+                    data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=1&quot;}">Anna Müller
+            </option>
+            <option value="2" data-subtext="cool"
+                    data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=2&quot;}">
+              Jim Knopf
+            </option>
+            <option value="42" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=3&quot;}">
+              Max Mustermann
+            </option>
+            <option value="13" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=13&quot;}">Günther Jauch
+            </option>
+            <option value="17" data-img="{&quot;src&quot;:&quot;https://picsum.photos/24?a=17&quot;}">
+              Thomas Gottschalk
+            </option>
+          </select>
+        </div>
       </form>
     </div>
   </div>
@@ -169,103 +105,12 @@
 
 <script src="./dist/main.js"></script>
 <script>
-  let pickme
-  const selectId = 'picker'
+  document.addEventListener('DOMContentLoaded', load)
 
-  const userData = {
-    'Manager': [
-      { value: 1, text: 'Anna Müller', subtext: 'awesome', img: { src: 'https://picsum.photos/24?a=1' } },
-      { value: 2, text: 'Jim Knopf', subtext: 'cool', img: { src: 'https://picsum.photos/24?a=2' } },
-      {
-        value: "{&quot;UserMailer&quot;:&quot;notify_about_survey&quot;}",
-        text: 'Max Mustermann',
-        img: { src: 'https://picsum.photos/24?a=3' },
-        selected: true
-      },
-    ],
-    'Praktikanten': [
-      { value: 13, text: 'Günther Jauch', img: { src: "https://picsum.photos/24?a=13" } },
-      { value: 17, text: 'Thomas Gottschalk', subtext: 'stylisch', img: { src: "https://picsum.photos/24?a=17" } }
-    ]
+  function load() {
+    new PickMe({id: 'single', search: {enabled: true}})
+    new PickMe({id: 'multiple', base: {multiple: true}, search: {enabled: true}})
   }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    //setupSelect(userData, true)
-    reload()
-  })
-
-  Array.apply(null, document.getElementById('settings').querySelectorAll('input,select')).forEach(function (input) {
-    input.addEventListener('input', function () {
-      pickme.destroy()
-      reload()
-    })
-  })
-
-  function setupSelect (data, useOptgroups) {
-    const select = document.getElementById(selectId)
-    Object.entries(data).forEach(([optGroupLabel, options]) => {
-      let optgroup
-      if (useOptgroups) {
-        optgroup = document.createElement('optgroup')
-        optgroup.setAttribute('label', optGroupLabel)
-        select.appendChild(optgroup)
-      }
-
-      options.forEach(optionData => {
-        const option = document.createElement('option')
-        option.innerHTML = optionData.text
-        option.setAttribute('value', optionData.value)
-        if (optionData.selected) option.setAttribute('selected', optionData.selected)
-        if (optionData.subtext) option.setAttribute('data-subtext', optionData.subtext)
-        if (optionData.img) option.setAttribute('data-img', JSON.stringify(optionData.img))
-        if (optgroup) {
-          optgroup.appendChild(option)
-        } else {
-          select.appendChild(option)
-        }
-      })
-    })
-  }
-
-  function reload () {
-    pickme = new PickMe({
-      id: selectId,
-      base: {
-        multiple: document.getElementById('multiple').checked,
-        popup: {
-          alignRight: document.getElementById('set_dropdown_align_right').checked
-        }
-      },
-      button: {
-        selectedText: {
-          format: document.getElementById('set_selected_text_format').value
-        }
-      },
-      language: {
-        locale: document.getElementById('set_language').value
-      },
-      search: {
-        enabled: document.getElementById('search_option').checked
-      },
-      debug: true
-    })
-    debugHandler()
-  }
-
-  function debugHandler () {
-    try {
-      document.getElementById('amount').innerHTML = pickme.ui.resultsWrapper.querySelectorAll('li').length.toString()
-      document.getElementById('value').innerHTML = Array.from(pickme.options.selected.keys()).toString()
-    } catch (e) {
-      console.log(e)
-      console.warn('could not show debug')
-    }
-  }
-
-  document.getElementById('picker').addEventListener('change', function (e) {
-    debugHandler()
-    console.log('Picker changed, new value:', e.detail)
-  })
 </script>
 </body>
 </html>

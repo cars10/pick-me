@@ -1,5 +1,5 @@
 import PickMeSettings from './settings'
-import { OptgroupMap, OptionMap } from "../pick-me"
+import {OptgroupMap, OptionMap} from "../pick-me"
 
 export default class PickMeUi {
     element: HTMLSelectElement
@@ -15,7 +15,7 @@ export default class PickMeUi {
     resultsWrapper: HTMLDivElement
     hovered: Element
 
-    constructor ({ element, settings }: { element: HTMLSelectElement, settings: PickMeSettings }) {
+    constructor({element, settings}: { element: HTMLSelectElement, settings: PickMeSettings }) {
         this.element = element
         this.settings = settings
         this.disabled = false
@@ -28,17 +28,17 @@ export default class PickMeUi {
         this.assemble()
     }
 
-    hideOriginalSelect () {
+    hideOriginalSelect() {
         this.element.classList.add('pm__hidden')
         this.element.setAttribute('tabindex', '-1')
     }
 
-    showOriginalSelect () {
+    showOriginalSelect() {
         this.element.classList.remove('pm__hidden')
         this.element.removeAttribute('tabindex')
     }
 
-    assemble () {
+    assemble() {
         this.wrapper.appendChild(this.button)
         if (!this.disabled) {
             if (this.settings.base.popup.containerSelector) {
@@ -55,7 +55,7 @@ export default class PickMeUi {
         this.element.parentNode.insertBefore(this.wrapper, this.element)
     }
 
-    positionPopup () {
+    positionPopup() {
         if (this.settings.base.popup.containerSelector) {
             const pos = this.wrapper.getBoundingClientRect()
             const offset = getOffsetFromBoundingBox(pos)
@@ -86,7 +86,7 @@ export default class PickMeUi {
         }
     }
 
-    shouldDropUp () {
+    shouldDropUp() {
         const pos = this.button.getBoundingClientRect()
         const offset = getOffsetFromBoundingBox(pos)
         const selectOffsetTop = offset.top - document.documentElement.scrollTop
@@ -94,14 +94,14 @@ export default class PickMeUi {
         return selectOffsetTop > selectOffsetBot && selectOffsetBot < this.popup.offsetHeight
     }
 
-    buildWrapper () {
+    buildWrapper() {
         const wrapper = document.createElement('div')
         wrapper.classList.add('pick-me')
         if (this.settings.base.multiple) wrapper.classList.add('pick-me--multiple')
         return wrapper
     }
 
-    buildButton () {
+    buildButton() {
         const button = document.createElement('button')
         button.setAttribute('type', 'button')
         button.classList.add('pm__button')
@@ -138,7 +138,7 @@ export default class PickMeUi {
     }
 
 
-    buildPopup () {
+    buildPopup() {
         const popup = document.createElement('div')
         popup.classList.add('pm__popup')
         if (this.settings.base.popup.alignRight) popup.classList.add('pm__popup--right')
@@ -149,7 +149,7 @@ export default class PickMeUi {
         return popup
     }
 
-    buildSearchInput () {
+    buildSearchInput() {
         const wrapper = document.createElement('div')
         wrapper.classList.add('pm__search-input__wrapper')
         this.searchInput = document.createElement('input')
@@ -165,7 +165,7 @@ export default class PickMeUi {
         return wrapper
     }
 
-    buildResultsScrollWrapper () {
+    buildResultsScrollWrapper() {
         this.resultsScrollWrapper = document.createElement('div')
         this.resultsScrollWrapper.classList.add('pm__results-scroll-wrapper')
         this.resultsWrapper = document.createElement('div')
@@ -176,7 +176,7 @@ export default class PickMeUi {
     }
 
     // dynamic part: optgroups Map<label, value[]>
-    renderEntries (allOptions: OptionMap, selectedOptions: OptionMap, optgroups: OptgroupMap) {
+    renderEntries(allOptions: OptionMap, selectedOptions: OptionMap, optgroups: OptgroupMap) {
         if (optgroups.size > 0) {
             let index = 0
             for (const optgroupLabel of optgroups.keys()) {
@@ -198,7 +198,7 @@ export default class PickMeUi {
                 }
             }
         } else {
-            const li = buildLi({ text: this.settings.search.noResultsText })
+            const li = buildLi({text: this.settings.search.noResultsText})
             li.classList.add('pm__results-list__item--muted')
             const pageUl = buildUl(this.settings.list.classList)
             pageUl.appendChild(li)
@@ -206,7 +206,7 @@ export default class PickMeUi {
         }
     }
 
-    renderNewEntries (allOptions: OptionMap, selectedOptions: OptionMap, optgroupValues: string[], ul: HTMLUListElement) {
+    renderNewEntries(allOptions: OptionMap, selectedOptions: OptionMap, optgroupValues: string[], ul: HTMLUListElement) {
         for (const value of optgroupValues) {
             const optionData = allOptions.get(value)
             const li = buildLi({
@@ -220,31 +220,31 @@ export default class PickMeUi {
         }
     }
 
-    selectItem (value: string) {
+    selectItem(value: string) {
         const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]') as HTMLOptionElement
         option.selected = true
         option.setAttribute('data-selected', '')
         this.addSelectedClassByValue(value)
     }
 
-    deselectItem (value: string) {
+    deselectItem(value: string) {
         const option = this.element.querySelector('option[value="' + value.replaceAll('"', '\\"') + '"]') as HTMLOptionElement
         option.selected = false
         option.removeAttribute('data-selected')
         this.removeSelectedClassByValue(value)
     }
 
-    addSelectedClassByValue (value: string) {
+    addSelectedClassByValue(value: string) {
         const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]') as HTMLLIElement
         if (li) setLiSelected(li, true, this.settings.base.multiple, this.settings.list.checkedIconHtml)
     }
 
-    removeSelectedClassByValue (value: string) {
+    removeSelectedClassByValue(value: string) {
         const li = this.resultsWrapper.querySelector('li[data-value="' + value.replaceAll('"', '\\"') + '"]') as HTMLLIElement
         if (li) setLiSelected(li, false, this.settings.base.multiple, this.settings.list.checkedIconHtml)
     }
 
-    destroy () {
+    destroy() {
         this.showOriginalSelect()
         if (this.settings.base.popup.containerSelector) {
             const container = document.querySelector(this.settings.base.popup.containerSelector)
@@ -253,11 +253,11 @@ export default class PickMeUi {
         if (this.element && this.element.parentNode) this.element.parentNode.removeChild(this.wrapper)
     }
 
-    getSelected () {
+    getSelected() {
         return this.resultsWrapper.querySelectorAll('li.pm__results-list__item--selected')[0]
     }
 
-    focusPreviousEntry () {
+    focusPreviousEntry() {
         if (!this.hovered) this.hovered = this.getSelected()
         const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]'))
         if (this.hovered) {
@@ -277,7 +277,7 @@ export default class PickMeUi {
         }
     }
 
-    focusNextEntry () {
+    focusNextEntry() {
         if (!this.hovered) this.hovered = this.getSelected()
         const allLis = Array.from(this.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]'))
         if (this.hovered) {
@@ -297,7 +297,7 @@ export default class PickMeUi {
         }
     }
 
-    scrollEntryIntoView (entry) {
+    scrollEntryIntoView(entry) {
         const entryOffsetTop = entry.offsetTop - this.resultsScrollWrapper.offsetTop
         const shouldScrollDown = this.resultsScrollWrapper.offsetHeight + this.resultsScrollWrapper.scrollTop < entryOffsetTop + entry.offsetHeight
         const shouldScrollUp = entryOffsetTop < this.resultsScrollWrapper.scrollTop
@@ -309,7 +309,7 @@ export default class PickMeUi {
         }
     }
 
-    setButtonText (selectedValues: OptionMap) {
+    setButtonText(selectedValues: OptionMap) {
         if (selectedValues && selectedValues.size > 0) {
             this.buttonText.innerHTML = this.renderButtonText(selectedValues)
         } else {
@@ -317,7 +317,7 @@ export default class PickMeUi {
         }
     }
 
-    renderButtonText (selectedValues: OptionMap) {
+    renderButtonText(selectedValues: OptionMap) {
         if (this.settings.button.selectedText.format) {
             const match = this.settings.button.selectedText.format.match(/count\s?>\s?([0-9]*)/)
             const count = match && match[1] && parseInt(match[1])
@@ -333,7 +333,7 @@ export default class PickMeUi {
     }
 }
 
-function joinSelectedTexts (selectedValues: OptionMap) {
+function joinSelectedTexts(selectedValues: OptionMap) {
     const selected = []
     for (const optionData of selectedValues.values()) {
         selected.push(optionData.text)
@@ -341,7 +341,7 @@ function joinSelectedTexts (selectedValues: OptionMap) {
     return selected.join(', ')
 }
 
-function buildUl (additionalClasses: string[]) {
+function buildUl(additionalClasses: string[]) {
     const pageUl = document.createElement('ul')
     pageUl.classList.add('pm__results-list')
     pageUl.setAttribute('aria-role', 'listbox')
@@ -351,7 +351,7 @@ function buildUl (additionalClasses: string[]) {
     return pageUl
 }
 
-function buildLi (options: {
+function buildLi(options: {
     text: string;
     selected?: boolean;
     multiple?: boolean;
@@ -405,7 +405,7 @@ function buildLi (options: {
     return li
 }
 
-function setLiSelected (li: HTMLLIElement, selected: boolean, addCheck: boolean, checkedIconHtml: string) {
+function setLiSelected(li: HTMLLIElement, selected: boolean, addCheck: boolean, checkedIconHtml: string) {
     if (selected) {
         if (addCheck) {
             const wrap = document.createElement('span')
@@ -427,7 +427,7 @@ function setLiSelected (li: HTMLLIElement, selected: boolean, addCheck: boolean,
     }
 }
 
-function getOffsetFromBoundingBox (box) {
+function getOffsetFromBoundingBox(box) {
     const docElem = document.documentElement
 
     return {

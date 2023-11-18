@@ -68,14 +68,6 @@ type ListSettings = {
     classList?: string[]
 }
 
-type SelectAllSettings = {
-    enabled?: boolean
-    classList?: string[]
-    wrapperClassList?: string[]
-    selectText?: string
-    deselectText?: string
-}
-
 export default class PickMeSettings {
     element: HTMLSelectElement
     base?: BaseSettings
@@ -83,9 +75,8 @@ export default class PickMeSettings {
     search: SearchSettings
     button: ButtonSettings
     list: ListSettings
-    selectAll: SelectAllSettings
 
-    constructor (props: Settings) {
+    constructor(props: Settings) {
         this.element = document.getElementById(props.id) as HTMLSelectElement
         this.setBase(props.base)
         this.setLanguage(props.language)
@@ -94,10 +85,10 @@ export default class PickMeSettings {
         this.setList(props.list)
     }
 
-    setBase (props: BaseSettings) {
+    setBase(props: BaseSettings) {
         this.base = {}
         this.base.multiple = !!this.element.multiple || !!props?.multiple
-        this.base.debug = props.debug
+        this.base.debug = props?.debug
 
         this.base.popup = {}
         this.base.popup.containerSelector = props?.popup?.containerSelector
@@ -105,13 +96,13 @@ export default class PickMeSettings {
         this.base.popup.width = props?.popup?.width || '300px'
     }
 
-    setLanguage (props: LanguageSettings) {
+    setLanguage(props: LanguageSettings) {
         this.language = {}
         this.language.locale = props?.locale || document.documentElement.lang || 'en'
         this.language.i18n = props?.i18n || i18n[props?.locale] || i18n.en
     }
 
-    setSearch (props: SearchSettings) {
+    setSearch(props: SearchSettings) {
         this.search = {}
 
         this.search.enabled = !!props?.enabled
@@ -122,7 +113,7 @@ export default class PickMeSettings {
         this.search.noResultsText = props?.noResultsText || this.language.i18n?.search?.noResultsText || 'No results'
     }
 
-    setButton (props: ButtonSettings) {
+    setButton(props: ButtonSettings) {
         this.button = {}
         this.button.placeholderText = props?.placeholderText || this.language.i18n?.button?.placeholderText || 'Select'
         this.button.labelText = props?.labelText
@@ -136,7 +127,7 @@ export default class PickMeSettings {
         this.button.selectedText.text = props?.selectedText?.text || this.language.i18n?.button?.selectedText?.text || `%num% selected`
     }
 
-    setList (props: ListSettings) {
+    setList(props: ListSettings) {
         this.list = {}
 
         this.list.checkedIconHtml = props?.checkedIconHtml || '✓'

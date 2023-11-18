@@ -1,5 +1,5 @@
 import PickMeUi from './pick-me/ui'
-import PickMeSettings, { Settings } from './pick-me/settings'
+import PickMeSettings, {Settings} from './pick-me/settings'
 
 export type OptionData = {
     text: string
@@ -28,7 +28,7 @@ export default class PickMe {
     options: Options
     searchInputTimer: number
 
-    constructor (options: Settings) {
+    constructor(options: Settings) {
         this.id = options.id
         this.element = document.getElementById(this.id) as HTMLSelectElement
         this.label = document.querySelector('label[for="' + this.id + '"]')
@@ -43,7 +43,7 @@ export default class PickMe {
         return this
     }
 
-    initialize () {
+    initialize() {
         this.setupInitialValues()
         this.ui = this.buildMarkup()
         this.addHandlers()
@@ -56,12 +56,12 @@ export default class PickMe {
         this.ui.setButtonText(this.options.selected)
     }
 
-    setupInitialValues () {
+    setupInitialValues() {
         const options = this.element.querySelectorAll('option[selected]') as NodeListOf<HTMLOptionElement>
         options.forEach(option => (this.initialSelectedValues.push(option.value)))
     }
 
-    addHandlers () {
+    addHandlers() {
         this.handlers.closePopupHandler = (e: Event) => (this.closePopup(e))
         this.handlers.selectHandler = (e: Event) => (this.select(e))
         this.handlers.containerPositionHandler = () => (this.ui.positionPopup())
@@ -72,7 +72,7 @@ export default class PickMe {
         }
     }
 
-    addEvents () {
+    addEvents() {
         this.ui.button.addEventListener('click', () => (this.togglePopup()))
         this.ui.popup.addEventListener('click', e => (e.stopPropagation()))
         if (this.settings.search.enabled) {
@@ -90,7 +90,7 @@ export default class PickMe {
         onDomRemove(this.ui.element, this.destroy.bind(this))
     }
 
-    setupValues () {
+    setupValues() {
         this.options = {
             all: new Map(), // Map<value, optionData>
             selected: new Map(), // Map<value, optionData>
@@ -111,30 +111,30 @@ export default class PickMe {
             this.options.all.set(option.value, optionData)
             this.options.optgroups.get(optgroupLabel).push(option.value)
 
-            if (option.selected || option.hasAttribute('selected')) {
+            if (option.hasAttribute('selected')) {
                 this.options.selected.set(option.value, optionData)
                 option.setAttribute('data-selected', 'true')
             }
         })
     }
 
-    buildMarkup () {
-        return new PickMeUi({ element: this.element, settings: this.settings })
+    buildMarkup() {
+        return new PickMeUi({element: this.element, settings: this.settings})
     }
 
-    resetAndReload () {
+    resetAndReload() {
         this.logDebugMessage('form reset! reloading pick-me')
         this.reload()
     }
 
-    onButtonKeyDown (e: KeyboardEvent) {
+    onButtonKeyDown(e: KeyboardEvent) {
         if (e.keyCode === 13) { // enter
             e.preventDefault()
             this.togglePopup(e)
         }
     }
 
-    onMarkupKeyDown (e: KeyboardEvent) {
+    onMarkupKeyDown(e: KeyboardEvent) {
         if (e.keyCode === 9 || e.keyCode === 27) { // tab || esc
             this.closePopupAndFocus(e)
         } else if (e.keyCode === 40) { // arrow down
@@ -147,14 +147,14 @@ export default class PickMe {
             e.preventDefault()
             if (this.open) {
                 const li = this.ui.hovered
-                if (li) this.select({ currentTarget: li } as unknown as Event)
+                if (li) this.select({currentTarget: li} as unknown as Event)
             } else {
                 this.openPopup()
             }
         }
     }
 
-    removeEvents () {
+    removeEvents() {
         document.removeEventListener('click', this.handlers.closePopupHandler)
         window.removeEventListener('resize', this.handlers.containerPositionHandler)
         window.removeEventListener('scroll', this.handlers.containerPositionHandler)
@@ -162,11 +162,11 @@ export default class PickMe {
         if (this.element.form) this.element.form.removeEventListener('reset', this.handlers.resetFormHandler)
     }
 
-    togglePopup (e?: Event) {
+    togglePopup(e?: Event) {
         this.open ? this.closePopupAndFocus(e) : this.openPopup()
     }
 
-    search () {
+    search() {
         if (this.searchInputTimer) clearTimeout(this.searchInputTimer)
         if (this.ui.hovered) this.ui.hovered.classList.remove('pm__results-list__item--hover')
         this.ui.hovered = null
@@ -176,7 +176,7 @@ export default class PickMe {
         }, this.settings.search.debounce)
     }
 
-    doSearch () {
+    doSearch() {
         const inputValue = this.ui.searchInput.value
         const lowerInputValue = inputValue.toLowerCase()
 
@@ -196,14 +196,14 @@ export default class PickMe {
         this.addEventListenersForPage()
     }
 
-    openPopup () {
+    openPopup() {
         this.ui.popup.classList.add('pm__popup--visible')
         this.open = true
         this.ui.positionPopup()
         if (this.settings.search.enabled) this.ui.searchInput.focus()
     }
 
-    closePopup (e?: Event) {
+    closePopup(e?: Event) {
         const target = e?.target as HTMLButtonElement
         const clickedButton = e && (target === this.ui.button || target?.parentElement === this.ui.button)
         if (this.open && !clickedButton) {
@@ -215,18 +215,18 @@ export default class PickMe {
         }
     }
 
-    closePopupAndFocus (e: Event) {
+    closePopupAndFocus(e: Event) {
         this.closePopup(e)
         this.ui.button.focus()
     }
 
-    addEventListenersForPage () {
+    addEventListenersForPage() {
         Array(...this.ui.resultsWrapper.querySelectorAll('li.pm__results-list__item[data-value]:not(.pm__results-list__item--disabled)')).forEach(li => {
             li.addEventListener('click', this.handlers.selectHandler)
         })
     }
 
-    select (e: Event) {
+    select(e: Event) {
         const li = e.currentTarget as HTMLLIElement
         const value = li.getAttribute('data-value')
         const optionData = this.options.all.get(value)
@@ -242,11 +242,11 @@ export default class PickMe {
         this.triggerChange()
     }
 
-    triggerChange () {
-        this.element.dispatchEvent(new CustomEvent('change', { detail: this.options.selected }))
+    triggerChange() {
+        this.element.dispatchEvent(new CustomEvent('change', {detail: this.options.selected}))
     }
 
-    toggleSelectedValue (value: string, optionData: OptionData) {
+    toggleSelectedValue(value: string, optionData: OptionData) {
         if (this.options.selected.get(value)) {
             this.removeSelectedValue(value)
         } else {
@@ -254,19 +254,19 @@ export default class PickMe {
         }
     }
 
-    addSelectedValue (value: string, optionData: OptionData) {
+    addSelectedValue(value: string, optionData: OptionData) {
         this.options.selected.set(value, optionData)
 
         this.ui.selectItem(value)
         if (this.settings.search.enabled) this.ui.searchInput.focus()
     }
 
-    removeSelectedValue (value: string) {
+    removeSelectedValue(value: string) {
         this.options.selected.delete(value)
         this.ui.deselectItem(value)
     }
 
-    setSelectedValue (value: string, optionData: OptionData) {
+    setSelectedValue(value: string, optionData: OptionData) {
         if (this.options.selected.size > 0) {
             this.removeSelectedValue(this.options.selected.entries().next().value[0])
             const selected = this.ui.getSelected()
@@ -275,18 +275,18 @@ export default class PickMe {
         this.addSelectedValue(value, optionData)
     }
 
-    logDebugMessage (msg: string, someObject?: object) {
+    logDebugMessage(msg: string, someObject?: object) {
         if (!this.settings.base.debug) return
         if (msg) console.log('PickMe#' + this.id, msg)
         if (someObject) console.log(someObject)
     }
 
-    resetSearch () {
+    resetSearch() {
         this.ui.searchInput.value = ''
         this.search()
     }
 
-    destroy () {
+    destroy() {
         this.removeEvents()
         this.ui.destroy()
         this.options = null
@@ -294,7 +294,7 @@ export default class PickMe {
         this.element.classList.remove('pm__hidden')
     }
 
-    reload () {
+    reload() {
         for (const value of this.options.selected.keys()) {
             this.ui.deselectItem(value)
         }
@@ -313,9 +313,9 @@ export default class PickMe {
  * Helpers
  */
 
-function onDomRemove (element: HTMLElement, onDetachCallback: () => void) {
+function onDomRemove(element: HTMLElement, onDetachCallback: () => void) {
     const observer = new MutationObserver(function () {
-        function isDetached (el: ParentNode) {
+        function isDetached(el: ParentNode) {
             if (el.parentNode === document) {
                 return false
             } else if (el.parentNode === null) {
